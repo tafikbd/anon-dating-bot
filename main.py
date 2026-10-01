@@ -575,7 +575,7 @@ def main():
         .post_shutdown(post_shutdown)
         .build()
     )
-app.add_handler(CommandHandler("reset", reset_command))
+    app.add_handler(CommandHandler("reset", reset_command))
 
 # Commands
 app.add_handler(CommandHandler("start", start))
