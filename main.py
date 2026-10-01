@@ -1,6 +1,6 @@
 """
 Anonymous Chatting & Dating Telegram Bot
-Complete code with all features: gender filter, referral, coins, VIP, anonymous link.
+Complete code with strict registration, main menu, and queue management.
 """
 
 import os
@@ -222,6 +222,47 @@ async def remove_from_queues(user_id):
     for q in ["queue_male", "queue_female", "queue_any"]:
         await redis_client.lrem(q, 0, user_id)
 
+async def is_in_queue(user_id):
+    for q in ["queue_male", "queue_female", "queue_any"]:
+        if await redis_client.lpos(q, user_id) is not None:
+            return True
+    return False
+
+# ============================================================
+# HELPER: MAIN MENU
+# ============================================================
+def get_main_menu_keyboard():
+    keyboard = [
+        [InlineKeyboardButton("🔍 Find Partner", callback_data="find_partner")],
+        [InlineKeyboardButton("👤 My Profile", callback_data="profile")],
+        [InlineKeyboardButton("❓ Help", callback_data="help")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+async def show_main_menu(update_or_query, context, text=None):
+    user_id = update_or_query.from_user.id
+    profile = await get_profile(user_id)
+    if not profile:
+        if isinstance(update_or_query, Update):
+            await update_or_query.message.reply_text("❌ আগে /start দিয়ে রেজিস্ট্রেশন করুন।")
+        else:
+            await update_or_query.edit_message_text("❌ আগে /start দিয়ে রেজিস্ট্রেশন করুন।")
+        return
+
+    if text is None:
+        text = (
+            f"👋 স্বাগতম, {profile['name']}!\n\n"
+            f"🎯 এটি একটি Anonymous Chatting Bot।\n"
+            f"সম্পূর্ণ অজ্ঞাত পরিচয়ে চ্যাট করুন।\n\n"
+            f"নিচের বাটনে ক্লিক করুন।"
+        )
+
+    reply_markup = get_main_menu_keyboard()
+    if isinstance(update_or_query, Update):
+        await update_or_query.message.reply_text(text, reply_markup=reply_markup)
+    else:
+        await update_or_query.edit_message_text(text, reply_markup=reply_markup)
+
 # ============================================================
 # HANDLERS: START & REGISTRATION
 # ============================================================
@@ -256,33 +297,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # Directly find partner on /start
-    user_gender = profile.get("gender", "any")
-    if user_gender == "male":
-        user_pref = "female"
-    elif user_gender == "female":
-        user_pref = "male"
-    else:
-        user_pref = "any"
-
-    partner_id = await find_match(user_id, user_pref)
-    if partner_id:
-        await set_partner(user_id, partner_id)
-        success_text = (
-            "✅ পার্টনার পাওয়া গেছে!\n\n💬 এখন মেসেজ পাঠান।\n"
-            "🛑 চ্যাট শেষ করতে /stop দিন।\n🚨 রিপোর্ট করতে /report দিন।"
-        )
-        await update.message.reply_text(success_text)
-        try:
-            await context.bot.send_message(partner_id, success_text)
-        except Exception:
-            pass
-        await add_coins(user_id, COINS_PER_CHAT)
-    else:
-        await add_to_queue(user_id, user_gender, user_pref)
-        await update.message.reply_text(
-            "⏳ পার্টনার খোঁজা হচ্ছে...\n\nঅনুগ্রহ করে অপেক্ষা করুন।"
-        )
+    # Show main menu
+    await show_main_menu(update, context)
 
 async def handle_registration(update: Update, context: ContextTypes.DEFAULT_TYPE):
     state = context.user_data.get("state")
@@ -319,6 +335,10 @@ async def handle_registration(update: Update, context: ContextTypes.DEFAULT_TYPE
         )
         return
 
+    if state == "awaiting_gender":
+        await update.message.reply_text("⚠️ দয়া করে উপরের বাটন থেকে জেন্ডার সিলেক্ট করুন।")
+        return
+
 async def gender_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -333,16 +353,13 @@ async def gender_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await save_profile(user_id, name=name, age=age, gender=gender)
     context.user_data.clear()
+
     gender_text = "ছেলে" if gender == "male" else "মেয়ে"
-    keyboard = [
-        [InlineKeyboardButton("🔍 Find Partner", callback_data="find_partner")],
-        [InlineKeyboardButton("👤 My Profile", callback_data="profile")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
     await query.edit_message_text(
-        f"✅ রেজিস্ট্রেশন সম্পন্ন!\n\n👤 নাম: {name}\n🎂 বয়স: {age}\n"
-        f"⚧ জেন্ডার: {gender_text}\n\nএখন পার্টনার খুঁজতে বাটনে ক্লিক করুন।",
-        reply_markup=reply_markup
+        f"✅ রেজিস্ট্রেশন সম্পন্ন!\n\n"
+        f"👤 নাম: {name}\n🎂 বয়স: {age}\n⚧ জেন্ডার: {gender_text}\n\n"
+        f"এখন নিচের বাটন থেকে পার্টনার খুঁজুন।",
+        reply_markup=get_main_menu_keyboard()
     )
 
 # ============================================================
@@ -360,17 +377,16 @@ async def find_partner(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
+    if await is_in_queue(user_id):
+        await query.edit_message_text(
+            "⏳ আপনি ইতিমধ্যে সারিতে আছেন।\nঅনুগ্রহ করে অপেক্ষা করুন, কেউ ম্যাচ হলেই জানানো হবে।"
+        )
+        return
+
     profile = await get_profile(user_id)
     if not profile:
         await query.edit_message_text("❌ আগে /start দিয়ে রেজিস্ট্রেশন করুন।")
         return
-
-    for q in ["queue_male", "queue_female", "queue_any"]:
-        if await redis_client.lpos(q, user_id) is not None:
-            await query.edit_message_text(
-                "⏳ আপনি ইতিমধ্যে সারিতে আছেন।\nঅনুগ্রহ করে অপেক্ষা করুন।"
-            )
-            return
 
     user_gender = profile.get("gender", "any")
     if user_gender == "male":
@@ -381,21 +397,27 @@ async def find_partner(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_pref = "any"
 
     partner_id = await find_match(user_id, user_pref)
+
     if partner_id:
         await set_partner(user_id, partner_id)
         success_text = (
-            "✅ পার্টনার পাওয়া গেছে!\n\n💬 এখন মেসেজ পাঠান।\n"
-            "🛑 চ্যাট শেষ করতে /stop দিন।\n🚨 রিপোর্ট করতে /report দিন।"
+            "✅ পার্টনার পাওয়া গেছে!\n\n"
+            "💬 এখন মেসেজ পাঠান।\n"
+            "🛑 চ্যাট শেষ করতে /stop দিন।\n"
+            "🚨 রিপোর্ট করতে /report দিন।"
         )
         await query.edit_message_text(success_text)
         try:
             await context.bot.send_message(partner_id, success_text)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"Could not notify partner {partner_id}: {e}")
         await add_coins(user_id, COINS_PER_CHAT)
     else:
         await add_to_queue(user_id, user_gender, user_pref)
-        await query.edit_message_text("⏳ পার্টনার খোঁজা হচ্ছে...\n\nঅনুগ্রহ করে অপেক্ষা করুন।")
+        await query.edit_message_text(
+            "⏳ পার্টনার খোঁজা হচ্ছে...\n\n"
+            "অনুগ্রহ করে অপেক্ষা করুন। কেউ অনলাইনে এলে আপনাকে জানানো হবে।"
+        )
 
 # ============================================================
 # HANDLERS: STOP & REPORT
@@ -404,12 +426,12 @@ async def stop_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     await remove_from_queues(user_id)
     partner_id = await end_chat(user_id)
+
     if not partner_id:
         await update.message.reply_text("❌ আপনি বর্তমানে কোনো চ্যাটে নেই।")
         return
-    await update.message.reply_text(
-        "🛑 চ্যাট শেষ হয়েছে।\nনতুন পার্টনার খুঁজতে /start দিন।"
-    )
+
+    await update.message.reply_text("🛑 চ্যাট শেষ হয়েছে।")
     try:
         await context.bot.send_message(
             partner_id,
@@ -417,43 +439,29 @@ async def stop_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except Exception:
         pass
+    await show_main_menu(update, context)
 
 async def report_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     partner_id = await get_partner(user_id)
+
     if not partner_id:
         await update.message.reply_text("❌ আপনি কোনো চ্যাটে নেই।")
         return
+
     await block_user(user_id, partner_id)
     await end_chat(user_id)
-    await update.message.reply_text(
-        "✅ পার্টনারকে রিপোর্ট ও ব্লক করা হয়েছে।\nনতুন পার্টনার খুঁজতে /start দিন।"
-    )
+
+    await update.message.reply_text("✅ পার্টনারকে রিপোর্ট ও ব্লক করা হয়েছে।")
     try:
         await context.bot.send_message(partner_id, "🛑 আপনার পার্টনার চ্যাট শেষ করেছেন।")
     except Exception:
         pass
+    await show_main_menu(update, context)
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data.clear()
     await update.message.reply_text("✅ বাতিল করা হয়েছে। /start দিন।")
-
-# ============================================================
-# HANDLERS: NEW CHAT
-# ============================================================
-async def newchat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    await remove_from_queues(user_id)
-    partner_id = await end_chat(user_id)
-    if partner_id:
-        try:
-            await context.bot.send_message(
-                partner_id,
-                "🛑 আপনার পার্টনার নতুন চ্যাট শুরু করেছেন।\nনতুন পার্টনার খুঁজতে /start দিন।"
-            )
-        except Exception:
-            pass
-    await update.message.reply_text("🔄 নতুন চ্যাট শুরু হচ্ছে... /start দিন।")
 
 # ============================================================
 # HANDLERS: HELP
@@ -461,15 +469,13 @@ async def newchat_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📖 সাহায্য\n\n"
-        "🔹 /start — মেইন মেনু ও পার্টনার খোঁজা\n"
+        "🔹 /start — মেইন মেনু\n"
         "🔹 /stop — চলমান চ্যাট শেষ\n"
         "🔹 /report — পার্টনারকে রিপোর্ট ও ব্লক\n"
         "🔹 /cancel — চলমান কাজ বাতিল\n"
         "🔹 /profile — নিজের প্রোফাইল দেখা\n"
-        "🔹 /newchat — নতুন চ্যাট শুরু\n"
         "🔹 /link — ইনভাইট লিংক ও কয়েন\n"
         "🔹 /credit — কয়েন ব্যালেন্স\n"
-        "🔹 /link_anon — অ্যানোনিমাস লিংক\n"
         "🔹 /vip — VIP আপগ্রেড\n\n"
         "📌 নিয়মাবলি:\n• সবসময় ভদ্র ভাষায় কথা বলুন\n"
         "• অন্যের ব্যক্তিগত তথ্য চাইবেন না\n"
@@ -514,22 +520,7 @@ async def help_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def main_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
-    data = await get_profile(user_id)
-    if not data:
-        await query.edit_message_text("❌ আগে /start দিন।")
-        return
-    keyboard = [
-        [InlineKeyboardButton("🔍 Find Partner", callback_data="find_partner")],
-        [InlineKeyboardButton("👤 My Profile", callback_data="profile")],
-        [InlineKeyboardButton("❓ Help", callback_data="help")]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await query.edit_message_text(
-        f"👋 স্বাগতম, {data['name']}!\n\n🎯 এটি একটি Anonymous Chatting Bot।\n\n"
-        f"নিচের বাটনে ক্লিক করুন।",
-        reply_markup=reply_markup
-    )
+    await show_main_menu(query, context)
 
 # ============================================================
 # HANDLERS: COINS & VIP
@@ -593,17 +584,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     state = context.user_data.get("state")
 
-    if state in ("awaiting_name", "awaiting_age"):
-        if update.message.text:
+    # Registration flow first
+    if state in ("awaiting_name", "awaiting_age", "awaiting_gender"):
+        if update.message.text and state in ("awaiting_name", "awaiting_age"):
             await handle_registration(update, context)
         else:
-            await update.message.reply_text("⚠️ দয়া করে টেক্সট লিখুন।")
+            await update.message.reply_text("⚠️ দয়া করে টেক্সট লিখুন অথবা বাটন ব্যবহার করুন।")
         return
 
-    if state == "awaiting_gender":
-        await update.message.reply_text("⚠️ উপরের বাটন থেকে জেন্ডার সিলেক্ট করুন।")
-        return
-
+    # Chat flow
     partner_id = await get_partner(user_id)
     if not partner_id:
         await update.message.reply_text(
@@ -649,7 +638,6 @@ def main():
     app.add_handler(CommandHandler("report", report_command))
     app.add_handler(CommandHandler("cancel", cancel))
     app.add_handler(CommandHandler("help", help_command))
-    app.add_handler(CommandHandler("newchat", newchat_command))
     app.add_handler(CommandHandler("credit", credit_command))
     app.add_handler(CommandHandler("link", link_command))
     app.add_handler(CommandHandler("link_anon", link_anon_command))
