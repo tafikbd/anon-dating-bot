@@ -129,7 +129,11 @@ async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ================= MAIN =================
 def main():
-    # Flask থ্রেড চালু করা (Render-এর জন্য)
+    # ইভেন্ট লুপ তৈরি করে সেট করা (Python 3.14 এরর সমাধানের জন্য)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    # Flask থ্রেড চালু করা (Render-এর হেলথ চেকের জন্য)
     threading.Thread(target=run_flask, daemon=True).start()
 
     request = HTTPXRequest(connection_pool_size=20, connect_timeout=20.0, read_timeout=30.0, write_timeout=30.0)
