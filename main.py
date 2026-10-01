@@ -79,16 +79,13 @@ STRINGS = {
     "my_profile": {"bn": "👤 My Profile", "en": "👤 My Profile"},
     "safety": {"bn": "🛡 Safety", "en": "🛡 Safety"},
     "help": {"bn": "ℹ️ Help", "en": "ℹ️ Help"},
-    "coins": {"bn": "🪙 কয়েন", "en": "🪙 Coins"},
+    "coins": {"bn": "🪙 Coins", "en": "🪙 Coins"},
     "vip": {"bn": "⭐ VIP", "en": "⭐ VIP"},
     "invite": {"bn": "🔗 Invite", "en": "🔗 Invite"},
     "end_chat": {"bn": "🛑 End Chat", "en": "🛑 End Chat"},
     "next_person": {"bn": "➡️ Next Person", "en": "➡️ Next Person"},
     "report": {"bn": "🚫 Report", "en": "🚫 Report"},
-    "reg_done": {
-        "bn": "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉",
-        "en": "✅ Registration complete! 🎉",
-    },
+    "reg_done": {"bn": "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉", "en": "✅ Registration complete! 🎉"},
     "searching": {
         "bn": "⏳ পার্টনার খোঁজা হচ্ছে...\n\nঅনুগ্রহ করে অপেক্ষা করুন। কেউ অনলাইনে এলেই আপনাকে কানেক্ট করা হবে।",
         "en": "⏳ Searching for partner...\n\nPlease wait. You'll be connected as soon as someone comes online.",
@@ -98,40 +95,25 @@ STRINGS = {
         "en": "✅ Partner found!\n\n💬 Send any message — text, photo, voice all work.\n🔒 Your identity is completely anonymous.",
     },
     "chat_ended": {"bn": "🛑 চ্যাট শেষ হয়েছে।", "en": "🛑 Chat ended."},
-    "partner_ended": {
-        "bn": "🛑 আপনার পার্টনার চ্যাট শেষ করেছেন।",
-        "en": "🛑 Your partner ended the chat.",
-    },
-    "partner_left": {
-        "bn": "🛑 আপনার পার্টনার নতুন পার্টনার খুঁজতে চলে গেছেন।",
-        "en": "🛑 Your partner left to find someone new.",
-    },
+    "partner_ended": {"bn": "🛑 আপনার পার্টনার চ্যাট শেষ করেছেন।", "en": "🛑 Your partner ended the chat."},
+    "partner_left": {"bn": "🛑 আপনার পার্টনার নতুন পার্টনার খুঁজতে চলে গেছেন।", "en": "🛑 Your partner left to find someone new."},
     "not_in_chat": {"bn": "⚠️ আপনি কোনো চ্যাটে নেই। /start দিন।", "en": "⚠️ You're not in a chat. Send /start."},
     "reg_first": {"bn": "❌ আগে /start দিন।", "en": "❌ Please /start first."},
-    "already_in_chat": {
-        "bn": "❌ আপনি ইতিমধ্যে একটি চ্যাটে আছেন।",
-        "en": "❌ You're already in a chat.",
-    },
+    "already_in_chat": {"bn": "❌ আপনি ইতিমধ্যে একটি চ্যাটে আছেন।", "en": "❌ You're already in a chat."},
     "search_cancelled": {"bn": "❌ সার্চ বাতিল করা হয়েছে।", "en": "❌ Search cancelled."},
     "online_count": {"bn": "🟢 এখন {n} জন অনলাইনে আছেন", "en": "🟢 {n} users online now"},
     "referral_msg": {
         "bn": "🔗 আপনার ইনভাইট লিংক:\n\n{link}\n\n💡 বন্ধুদের ইনভাইট করলে প্রতি জয়েনে {coins} কয়েন পাবেন!",
         "en": "🔗 Your invite link:\n\n{link}\n\n💡 Earn {coins} coins per friend who joins!",
     },
-    "coins_balance": {
-        "bn": "🪙 আপনার কয়েন: {coins}\n⭐ VIP: {vip}",
-        "en": "🪙 Your coins: {coins}\n⭐ VIP: {vip}",
-    },
+    "coins_balance": {"bn": "🪙 আপনার কয়েন: {coins}\n⭐ VIP: {vip}", "en": "🪙 Your coins: {coins}\n⭐ VIP: {vip}"},
     "vip_active": {"bn": "✅ Active", "en": "✅ Active"},
     "vip_inactive": {"bn": "❌ Inactive", "en": "❌ Inactive"},
     "vip_buy_msg": {
-        "bn": "⭐ VIP সাবস্ক্রিপশন\n\n💰 {price} কয়েন অথবা {stars} Telegram Stars দিয়ে {days} দিনের জন্য VIP কিনুন।\n\n🎁 VIP সুবিধা:\n• আনলিমিটেড চ্যাট\n• প্রায়োরিটি ম্যাচিং\n• বিজ্ঞাপনমুক্ত",
-        "en": "⭐ VIP Subscription\n\n💰 Get {days}-day VIP for {price} coins or {stars} Telegram Stars.\n\n🎁 VIP Benefits:\n• Unlimited chats\n• Priority matching\n• No ads",
+        "bn": "⭐ VIP সাবস্ক্রিপশন\n\n💰 {price} কয়েন অথবা {stars} Telegram Stars দিয়ে {days} দিনের জন্য VIP কিনুন।\n\n🎁 VIP সুবিধা:\n• আনলিমিটেড চ্যাট\n• প্রায়োরিটি ম্যাচিং\n• ডাবল কয়েন",
+        "en": "⭐ VIP Subscription\n\n💰 Get {days}-day VIP for {price} coins or {stars} Telegram Stars.\n\n🎁 VIP Benefits:\n• Unlimited chats\n• Priority matching\n• Double coins",
     },
-    "vip_bought": {
-        "bn": "🎉 অভিনন্দন! আপনি VIP হয়েছেন!\n\n✅ {days} দিনের জন্য VIP সক্রিয়।",
-        "en": "🎉 Congratulations! You're now VIP!\n\n✅ VIP active for {days} days.",
-    },
+    "vip_bought": {"bn": "🎉 অভিনন্দন! আপনি VIP হয়েছেন!\n\n✅ {days} দিনের জন্য VIP সক্রিয়।", "en": "🎉 Congratulations! You're now VIP!\n\n✅ VIP active for {days} days."},
     "not_enough_coins": {
         "bn": "❌ আপনার যথেষ্ট কয়েন নেই।\n\n🪙 প্রয়োজন: {need}\n🪙 আপনার আছে: {have}\n\n💡 কয়েন আর্ন করতে /link ব্যবহার করুন।",
         "en": "❌ Not enough coins.\n\n🪙 Need: {need}\n🪙 You have: {have}\n\n💡 Use /link to earn coins.",
@@ -139,13 +121,10 @@ STRINGS = {
     "already_vip": {"bn": "⭐ আপনি ইতিমধ্যে VIP!", "en": "⭐ You're already VIP!"},
     "buy_with_coins": {"bn": "💰 কয়েন দিয়ে কিনুন", "en": "💰 Buy with Coins"},
     "buy_with_stars": {"bn": "⭐ Stars দিয়ে কিনুন", "en": "⭐ Buy with Stars"},
-    "back": {"bn": "🔙 Back", "en": "🔙 Back"},
     "language_select": {
         "bn": "🌍 ভাষা নির্বাচন করুন:\n\nSelect your language:",
         "en": "🌍 Choose your language:\n\nআপনার ভাষা নির্বাচন করুন:",
     },
-    "banned": {"bn": "🚫 আপনি এই বট থেকে ব্যান হয়েছেন।", "en": "🚫 You are banned from this bot."},
-    "rate_limited": {"bn": "⏳ একটু অপেক্ষা করুন।", "en": "⏳ Please wait a moment."},
     "report_thanks": {"bn": "✅ ধন্যবাদ। আপনার রিপোর্ট জমা হয়েছে।", "en": "✅ Thank you. Your report has been submitted."},
     "report_blocked": {
         "bn": "✅ ধন্যবাদ। রিপোর্ট জমা হয়েছে এবং পার্টনারকে ব্লক করা হয়েছে।",
@@ -342,14 +321,37 @@ async def set_vip(user_id, days=VIP_DURATION_DAYS):
 # REFERRAL
 # ============================================================
 async def process_referral(new_user_id, referrer_id):
+    """নতুন ইউজারকে রেফার করুন। সফল হলে True রিটার্ন করবে।"""
     if new_user_id == referrer_id:
         return False
+
     async with db_pool.acquire() as conn:
-        already = await conn.fetchval("SELECT referred_by FROM users WHERE user_id = $1", new_user_id)
-        if already:
+        # রেফারার আসল ইউজার কি না চেক
+        referrer_exists = await conn.fetchval(
+            "SELECT 1 FROM users WHERE user_id = $1", referrer_id
+        )
+        if not referrer_exists:
             return False
-        await conn.execute("UPDATE users SET referred_by = $1 WHERE user_id = $2", referrer_id, new_user_id)
-    await add_coins(referrer_id, REFERRAL_COIN_REWARD)
+
+        # নতুন ইউজার আগে থেকে রেফার হয়েছে কি না চেক
+        already = await conn.fetchval(
+            "SELECT referred_by FROM users WHERE user_id = $1", new_user_id
+        )
+        if already is not None:
+            return False
+
+        # রেফারেল সেভ করুন
+        await conn.execute(
+            "UPDATE users SET referred_by = $1 WHERE user_id = $2",
+            referrer_id, new_user_id
+        )
+
+        # রেফারারকে কয়েন দিন
+        await conn.execute(
+            "UPDATE users SET coins = coins + $1 WHERE user_id = $2",
+            REFERRAL_COIN_REWARD, referrer_id
+        )
+
     return True
 
 
@@ -419,11 +421,9 @@ async def queue_timeout_check(context: ContextTypes.DEFAULT_TYPE):
     if still_in_queue and not active_chat:
         try:
             text = (
-                "⏰ এখনো কেউ অনলাইনে আসেনি।\n\n"
-                "💡 আপনি অপেক্ষা করতে পারেন অথবা সার্চ বাতিল করতে পারেন।"
+                "⏰ এখনো কেউ অনলাইনে আসেনি।\n\n💡 আপনি অপেক্ষা করতে পারেন অথবা সার্চ বাতিল করতে পারেন।"
                 if lang == 'bn' else
-                "⏰ No one has come online yet.\n\n"
-                "💡 You can keep waiting or cancel the search."
+                "⏰ No one has come online yet.\n\n💡 You can keep waiting or cancel the search."
             )
             await context.bot.send_message(
                 user_id,
@@ -451,14 +451,44 @@ async def start(update, context):
 
     args = context.args or []
 
+    # Referral ID আগে বের করে নিন (নতুন বা পুরনো যাই হোক)
+    referrer_id = None
+    if args and args[0].startswith("ref_"):
+        try:
+            parsed_id = int(args[0][4:])
+            if parsed_id != user_id:
+                referrer_id = parsed_id
+        except (ValueError, IndexError):
+            referrer_id = None
+
     async with db_pool.acquire() as conn:
         user = await conn.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
+
+        # নতুন ইউজার তৈরি
         if not user:
             await conn.execute("INSERT INTO users (user_id) VALUES ($1)", user_id)
+
+            # নতুন ইউজার তৈরি হওয়ার পর রেফারেল প্রসেস
+            if referrer_id:
+                try:
+                    success = await process_referral(user_id, referrer_id)
+                    if success:
+                        # রেফারারকে নোটিফিকেশন
+                        try:
+                            referrer_lang = await get_user_lang(referrer_id)
+                            await context.bot.send_message(
+                                referrer_id,
+                                t("referral_bonus", referrer_lang, coins=REFERRAL_COIN_REWARD)
+                            )
+                        except Exception as e:
+                            logger.error(f"Notify referrer error: {e}")
+                except Exception as e:
+                    logger.error(f"Referral process error: {e}")
+
             context.user_data.clear()
             context.user_data['reg_step'] = 'language'
             await update.message.reply_text(
-                "🌍 ভাষা নির্বাচন করুন:\n\nSelect your language:",
+                t("language_select", "bn"),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn")],
                     [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]
@@ -468,16 +498,26 @@ async def start(update, context):
 
     lang = user.get('language') or 'bn'
 
-    # Referral
-    if args and args[0].startswith("ref_"):
+    # পুরনো ইউজার যদি রেফার লিংক দিয়ে আসে এবং আগে রেফার না হয়ে থাকে
+    if referrer_id:
         try:
-            referrer_id = int(args[0][4:])
-            if referrer_id != user_id:
+            async with db_pool.acquire() as conn:
+                already_ref = await conn.fetchval(
+                    "SELECT referred_by FROM users WHERE user_id = $1", user_id
+                )
+            if already_ref is None:
                 success = await process_referral(user_id, referrer_id)
                 if success:
-                    await update.message.reply_text(t("referral_bonus", lang, coins=REFERRAL_COIN_REWARD))
-        except (ValueError, IndexError):
-            pass
+                    try:
+                        referrer_lang = await get_user_lang(referrer_id)
+                        await context.bot.send_message(
+                            referrer_id,
+                            t("referral_bonus", referrer_lang, coins=REFERRAL_COIN_REWARD)
+                        )
+                    except Exception:
+                        pass
+        except Exception as e:
+            logger.error(f"Referral process error (existing): {e}")
 
     profile = await get_profile(user_id)
     if not profile or not profile.get('display_name'):
@@ -531,7 +571,7 @@ async def start(update, context):
 
 
 # ============================================================
-# LANGUAGE SELECT
+# LANGUAGE
 # ============================================================
 async def language_callback(update, context):
     query = update.callback_query
@@ -584,9 +624,7 @@ async def handle_text(update, context):
 
     if step == 'name':
         if len(text) < 2 or len(text) > 50:
-            await update.message.reply_text(
-                "⚠️ নাম ২-৫০ অক্ষর / Name 2-50 chars"
-            )
+            await update.message.reply_text("⚠️ নাম ২-৫০ অক্ষর / Name 2-50 chars")
             return
         await save_profile(user_id, display_name=text)
         context.user_data['reg_step'] = 'age'
@@ -625,7 +663,7 @@ async def handle_text(update, context):
 
 
 # ============================================================
-# GENDER / PREF CALLBACKS
+# GENDER / PREF
 # ============================================================
 async def gender_callback(update, context):
     query = update.callback_query
@@ -760,7 +798,6 @@ async def find_partner(update, context):
             except Exception as e:
                 logger.error(f"Notify partner error: {e}")
 
-            # কয়েন রিওয়ার্ড (VIP হলে দ্বিগুণ)
             reward = CHAT_COIN_REWARD * 2 if await is_vip(user_id) else CHAT_COIN_REWARD
             await add_coins(user_id, reward)
         else:
@@ -816,7 +853,7 @@ async def handle_chat_message(update, context):
         await update.message.reply_text(t("not_in_chat", lang))
         return
     if is_rate_limited(user_id, max_requests=15, window_seconds=10):
-        await update.message.reply_text(t("rate_limited", lang))
+        await update.message.reply_text("⏳ Wait a moment.")
         return
     partner_id = chat['partner_id']
     try:
@@ -1248,7 +1285,7 @@ async def vip_command(update, context):
 
 async def language_command(update, context):
     await update.message.reply_text(
-        "🌍 ভাষা / Language:",
+        t("language_select", "bn"),
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn")],
             [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]
@@ -1286,7 +1323,6 @@ async def stop_chat(update, context):
 
 async def reset_command(update, context):
     user_id = update.effective_user.id
-    lang = await get_user_lang(user_id)
     async with db_pool.acquire() as conn:
         await conn.execute("DELETE FROM profiles WHERE user_id = $1", user_id)
         await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
@@ -1334,6 +1370,7 @@ async def admin_stats(update, context):
         pending = await conn.fetchval("SELECT COUNT(*) FROM reports WHERE status = 'pending'") or 0
         banned = await conn.fetchval("SELECT COUNT(*) FROM users WHERE is_banned = TRUE") or 0
         vip_count = await conn.fetchval("SELECT COUNT(*) FROM users WHERE is_vip = TRUE") or 0
+        total_coins = await conn.fetchval("SELECT SUM(coins) FROM users") or 0
     await update.message.reply_text(
         f"📊 Admin Dashboard\n\n"
         f"👥 Users: {total_users}\n"
@@ -1342,7 +1379,8 @@ async def admin_stats(update, context):
         f"💬 Chats: {active_chats}\n"
         f"⚠️ Reports: {pending}\n"
         f"🚫 Banned: {banned}\n"
-        f"⭐ VIP: {vip_count}"
+        f"⭐ VIP: {vip_count}\n"
+        f"🪙 Total Coins: {total_coins}"
     )
 
 
