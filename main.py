@@ -575,7 +575,7 @@ def main():
         .post_shutdown(post_shutdown)
         .build()
     )
-   app.add_handler(CommandHandler("reset", reset_command))
+app.add_handler(CommandHandler("reset", reset_command))
 
 # Commands
 app.add_handler(CommandHandler("start", start))
@@ -599,7 +599,4 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
 app.add_handler(MessageHandler(~filters.COMMAND, handle_chat_message))
 
 logger.info("🤖 Matchmaking Bot starting...")
-app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True) 
-
-if __name__ == "__main__":
-    main()
+app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
