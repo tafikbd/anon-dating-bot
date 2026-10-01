@@ -2,7 +2,7 @@ import os
 import logging
 import asyncio
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
@@ -40,6 +40,10 @@ def run_flask():
 
 db_pool = None
 
+ONLINE_THRESHOLD_MINUTES = 5
+QUEUE_TIMEOUT_SECONDS = 120
+AUTO_BAN_REPORT_COUNT = 5
+
 
 async def init_db():
     global db_pool
@@ -51,7 +55,7 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_18_plus BOOLEAN DEFAULT FALSE,
                 is_banned BOOLEAN DEFAULT FALSE,
-                last_active TIMESTAMP
+                last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id BIGINT PRIMARY KEY,
@@ -94,6 +98,28 @@ async def init_db():
 async def close_db():
     if db_pool:
         await db_pool.close()
+
+
+async def touch_user(user_id):
+    async with db_pool.acquire() as conn:
+        await conn.execute(
+            "UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE user_id = $1",
+            user_id
+        )
+
+
+async def get_online_count():
+    async with db_pool.acquire() as conn:
+        count = await conn.fetchval(
+            "SELECT COUNT(*) FROM users WHERE last_active > NOW() - INTERVAL '5 minutes'"
+        )
+        return count or 0
+
+
+async def is_user_banned(user_id):
+    async with db_pool.acquire() as conn:
+        banned = await conn.fetchval("SELECT is_banned FROM users WHERE user_id = $1", user_id)
+        return bool(banned)
 
 
 async def get_profile(user_id):
@@ -140,9 +166,11 @@ async def get_active_chat(user_id):
 
 
 async def main_menu_keyboard():
+    online = await get_online_count()
     return InlineKeyboardMarkup([
         [InlineKeyboardButton("🔍 Find Partner", callback_data="find_partner")],
         [InlineKeyboardButton("👤 My Profile", callback_data="my_profile")],
+        [InlineKeyboardButton(f"🟢 Online: {online}", callback_data="refresh_online")],
         [InlineKeyboardButton("🛡 Safety", callback_data="safety")],
         [InlineKeyboardButton("ℹ️ Help", callback_data="help")]
     ])
@@ -156,8 +184,41 @@ async def chat_keyboard(partner_id):
     ])
 
 
+async def queue_timeout_check(context: ContextTypes.DEFAULT_TYPE):
+    job_data = context.job.data
+    user_id = job_data['user_id']
+    async with db_pool.acquire() as conn:
+        still_in_queue = await conn.fetchrow(
+            "SELECT 1 FROM match_queue WHERE user_id = $1", user_id
+        )
+        active_chat = await conn.fetchrow(
+            "SELECT 1 FROM active_chats WHERE user_id = $1", user_id
+        )
+    if still_in_queue and not active_chat:
+        try:
+            await context.bot.send_message(
+                user_id,
+                "⏰ এখনো কেউ অনলাইনে আসেনি।\n\n"
+                "💡 আপনি অপেক্ষা করতে পারেন অথবা সার্চ বাতিল করতে পারেন।\n"
+                "🔗 বন্ধুদের ইনভাইট করলে দ্রুত পার্টনার পাবেন।",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("❌ Cancel Search", callback_data="cancel_search")],
+                    [InlineKeyboardButton("🔗 Invite Friends", callback_data="show_link")],
+                    [InlineKeyboardButton("🏠 মেইন মেনু", callback_data="main_menu")]
+                ])
+            )
+        except Exception as e:
+            logger.error(f"Queue timeout notify error: {e}")
+
+
 async def start(update, context):
     user_id = update.effective_user.id
+    await touch_user(user_id)
+
+    if await is_user_banned(user_id):
+        await update.message.reply_text("🚫 আপনি এই বট থেকে ব্যান হয়েছেন।")
+        return
+
     async with db_pool.acquire() as conn:
         user = await conn.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
         if not user:
@@ -218,8 +279,10 @@ async def start(update, context):
         )
         return
 
+    online = await get_online_count()
     await update.message.reply_text(
-        "🏠 মেইন মেনু — নিচের বাটন থেকে নির্বাচন করুন:",
+        f"🏠 মেইন মেনু — নিচের বাটন থেকে নির্বাচন করুন:\n\n"
+        f"🟢 এখন {online} জন অনলাইনে আছেন",
         reply_markup=await main_menu_keyboard()
     )
 
@@ -239,6 +302,12 @@ async def age_gate_callback(update, context):
 
 async def handle_text(update, context):
     user_id = update.effective_user.id
+    await touch_user(user_id)
+
+    if await is_user_banned(user_id):
+        await update.message.reply_text("🚫 আপনি এই বট থেকে ব্যান হয়েছেন।")
+        return
+
     step = context.user_data.get('reg_step')
     text = update.message.text.strip() if update.message.text else ""
 
@@ -274,8 +343,11 @@ async def handle_text(update, context):
     if step == 'bio':
         await save_profile(user_id, bio=text[:200])
         context.user_data['reg_step'] = None
+        online = await get_online_count()
         await update.message.reply_text(
-            "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉\n\nএখন মেইন মেনু:",
+            f"✅ রেজিস্ট্রেশন সম্পন্ন! 🎉\n\n"
+            f"🟢 এখন {online} জন অনলাইনে আছেন\n\n"
+            f"নিচের বাটন থেকে পার্টনার খুঁজুন:",
             reply_markup=await main_menu_keyboard()
         )
         return
@@ -315,16 +387,26 @@ async def pref_gender_callback(update, context):
 async def main_menu_callback(update, context):
     query = update.callback_query
     await query.answer()
+    online = await get_online_count()
     await query.edit_message_text(
-        "🏠 মেইন মেনু — নিচের বাটন থেকে নির্বাচন করুন:",
+        f"🏠 মেইন মেনু — নিচের বাটন থেকে নির্বাচন করুন:\n\n"
+        f"🟢 এখন {online} জন অনলাইনে আছেন",
         reply_markup=await main_menu_keyboard()
     )
+
+
+async def refresh_online(update, context):
+    query = update.callback_query
+    await query.answer()
+    online = await get_online_count()
+    await query.answer(f"🟢 এখন {online} জন অনলাইনে আছেন", show_alert=True)
 
 
 async def find_partner(update, context):
     query = update.callback_query
     await query.answer()
     user_id = query.from_user.id
+    await touch_user(user_id)
 
     profile = await get_profile(user_id)
     if not profile:
@@ -402,14 +484,26 @@ async def find_partner(update, context):
                 INSERT INTO match_queue (user_id, gender, pref_gender) VALUES ($1, $2, $3)
                 ON CONFLICT (user_id) DO UPDATE SET queued_at = CURRENT_TIMESTAMP
             """, user_id, user_gender, user_pref)
+
             await query.edit_message_text(
                 "⏳ পার্টনার খোঁজা হচ্ছে...\n\n"
                 "অনুগ্রহ করে অপেক্ষা করুন। কেউ অনলাইনে এলেই আপনাকে কানেক্ট করা হবে।\n\n"
-                "💡 বন্ধুদের ইনভাইট করলে দ্রুত পার্টনার পাবেন। /link ব্যবহার করুন।",
+                "💡 বন্ধুদের ইনভাইট করলে দ্রুত পার্টনার পাবেন।",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("❌ Cancel", callback_data="cancel_search")],
+                    [InlineKeyboardButton("🔗 Invite Friends", callback_data="show_link")],
                     [InlineKeyboardButton("🏠 মেইন মেনু", callback_data="main_menu")]
                 ])
+            )
+
+            job_name = f"queue_timeout_{user_id}"
+            for job in context.job_queue.get_jobs_by_name(job_name):
+                job.schedule_removal()
+            context.job_queue.run_once(
+                queue_timeout_check,
+                QUEUE_TIMEOUT_SECONDS,
+                data={'user_id': user_id},
+                name=job_name
             )
 
 
@@ -419,8 +513,24 @@ async def cancel_search(update, context):
     user_id = query.from_user.id
     async with db_pool.acquire() as conn:
         await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
+    job_name = f"queue_timeout_{user_id}"
+    for job in context.job_queue.get_jobs_by_name(job_name):
+        job.schedule_removal()
     await query.edit_message_text(
         "❌ সার্চ বাতিল করা হয়েছে।",
+        reply_markup=await main_menu_keyboard()
+    )
+
+
+async def show_link(update, context):
+    query = update.callback_query
+    await query.answer()
+    user_id = query.from_user.id
+    bot = await context.bot.get_me()
+    link = f"https://t.me/{bot.username}?start=ref_{user_id}"
+    await query.edit_message_text(
+        f"🔗 আপনার ইনভাইট লিংক:\n\n{link}\n\n"
+        f"💡 বন্ধুদের এই লিংক শেয়ার করলে তারা সরাসরি বটে যোগ দিতে পারবে এবং আপনি দ্রুত পার্টনার পাবেন।",
         reply_markup=await main_menu_keyboard()
     )
 
@@ -522,6 +632,7 @@ async def report_reason_callback(update, context):
     reason = parts[2]
     reported_id = int(parts[3])
     reporter_id = query.from_user.id
+
     async with db_pool.acquire() as conn:
         await conn.execute(
             "INSERT INTO reports (reporter_id, reported_id, reason) VALUES ($1, $2, $3)",
@@ -532,10 +643,41 @@ async def report_reason_callback(update, context):
             reporter_id, reported_id
         )
         await conn.execute("DELETE FROM active_chats WHERE user_id = $1 OR user_id = $2", reporter_id, reported_id)
-    await query.edit_message_text(
-        "✅ ধন্যবাদ। আপনার রিপোর্ট জমা হয়েছে এবং পার্টনারকে ব্লক করা হয়েছে।",
-        reply_markup=await main_menu_keyboard()
-    )
+
+        unique_reporters = await conn.fetchval(
+            "SELECT COUNT(DISTINCT reporter_id) FROM reports WHERE reported_id = $1 AND status = 'pending'",
+            reported_id
+        )
+
+        auto_banned = False
+        if unique_reporters and unique_reporters >= AUTO_BAN_REPORT_COUNT:
+            await conn.execute(
+                "UPDATE users SET is_banned = TRUE WHERE user_id = $1",
+                reported_id
+            )
+            await conn.execute(
+                "UPDATE reports SET status = 'actioned' WHERE reported_id = $1",
+                reported_id
+            )
+            auto_banned = True
+            for admin_id in ADMIN_IDS:
+                try:
+                    await context.bot.send_message(
+                        admin_id,
+                        f"🚨 Auto-Ban Triggered\n\n"
+                        f"👤 User ID: {reported_id}\n"
+                        f"📊 Reports: {unique_reporters}\n"
+                        f"⚡ Status: Banned"
+                    )
+                except Exception:
+                    pass
+
+    if auto_banned:
+        msg = "✅ ধন্যবাদ। আপনার রিপোর্ট জমা হয়েছে।"
+    else:
+        msg = "✅ ধন্যবাদ। আপনার রিপোর্ট জমা হয়েছে এবং পার্টনারকে ব্লক করা হয়েছে।"
+
+    await query.edit_message_text(msg, reply_markup=await main_menu_keyboard())
     try:
         await context.bot.send_message(
             reported_id,
@@ -583,7 +725,7 @@ async def safety_callback(update, context):
         "• সন্দেহজনক লিংকে ক্লিক করবেন না\n"
         "• কোনো খারাপ ব্যবহার হলে সাথে সাথে Report করুন\n"
         "• নিরাপদ থাকতে সবসময় End Chat ব্যবহার করুন\n\n"
-        "🚫 Report করলে পার্টনারকে ব্লক করা হয় — সে আর কখনো আপনার সাথে ম্যাচ করবে না।",
+        "🚫 ৫টি আলাদা রিপোর্ট পেলে ইউজার অটো-ব্যান হয়।",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🏠 মেইন মেনু", callback_data="main_menu")]
         ])
@@ -597,7 +739,8 @@ async def help_callback(update, context):
         "📖 সাহায্য\n\n"
         "🔹 /start — মেইন মেনু\n"
         "🔹 /stop — চলমান চ্যাট শেষ\n"
-        "🔹 /reset — প্রোফাইল রিসেট\n\n"
+        "🔹 /reset — প্রোফাইল রিসেট\n"
+        "🔹 /stats — বটের পরিসংখ্যান\n\n"
         "🎯 কীভাবে ব্যবহার করবেন:\n"
         "১. Find Partner বাটনে ক্লিক করুন\n"
         "২. কেউ অনলাইনে থাকলে সাথে সাথে কানেক্ট হবেন\n"
@@ -644,22 +787,43 @@ async def reset_command(update, context):
     await update.message.reply_text("🔄 প্রোফাইল রিসেট। আবার /start দিন।")
 
 
+async def stats_command(update, context):
+    async with db_pool.acquire() as conn:
+        total_users = await conn.fetchval("SELECT COUNT(*) FROM users") or 0
+        online = await get_online_count()
+        in_queue = await conn.fetchval("SELECT COUNT(*) FROM match_queue") or 0
+        active_chats = (await conn.fetchval("SELECT COUNT(*) FROM active_chats") or 0) // 2
+    await update.message.reply_text(
+        f"📊 বটের পরিসংখ্যান\n\n"
+        f"👥 মোট ইউজার: {total_users}\n"
+        f"🟢 এখন অনলাইনে: {online}\n"
+        f"⏳ পার্টনার খুঁজছেন: {in_queue}\n"
+        f"💬 চলমান চ্যাট: {active_chats}"
+    )
+
+
 async def admin_stats(update, context):
     user_id = update.effective_user.id
     if user_id not in ADMIN_IDS:
         await update.message.reply_text("⛔ আপনি অ্যাডমিন নন।")
         return
     async with db_pool.acquire() as conn:
-        total_users = await conn.fetchval("SELECT COUNT(*) FROM users")
-        in_queue = await conn.fetchval("SELECT COUNT(*) FROM match_queue")
-        active_chats = await conn.fetchval("SELECT COUNT(*) FROM active_chats") // 2
-        pending = await conn.fetchval("SELECT COUNT(*) FROM reports WHERE status = 'pending'")
+        total_users = await conn.fetchval("SELECT COUNT(*) FROM users") or 0
+        online = await get_online_count()
+        in_queue = await conn.fetchval("SELECT COUNT(*) FROM match_queue") or 0
+        active_chats = (await conn.fetchval("SELECT COUNT(*) FROM active_chats") or 0) // 2
+        pending = await conn.fetchval("SELECT COUNT(*) FROM reports WHERE status = 'pending'") or 0
+        banned = await conn.fetchval("SELECT COUNT(*) FROM users WHERE is_banned = TRUE") or 0
+        total_blocks = await conn.fetchval("SELECT COUNT(*) FROM blocks") or 0
     await update.message.reply_text(
-        f"📊 Admin Stats\n\n"
-        f"👥 Users: {total_users}\n"
+        f"📊 Admin Dashboard\n\n"
+        f"👥 Total Users: {total_users}\n"
+        f"🟢 Online Now: {online}\n"
         f"⏳ In Queue: {in_queue}\n"
         f"💬 Active Chats: {active_chats}\n"
-        f"⚠️ Pending Reports: {pending}"
+        f"⚠️ Pending Reports: {pending}\n"
+        f"🚫 Banned Users: {banned}\n"
+        f"🛑 Total Blocks: {total_blocks}"
     )
 
 
@@ -698,14 +862,17 @@ def main():
     app.add_handler(CommandHandler("stop", stop_chat))
     app.add_handler(CommandHandler("reset", reset_command))
     app.add_handler(CommandHandler("link", link_command))
+    app.add_handler(CommandHandler("stats", stats_command))
     app.add_handler(CommandHandler("adminstats", admin_stats))
 
     app.add_handler(CallbackQueryHandler(age_gate_callback, pattern="^age_"))
     app.add_handler(CallbackQueryHandler(gender_callback, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(pref_gender_callback, pattern="^pref_"))
     app.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^main_menu$"))
+    app.add_handler(CallbackQueryHandler(refresh_online, pattern="^refresh_online$"))
     app.add_handler(CallbackQueryHandler(find_partner, pattern="^find_partner$"))
     app.add_handler(CallbackQueryHandler(cancel_search, pattern="^cancel_search$"))
+    app.add_handler(CallbackQueryHandler(show_link, pattern="^show_link$"))
     app.add_handler(CallbackQueryHandler(end_chat_callback, pattern="^end_chat$"))
     app.add_handler(CallbackQueryHandler(next_partner, pattern="^next_partner$"))
     app.add_handler(CallbackQueryHandler(report_callback, pattern="^report_"))
