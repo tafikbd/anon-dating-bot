@@ -24,7 +24,7 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     level=logging.INFO
 )
-logger = logging.getLogger("match-bot")
+logger = logging.getLogger("anon-chat-bot")
 
 flask_app = Flask(__name__)
 
@@ -59,17 +59,9 @@ async def init_db():
                 age INTEGER,
                 gender VARCHAR(20),
                 pref_gender VARCHAR(20) DEFAULT 'any',
-                country VARCHAR(100),
-                city VARCHAR(100),
-                languages TEXT[],
-                interests TEXT[],
-                hobbies TEXT[],
                 bio TEXT,
-                looking_for VARCHAR(50),
-                is_visible BOOLEAN DEFAULT TRUE,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
-            ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pref_gender VARCHAR(20) DEFAULT 'any';
             CREATE TABLE IF NOT EXISTS match_queue (
                 user_id BIGINT PRIMARY KEY,
                 gender VARCHAR(20),
@@ -129,7 +121,7 @@ async def save_profile(user_id, **kwargs):
 rate_limit_store = {}
 
 
-def is_rate_limited(user_id, max_requests=5, window_seconds=60):
+def is_rate_limited(user_id, max_requests=10, window_seconds=10):
     now = datetime.now()
     timestamps = rate_limit_store.get(user_id, [])
     timestamps = [t for t in timestamps if (now - t).total_seconds() < window_seconds]
@@ -145,15 +137,6 @@ async def get_active_chat(user_id):
     async with db_pool.acquire() as conn:
         row = await conn.fetchrow("SELECT * FROM active_chats WHERE user_id = $1", user_id)
         return dict(row) if row else None
-
-
-async def is_blocked(user_id, target_id):
-    async with db_pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT 1 FROM blocks WHERE blocker_id = $1 AND blocked_id = $2",
-            user_id, target_id
-        )
-        return row is not None
 
 
 async def main_menu_keyboard():
@@ -226,21 +209,7 @@ async def start(update, context):
             ])
         )
         return
-    if not profile.get('looking_for'):
-        context.user_data.clear()
-        context.user_data['reg_step'] = 'looking_for'
-        await update.message.reply_text(
-            "❤️ আপনি কী খুঁজছেন?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("👫 বন্ধুত্ব", callback_data="intent_friendship")],
-                [InlineKeyboardButton("💬 কথোপকথন", callback_data="intent_conversation")],
-                [InlineKeyboardButton("📚 পড়াশোনার সঙ্গী", callback_data="intent_study")],
-                [InlineKeyboardButton("💕 ডেটিং", callback_data="intent_dating")]
-            ])
-        )
-        return
 
-    # চ্যাটে আছে কি না চেক
     chat = await get_active_chat(user_id)
     if chat:
         await update.message.reply_text(
@@ -302,54 +271,16 @@ async def handle_text(update, context):
         )
         return
 
-    if step == 'country':
-        await save_profile(user_id, country=text)
-        context.user_data['reg_step'] = 'city'
-        await update.message.reply_text("🏙️ আপনার শহর/অঞ্চল লিখুন:")
-        return
-
-    if step == 'city':
-        await save_profile(user_id, city=text)
-        context.user_data['reg_step'] = 'languages'
-        await update.message.reply_text("🗣️ আপনার ভাষাগুলো কমা দিয়ে লিখুন (যেমন: বাংলা, ইংরেজি):")
-        return
-
-    if step == 'languages':
-        langs = [l.strip() for l in text.split(",") if l.strip()]
-        await save_profile(user_id, languages=langs)
-        context.user_data['reg_step'] = 'interests'
-        await update.message.reply_text("🎯 আপনার আগ্রহগুলো কমা দিয়ে লিখুন (যেমন: সংগীত, চলচ্চিত্র):")
-        return
-
-    if step == 'interests':
-        interests = [i.strip() for i in text.split(",") if i.strip()]
-        await save_profile(user_id, interests=interests)
-        context.user_data['reg_step'] = 'hobbies'
-        await update.message.reply_text("🎨 আপনার শখগুলো কমা দিয়ে লিখুন:")
-        return
-
-    if step == 'hobbies':
-        hobbies = [h.strip() for h in text.split(",") if h.strip()]
-        await save_profile(user_id, hobbies=hobbies)
-        context.user_data['reg_step'] = 'bio'
-        await update.message.reply_text("📝 একটি ছোট বায়ো লিখুন (সর্বোচ্চ ২০০ অক্ষর):")
-        return
-
     if step == 'bio':
         await save_profile(user_id, bio=text[:200])
-        context.user_data['reg_step'] = 'looking_for'
+        context.user_data['reg_step'] = None
         await update.message.reply_text(
-            "❤️ আপনি কী খুঁজছেন?",
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("👫 বন্ধুত্ব", callback_data="intent_friendship")],
-                [InlineKeyboardButton("💬 কথোপকথন", callback_data="intent_conversation")],
-                [InlineKeyboardButton("📚 পড়াশোনার সঙ্গী", callback_data="intent_study")],
-                [InlineKeyboardButton("💕 ডেটিং", callback_data="intent_dating")]
-            ])
+            "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉\n\nএখন মেইন মেনু:",
+            reply_markup=await main_menu_keyboard()
         )
         return
 
-    if step in ('gender', 'pref_gender', 'looking_for'):
+    if step in ('gender', 'pref_gender'):
         await update.message.reply_text("⚠️ দয়া করে উপরের বাটন থেকে নির্বাচন করুন।")
         return
 
@@ -377,21 +308,8 @@ async def pref_gender_callback(update, context):
     pref = query.data.split("_")[1]
     user_id = query.from_user.id
     await save_profile(user_id, pref_gender=pref)
-    context.user_data['reg_step'] = 'country'
-    await query.edit_message_text("🌍 আপনার দেশ লিখুন:")
-
-
-async def intent_callback(update, context):
-    query = update.callback_query
-    await query.answer()
-    intent = query.data.split("_")[1]
-    user_id = query.from_user.id
-    await save_profile(user_id, looking_for=intent)
-    context.user_data['reg_step'] = None
-    await query.edit_message_text(
-        "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉\n\nএখন মেইন মেনু:",
-        reply_markup=await main_menu_keyboard()
-    )
+    context.user_data['reg_step'] = 'bio'
+    await query.edit_message_text("📝 একটি ছোট বায়ো লিখুন (সর্বোচ্চ ২০০ অক্ষর):")
 
 
 async def main_menu_callback(update, context):
@@ -413,7 +331,6 @@ async def find_partner(update, context):
         await query.edit_message_text("❌ আগে /start দিন।")
         return
 
-    # চেক করা ইউজার আগে থেকেই চ্যাটে আছে কি না
     existing = await get_active_chat(user_id)
     if existing:
         await query.edit_message_text(
@@ -426,10 +343,8 @@ async def find_partner(update, context):
     user_pref = profile.get('pref_gender') or 'any'
 
     async with db_pool.acquire() as conn:
-        # আগের কিউ এন্ট্রি মুছে ফেলা (রিফ্রেশের জন্য)
         await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
 
-        # ব্লকড ইউজারদের বাদ দিয়ে ক্যান্ডিডেট খোঁজা
         if user_pref == 'any':
             candidate = await conn.fetchrow("""
                 SELECT mq.* FROM match_queue mq
@@ -462,10 +377,10 @@ async def find_partner(update, context):
             partner_id = candidate['user_id']
             await conn.execute("DELETE FROM match_queue WHERE user_id = $1", partner_id)
 
-            await conn.execute(
-                "INSERT INTO active_chats (user_id, partner_id) VALUES ($1, $2), ($2, $1) ON CONFLICT (user_id) DO UPDATE SET partner_id = EXCLUDED.partner_id, started_at = CURRENT_TIMESTAMP",
-                user_id, partner_id
-            )
+            await conn.execute("""
+                INSERT INTO active_chats (user_id, partner_id) VALUES ($1, $2), ($2, $1)
+                ON CONFLICT (user_id) DO UPDATE SET partner_id = EXCLUDED.partner_id, started_at = CURRENT_TIMESTAMP
+            """, user_id, partner_id)
 
             success_text = (
                 "✅ পার্টনার পাওয়া গেছে!\n\n"
@@ -483,10 +398,10 @@ async def find_partner(update, context):
             except Exception as e:
                 logger.error(f"Notify partner error: {e}")
         else:
-            await conn.execute(
-                "INSERT INTO match_queue (user_id, gender, pref_gender) VALUES ($1, $2, $3) ON CONFLICT (user_id) DO UPDATE SET queued_at = CURRENT_TIMESTAMP",
-                user_id, user_gender, user_pref
-            )
+            await conn.execute("""
+                INSERT INTO match_queue (user_id, gender, pref_gender) VALUES ($1, $2, $3)
+                ON CONFLICT (user_id) DO UPDATE SET queued_at = CURRENT_TIMESTAMP
+            """, user_id, user_gender, user_pref)
             await query.edit_message_text(
                 "⏳ পার্টনার খোঁজা হচ্ছে...\n\n"
                 "অনুগ্রহ করে অপেক্ষা করুন। কেউ অনলাইনে এলেই আপনাকে কানেক্ট করা হবে।\n\n"
@@ -564,7 +479,6 @@ async def next_partner(update, context):
     await query.answer()
     user_id = query.from_user.id
 
-    # আগের চ্যাট বন্ধ
     chat = await get_active_chat(user_id)
     if chat:
         partner_id = chat['partner_id']
@@ -579,7 +493,6 @@ async def next_partner(update, context):
         except Exception:
             pass
 
-    # এখন নতুন পার্টনার খোঁজা (find_partner এর লজিক পুনরায়)
     await query.edit_message_text("🔍 নতুন পার্টনার খোঁজা হচ্ছে...")
     await asyncio.sleep(1)
     await find_partner(update, context)
@@ -648,13 +561,7 @@ async def my_profile(update, context):
         f"📝 নাম: {profile.get('display_name', 'N/A')}\n"
         f"🎂 বয়স: {profile.get('age', 'N/A')}\n"
         f"⚧ জেন্ডার: {gender_map.get(profile.get('gender'), 'N/A')}\n"
-        f"🎯 পছন্দ: {pref_map.get(profile.get('pref_gender'), 'যে কেউ')}\n"
-        f"🌍 দেশ: {profile.get('country', 'N/A')}\n"
-        f"🏙️ শহর: {profile.get('city', 'N/A')}\n"
-        f"🗣️ ভাষা: {', '.join(profile.get('languages') or [])}\n"
-        f"🎨 আগ্রহ: {', '.join(profile.get('interests') or [])}\n"
-        f"🎭 শখ: {', '.join(profile.get('hobbies') or [])}\n"
-        f"❤️ খুঁজছেন: {profile.get('looking_for', 'N/A')}\n\n"
+        f"🎯 পছন্দ: {pref_map.get(profile.get('pref_gender'), 'যে কেউ')}\n\n"
         f"💬 বায়ো: {(profile.get('bio') or 'N/A')[:200]}"
     )
     await query.edit_message_text(
@@ -796,7 +703,6 @@ def main():
     app.add_handler(CallbackQueryHandler(age_gate_callback, pattern="^age_"))
     app.add_handler(CallbackQueryHandler(gender_callback, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(pref_gender_callback, pattern="^pref_"))
-    app.add_handler(CallbackQueryHandler(intent_callback, pattern="^intent_"))
     app.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^main_menu$"))
     app.add_handler(CallbackQueryHandler(find_partner, pattern="^find_partner$"))
     app.add_handler(CallbackQueryHandler(cancel_search, pattern="^cancel_search$"))
