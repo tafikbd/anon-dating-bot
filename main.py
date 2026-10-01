@@ -575,31 +575,31 @@ def main():
         .post_shutdown(post_shutdown)
         .build()
     )
-    
-app.add_handler(CommandHandler("reset", reset_command))
-    # Commands
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(CommandHandler("adminstats", admin_stats))
+   app.add_handler(CommandHandler("reset", reset_command))
 
-    # Callbacks
-    app.add_handler(CallbackQueryHandler(age_gate_callback, pattern="^age_"))
-    app.add_handler(CallbackQueryHandler(gender_callback, pattern="^gender_"))
-    app.add_handler(CallbackQueryHandler(intent_callback, pattern="^intent_"))
-    app.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^main_menu$"))
-    app.add_handler(CallbackQueryHandler(find_someone, pattern="^find_someone$"))
-    app.add_handler(CallbackQueryHandler(like_callback, pattern="^like_"))
-    app.add_handler(CallbackQueryHandler(skip_callback, pattern="^skip_"))
-    app.add_handler(CallbackQueryHandler(chat_callback, pattern="^chat_"))
-    app.add_handler(CallbackQueryHandler(end_chat_callback, pattern="^end_chat$"))
-    app.add_handler(CallbackQueryHandler(report_callback, pattern="^report_"))
-    app.add_handler(CallbackQueryHandler(report_reason_callback, pattern="^report_reason_"))
+# Commands
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("adminstats", admin_stats))
 
-    # Text & media messages
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
-    app.add_handler(MessageHandler(~filters.COMMAND, handle_chat_message))
+# Callbacks
+app.add_handler(CallbackQueryHandler(age_gate_callback, pattern="^age_"))
+app.add_handler(CallbackQueryHandler(gender_callback, pattern="^gender_"))
+app.add_handler(CallbackQueryHandler(intent_callback, pattern="^intent_"))
+app.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^main_menu$"))
+app.add_handler(CallbackQueryHandler(find_someone, pattern="^find_someone$"))
+app.add_handler(CallbackQueryHandler(like_callback, pattern="^like_"))
+app.add_handler(CallbackQueryHandler(skip_callback, pattern="^skip_"))
+app.add_handler(CallbackQueryHandler(chat_callback, pattern="^chat_"))
+app.add_handler(CallbackQueryHandler(end_chat_callback, pattern="^end_chat$"))
+app.add_handler(CallbackQueryHandler(report_callback, pattern="^report_"))
+app.add_handler(CallbackQueryHandler(report_reason_callback, pattern="^report_reason_"))
 
-    logger.info("🤖 Matchmaking Bot starting...")
-    app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True)
+# Text & media messages
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
+app.add_handler(MessageHandler(~filters.COMMAND, handle_chat_message))
+
+logger.info("🤖 Matchmaking Bot starting...")
+app.run_polling(allowed_updates=Update.ALL_TYPES, drop_pending_updates=True) 
 
 if __name__ == "__main__":
     main()
