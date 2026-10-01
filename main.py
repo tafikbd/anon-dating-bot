@@ -171,11 +171,12 @@ async def find_candidates(user_id: int, limit: int = 10):
 # --- /start ---
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    
+    # ডেটাবেজে ইউজার আছে কি না চেক
     async with db_pool.acquire() as conn:
         user = await conn.fetchrow("SELECT * FROM users WHERE user_id = $1", user_id)
         if not user:
             await conn.execute("INSERT INTO users (user_id) VALUES ($1)", user_id)
-            # Start registration
             context.user_data['reg_step'] = 'age_gate'
             await update.message.reply_text(
                 "👋 স্বাগতম! এটি একটি ম্যাচমেকিং বট।\n\n"
@@ -186,9 +187,32 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 ])
             )
             return
-    # Existing user — show main menu
-    await show_main_menu(update, context)
 
+    # ইউজারের প্রোফাইল চেক (নাম, বয়স, জেন্ডার আছে কি না)
+    profile = await get_profile(user_id)
+    
+    # যদি প্রোফাইল অসম্পূর্ণ থাকে, তাহলে রেজিস্ট্রেশন চালু করো
+    if not profile or not profile.get('display_name') or not profile.get('age') or not profile.get('gender'):
+        if not profile or not profile.get('display_name'):
+            context.user_data['reg_step'] = 'name'
+            await update.message.reply_text("✅ ধন্যবাদ! এখন আপনার নাম লিখুন:")
+        elif not profile.get('age'):
+            context.user_data['reg_step'] = 'age'
+            await update.message.reply_text("🎂 আপনার বয়স লিখুন (শুধু সংখ্যা):")
+        elif not profile.get('gender'):
+            context.user_data['reg_step'] = 'gender'
+            await update.message.reply_text(
+                "⚧ আপনার জেন্ডার নির্বাচন করুন:",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("👦 ছেলে", callback_data="gender_male")],
+                    [InlineKeyboardButton("👧 মেয়ে", callback_data="gender_female")],
+                    [InlineKeyboardButton("🌈 অন্যান্য", callback_data="gender_other")]
+                ])
+            )
+        return
+    
+    # যদি সব ঠিক থাকে, তাহলে মেইন মেনু দেখাও
+    await show_main_menu(update, context)
 async def show_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("🔎 Find Someone", callback_data="find_someone")],
