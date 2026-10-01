@@ -542,7 +542,16 @@ async def admin_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
         f"❤️ Matches: {total_matches}\n"
         f"⚠️ Pending Reports: {pending_reports}"
     )
-
+async def reset_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    async with db_pool.acquire() as conn:
+        await conn.execute("DELETE FROM profiles WHERE user_id = $1", user_id)
+        await conn.execute("DELETE FROM preferences WHERE user_id = $1", user_id)
+    context.user_data.clear()
+    await update.message.reply_text(
+        "🔄 আপনার প্রোফাইল রিসেট করা হয়েছে।\n\n"
+        "এখন আবার /start দিন এবং নতুন করে রেজিস্ট্রেশন করুন।"
+    )
 # ============================================================
 # MAIN
 # ============================================================
@@ -566,7 +575,8 @@ def main():
         .post_shutdown(post_shutdown)
         .build()
     )
-
+    
+app.add_handler(CommandHandler("reset", reset_command))
     # Commands
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("adminstats", admin_stats))
