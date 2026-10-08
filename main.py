@@ -2,8 +2,6 @@ import os
 import logging
 import asyncio
 import threading
-import random
-import re
 from datetime import datetime, timedelta
 from flask import Flask
 from telegram import (
@@ -56,11 +54,20 @@ db_pool = None
 groq_client = Groq(api_key=GROQ_API_KEY) if (HAS_GROQ and GROQ_API_KEY) else None
 
 # ============================================================
+# AI MODELS (with fallback)
+# ============================================================
+AI_MODELS = [
+    "openai/gpt-oss-120b",
+    "llama-3.1-8b-instant",
+    "llama3-8b-8192",
+]
+
+# ============================================================
 # CONSTANTS
 # ============================================================
 ONLINE_THRESHOLD_MINUTES = 5
 QUEUE_TIMEOUT_SECONDS = 120
-CHAT_TIMER_SECONDS = 600  # 10 minutes default chat timer
+CHAT_TIMER_SECONDS = 600
 AUTO_BAN_REPORT_COUNT = 5
 REFERRAL_COIN_REWARD = 20
 CHAT_COIN_REWARD = 1
@@ -72,11 +79,9 @@ MAX_DAILY_CHATS_FREE = 20
 GROUP_ROOM_MAX = 6
 GROUP_ROOM_MIN = 3
 
-# Banned words filter (basic)
 BANNED_WORDS = [
     "fuck", "shit", "bitch", "asshole", "dick", "pussy", "bastard",
     "madarchod", "bhadwa", "chutiya", "chod", "harami", "kutta", "kuti",
-    "سکس", "لعنتی"  # can be extended
 ]
 
 # ============================================================
@@ -94,8 +99,8 @@ STRINGS = {
     "ask_age": {"bn": "🎂 আপনার বয়স লিখুন (শুধু সংখ্যা):", "en": "🎂 Enter your age (numbers only):"},
     "ask_gender": {"bn": "⚧ আপনার জেন্ডার নির্বাচন করুন:", "en": "⚧ Select your gender:"},
     "ask_pref": {"bn": "🎯 আপনি কার সাথে চ্যাট করতে চান?", "en": "🎯 Who do you want to chat with?"},
-    "ask_interest": {"bn": "💡 আপনার আগ্রহ নির্বাচন করুন (ম্যাচিং সহজ হবে):", "en": "💡 Select your interest (better matching):"},
-    "ask_lang_pref": {"bn": "🌐 আপনি কোন ভাষার পার্টনার চান?", "en": "🌐 Which language partner do you want?"},
+    "ask_interest": {"bn": "💡 আপনার আগ্রহ নির্বাচন করুন:", "en": "💡 Select your interest:"},
+    "ask_lang_pref": {"bn": "🌐 আপনি কোন ভাষার পার্টনার চান?", "en": "🌐 Which language partner?"},
     "ask_bio": {"bn": "📝 একটি ছোট বায়ো লিখুন (সর্বোচ্চ ২০০ অক্ষর):", "en": "📝 Write a short bio (max 200 chars):"},
     "male": {"bn": "👦 ছেলে", "en": "👦 Male"},
     "female": {"bn": "👧 মেয়ে", "en": "👧 Female"},
@@ -112,18 +117,13 @@ STRINGS = {
     "vip": {"bn": "⭐ VIP", "en": "⭐ VIP"},
     "invite": {"bn": "🔗 Invite", "en": "🔗 Invite"},
     "leaderboard": {"bn": "🏆 Leaderboard", "en": "🏆 Leaderboard"},
+    "language": {"bn": "🌐 ভাষা", "en": "🌐 Language"},
     "end_chat": {"bn": "🛑 End Chat", "en": "🛑 End Chat"},
     "next_person": {"bn": "➡️ Next Person", "en": "➡️ Next Person"},
     "report": {"bn": "🚫 Report", "en": "🚫 Report"},
     "reg_done": {"bn": "✅ রেজিস্ট্রেশন সম্পন্ন! 🎉", "en": "✅ Registration complete! 🎉"},
-    "searching": {
-        "bn": "⏳ পার্টনার খোঁজা হচ্ছে...\n\nঅনুগ্রহ করে অপেক্ষা করুন।",
-        "en": "⏳ Searching for partner...\n\nPlease wait.",
-    },
-    "partner_found": {
-        "bn": "✅ পার্টনার পাওয়া গেছে!\n\n💬 এখন যেকোনো মেসেজ পাঠান — টেক্সট, ছবি, ভয়েস সবই যাবে।\n🔒 আপনার পরিচয় সম্পূর্ণ গোপন থাকবে।",
-        "en": "✅ Partner found!\n\n💬 Send any message — text, photo, voice all work.\n🔒 Fully anonymous.",
-    },
+    "searching": {"bn": "⏳ পার্টনার খোঁজা হচ্ছে...\n\nঅনুগ্রহ করে অপেক্ষা করুন।", "en": "⏳ Searching for partner...\n\nPlease wait."},
+    "partner_found": {"bn": "✅ পার্টনার পাওয়া গেছে!\n\n💬 এখন যেকোনো মেসেজ পাঠান — টেক্সট, ছবি, ভয়েস সবই যাবে।\n🔒 আপনার পরিচয় সম্পূর্ণ গোপন থাকবে।", "en": "✅ Partner found!\n\n💬 Send any message — text, photo, voice all work.\n🔒 Fully anonymous."},
     "chat_ended": {"bn": "🛑 চ্যাট শেষ হয়েছে।", "en": "🛑 Chat ended."},
     "partner_ended": {"bn": "🛑 আপনার পার্টনার চ্যাট শেষ করেছেন।", "en": "🛑 Your partner ended the chat."},
     "partner_left": {"bn": "🛑 আপনার পার্টনার নতুন পার্টনার খুঁজতে চলে গেছেন।", "en": "🛑 Your partner left."},
@@ -133,31 +133,22 @@ STRINGS = {
     "already_in_chat": {"bn": "❌ আপনি ইতিমধ্যে একটি চ্যাটে আছেন।", "en": "❌ You're already in a chat."},
     "search_cancelled": {"bn": "✅ সার্চ বাতিল করা হয়েছে।", "en": "✅ Search cancelled."},
     "online_count": {"bn": "🟢 এখন {n} জন অনলাইনে আছেন", "en": "🟢 {n} users online"},
-    "referral_msg": {
-        "bn": "🔗 আপনার ইনভাইট লিংক:\n\n{link}\n\n💡 বন্ধুদের ইনভাইট করলে প্রতি জয়েনে {coins} কয়েন পাবেন!",
-        "en": "🔗 Your invite link:\n\n{link}\n\n💡 Earn {coins} coins per referral!",
-    },
+    "referral_msg": {"bn": "🔗 আপনার ইনভাইট লিংক:\n\n{link}\n\n💡 বন্ধুদের ইনভাইট করলে প্রতি জয়েনে {coins} কয়েন পাবেন!", "en": "🔗 Your invite link:\n\n{link}\n\n💡 Earn {coins} coins per referral!"},
     "coins_balance": {"bn": "🪙 আপনার কয়েন: {coins}\n⭐ VIP: {vip}", "en": "🪙 Coins: {coins}\n⭐ VIP: {vip}"},
     "vip_active": {"bn": "✅ Active", "en": "✅ Active"},
     "vip_inactive": {"bn": "❌ Inactive", "en": "❌ Inactive"},
-    "vip_buy_msg": {
-        "bn": "⭐ VIP সাবস্ক্রিপশন\n\n💰 {price} কয়েন বা {stars} Stars দিয়ে {days} দিনের VIP।\n\n🎁 সুবিধা:\n• Priority Matching (দ্রুত partner)\n• ডাবল কয়েন\n• Unlimited chats\n• Advanced Filters",
-        "en": "⭐ VIP Subscription\n\n💰 {days}-day VIP for {price} coins or {stars} Stars.\n\n🎁 Benefits:\n• Priority Matching\n• Double coins\n• Unlimited chats\n• Advanced Filters",
-    },
+    "vip_buy_msg": {"bn": "⭐ VIP সাবস্ক্রিপশন\n\n💰 {price} কয়েন বা {stars} Stars দিয়ে {days} দিনের VIP।\n\n🎁 সুবিধা:\n• Priority Matching\n• ডাবল কয়েন\n• Unlimited chats\n• Advanced Filters", "en": "⭐ VIP Subscription\n\n💰 {days}-day VIP for {price} coins or {stars} Stars.\n\n🎁 Benefits:\n• Priority Matching\n• Double coins\n• Unlimited chats\n• Advanced Filters"},
     "vip_bought": {"bn": "🎉 অভিনন্দন! আপনি VIP!\n✅ {days} দিনের জন্য সক্রিয়।", "en": "🎉 Congratulations! VIP!\n✅ Active for {days} days."},
-    "not_enough_coins": {
-        "bn": "❌ যথেষ্ট কয়েন নেই।\n🪙 দরকার: {need}\n🪙 আছে: {have}\n\n💡 /link দিয়ে আর্ন করুন।",
-        "en": "❌ Not enough coins.\n🪙 Need: {need}\n🪙 Have: {have}\n\n💡 Earn with /link",
-    },
+    "not_enough_coins": {"bn": "❌ যথেষ্ট কয়েন নেই।\n🪙 দরকার: {need}\n🪙 আছে: {have}\n\n💡 /link দিয়ে আর্ন করুন।", "en": "❌ Not enough coins.\n🪙 Need: {need}\n🪙 Have: {have}\n\n💡 Earn with /link"},
     "already_vip": {"bn": "⭐ আপনি ইতিমধ্যে VIP!", "en": "⭐ You're already VIP!"},
     "buy_with_coins": {"bn": "💰 কয়েন দিয়ে", "en": "💰 With Coins"},
     "buy_with_stars": {"bn": "⭐ Stars দিয়ে", "en": "⭐ With Stars"},
     "language_select": {"bn": "🌍 ভাষা নির্বাচন করুন:", "en": "🌍 Choose your language:"},
+    "language_changed": {"bn": "✅ ভাষা সেট হয়েছে: বাংলা", "en": "✅ Language set: English"},
     "report_thanks": {"bn": "✅ ধন্যবাদ। রিপোর্ট জমা হয়েছে।", "en": "✅ Thanks. Report submitted."},
     "report_blocked": {"bn": "✅ রিপোর্ট জমা + পার্টনার ব্লকড।", "en": "✅ Report submitted + partner blocked."},
     "referral_bonus": {"bn": "🎁 আপনি {coins} কয়েন পেয়েছেন!", "en": "🎁 You earned {coins} coins!"},
     "daily_bonus": {"bn": "🎁 ডেইলি বোনাস: +{coins} কয়েন!", "en": "🎁 Daily bonus: +{coins} coins!"},
-    "daily_bonus_already": {"bn": "⏰ আগামীকাল আবার আসুন।", "en": "⏰ Come back tomorrow."},
     "chat_limit_reached": {"bn": "❌ আজকের ফ্রি চ্যাট লিমিট শেষ ({n})।\n\n⭐ VIP নিন unlimited এর জন্য।", "en": "❌ Daily free chat limit reached ({n}).\n\n⭐ Get VIP for unlimited."},
     "spam_warning": {"bn": "⚠️ অনুগ্রহ করে ভদ্রভাবে কথা বলুন।", "en": "⚠️ Please be respectful."},
     "chat_timer_warning": {"bn": "⏰ চ্যাট ২ মিনিটে শেষ হবে।", "en": "⏰ Chat ends in 2 minutes."},
@@ -165,15 +156,12 @@ STRINGS = {
     "no_partner_ai": {"bn": "🤖 কোনো পার্টনার পাওয়া যায়নি। AI এর সাথে চ্যাট করুন?", "en": "🤖 No partner found. Chat with AI instead?"},
     "ai_mode_on": {"bn": "🤖 AI মোড চালু। এখন আপনি AI এর সাথে কথা বলছেন।\n\n🛑 থামাতে /stop দিন।", "en": "🤖 AI mode ON. You're now chatting with AI.\n\n🛑 Send /stop to stop."},
     "profile_saved": {"bn": "✅ প্রোফাইল সেভ হয়েছে!", "en": "✅ Profile saved!"},
-    "leaderboard_title": {"bn": "🏆 টপ চ্যাটার (এই সপ্তাহে)", "en": "🏆 Top Chatters (this week)"},
+    "leaderboard_title": {"bn": "🏆 টপ চ্যাটার", "en": "🏆 Top Chatters"},
     "leaderboard_empty": {"bn": "এখনো কোনো ডেটা নেই।", "en": "No data yet."},
     "group_room_menu": {"bn": "👥 Group Chat Rooms\n\nএকটি রুমে ৩-৬ জন অ্যানোনিমাস।", "en": "👥 Group Chat Rooms\n\n3-6 anonymous users per room."},
-    "group_room_created": {"bn": "✅ Group Room তৈরি হয়েছে! ID: {rid}\n\n/joinroom {rid} দিয়ে জয়েন করুন।", "en": "✅ Group Room created! ID: {rid}\n\nJoin with /joinroom {rid}"},
-    "group_room_joined": {"bn": "✅ আপনি Room {rid} এ জয়েন করেছেন।", "en": "✅ Joined Room {rid}."},
     "group_room_full": {"bn": "❌ রুম ফুল।", "en": "❌ Room full."},
     "group_room_not_found": {"bn": "❌ রুম পাওয়া যায়নি।", "en": "❌ Room not found."},
     "group_room_left": {"bn": "🚪 আপনি রুম থেকে বেরিয়ে গেছেন।", "en": "🚪 Left the room."},
-    "cannot_use_here": {"bn": "❌ এখানে ব্যবহার করা যাবে না।", "en": "❌ Not allowed here."},
     "wait_moment": {"bn": "⏳ একটু অপেক্ষা করুন।", "en": "⏳ Wait a moment."},
 }
 
@@ -196,7 +184,7 @@ async def init_db():
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=10)
     async with db_pool.acquire() as conn:
-        # ---------- USERS TABLE ----------
+        # USERS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id BIGINT PRIMARY KEY,
@@ -211,7 +199,6 @@ async def init_db():
                 referred_by BIGINT
             );
         """)
-        # Add missing columns (for old databases)
         user_cols = [
             ("ban_reason", "TEXT"),
             ("chats_today", "INTEGER DEFAULT 0"),
@@ -221,13 +208,11 @@ async def init_db():
         ]
         for col_name, col_def in user_cols:
             try:
-                await conn.execute(
-                    f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
-                )
+                await conn.execute(f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col_name} {col_def}")
             except Exception as e:
                 logger.warning(f"users.{col_name} skip: {e}")
 
-        # ---------- PROFILES ----------
+        # PROFILES
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id BIGINT PRIMARY KEY,
@@ -239,19 +224,16 @@ async def init_db():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        profile_cols = [
+        for col_name, col_def in [
             ("pref_language", "VARCHAR(10) DEFAULT 'any'"),
             ("interest", "VARCHAR(30) DEFAULT 'any'"),
-        ]
-        for col_name, col_def in profile_cols:
+        ]:
             try:
-                await conn.execute(
-                    f"ALTER TABLE profiles ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
-                )
+                await conn.execute(f"ALTER TABLE profiles ADD COLUMN IF NOT EXISTS {col_name} {col_def}")
             except Exception as e:
                 logger.warning(f"profiles.{col_name} skip: {e}")
 
-        # ---------- MATCH QUEUE ----------
+        # MATCH QUEUE
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS match_queue (
                 user_id BIGINT PRIMARY KEY,
@@ -260,20 +242,17 @@ async def init_db():
                 queued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        mq_cols = [
+        for col_name, col_def in [
             ("pref_language", "VARCHAR(10) DEFAULT 'any'"),
             ("interest", "VARCHAR(30) DEFAULT 'any'"),
             ("is_vip", "BOOLEAN DEFAULT FALSE"),
-        ]
-        for col_name, col_def in mq_cols:
+        ]:
             try:
-                await conn.execute(
-                    f"ALTER TABLE match_queue ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
-                )
+                await conn.execute(f"ALTER TABLE match_queue ADD COLUMN IF NOT EXISTS {col_name} {col_def}")
             except Exception as e:
                 logger.warning(f"match_queue.{col_name} skip: {e}")
 
-        # ---------- ACTIVE CHATS ----------
+        # ACTIVE CHATS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS active_chats (
                 user_id BIGINT PRIMARY KEY,
@@ -282,13 +261,11 @@ async def init_db():
             );
         """)
         try:
-            await conn.execute(
-                "ALTER TABLE active_chats ADD COLUMN IF NOT EXISTS is_ai BOOLEAN DEFAULT FALSE"
-            )
+            await conn.execute("ALTER TABLE active_chats ADD COLUMN IF NOT EXISTS is_ai BOOLEAN DEFAULT FALSE")
         except Exception as e:
             logger.warning(f"active_chats.is_ai skip: {e}")
 
-        # ---------- GROUP ROOMS ----------
+        # GROUP ROOMS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS group_rooms (
                 room_id SERIAL PRIMARY KEY,
@@ -298,7 +275,7 @@ async def init_db():
             );
         """)
 
-        # ---------- GROUP MEMBERS ----------
+        # GROUP MEMBERS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS group_members (
                 room_id INTEGER,
@@ -308,7 +285,7 @@ async def init_db():
             );
         """)
 
-        # ---------- BLOCKS ----------
+        # BLOCKS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS blocks (
                 blocker_id BIGINT,
@@ -318,7 +295,7 @@ async def init_db():
             );
         """)
 
-        # ---------- REPORTS ----------
+        # REPORTS
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS reports (
                 report_id SERIAL PRIMARY KEY,
@@ -343,10 +320,7 @@ async def close_db():
 # ============================================================
 async def touch_user(user_id):
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            "UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE user_id = $1",
-            user_id
-        )
+        await conn.execute("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE user_id = $1", user_id)
 
 
 async def get_user_lang(user_id):
@@ -362,9 +336,7 @@ async def set_user_lang(user_id, lang):
 
 async def get_online_count():
     async with db_pool.acquire() as conn:
-        count = await conn.fetchval(
-            "SELECT COUNT(*) FROM users WHERE last_active > NOW() - INTERVAL '5 minutes'"
-        )
+        count = await conn.fetchval("SELECT COUNT(*) FROM users WHERE last_active > NOW() - INTERVAL '5 minutes'")
         return count or 0
 
 
@@ -433,48 +405,32 @@ async def is_vip(user_id):
 async def set_vip(user_id, days=VIP_DURATION_DAYS):
     until = datetime.now() + timedelta(days=days)
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            "UPDATE users SET is_vip = TRUE, vip_until = $1 WHERE user_id = $2",
-            until, user_id
-        )
+        await conn.execute("UPDATE users SET is_vip = TRUE, vip_until = $1 WHERE user_id = $2", until, user_id)
 
 
 # ============================================================
 # DAILY LIMIT / BONUS
 # ============================================================
 async def check_and_increment_chat_limit(user_id):
-    """Return True if user can chat, else False."""
     if await is_vip(user_id):
         return True
     async with db_pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT chats_today, chats_today_date FROM users WHERE user_id = $1",
-            user_id
-        )
+        row = await conn.fetchrow("SELECT chats_today, chats_today_date FROM users WHERE user_id = $1", user_id)
         today = datetime.now().date()
         if not row:
             return False
         if row['chats_today_date'] != today:
-            await conn.execute(
-                "UPDATE users SET chats_today = 1, chats_today_date = $1 WHERE user_id = $2",
-                today, user_id
-            )
+            await conn.execute("UPDATE users SET chats_today = 1, chats_today_date = $1 WHERE user_id = $2", today, user_id)
             return True
         if row['chats_today'] >= MAX_DAILY_CHATS_FREE:
             return False
-        await conn.execute(
-            "UPDATE users SET chats_today = chats_today + 1 WHERE user_id = $1",
-            user_id
-        )
+        await conn.execute("UPDATE users SET chats_today = chats_today + 1 WHERE user_id = $1", user_id)
         return True
 
 
 async def try_daily_bonus(user_id):
     async with db_pool.acquire() as conn:
-        row = await conn.fetchrow(
-            "SELECT daily_bonus_date FROM users WHERE user_id = $1",
-            user_id
-        )
+        row = await conn.fetchrow("SELECT daily_bonus_date FROM users WHERE user_id = $1", user_id)
         today = datetime.now().date()
         if row and row['daily_bonus_date'] == today:
             return False
@@ -492,39 +448,27 @@ async def process_referral(new_user_id, referrer_id):
     if new_user_id == referrer_id:
         return False
     async with db_pool.acquire() as conn:
-        referrer_exists = await conn.fetchval("SELECT 1 FROM users WHERE user_id = $1", referrer_id)
-        if not referrer_exists:
+        exists = await conn.fetchval("SELECT 1 FROM users WHERE user_id = $1", referrer_id)
+        if not exists:
             return False
         already = await conn.fetchval("SELECT referred_by FROM users WHERE user_id = $1", new_user_id)
         if already is not None:
             return False
-        await conn.execute(
-            "UPDATE users SET referred_by = $1 WHERE user_id = $2",
-            referrer_id, new_user_id
-        )
-        await conn.execute(
-            "UPDATE users SET coins = coins + $1 WHERE user_id = $2",
-            REFERRAL_COIN_REWARD, referrer_id
-        )
+        await conn.execute("UPDATE users SET referred_by = $1 WHERE user_id = $2", referrer_id, new_user_id)
+        await conn.execute("UPDATE users SET coins = coins + $1 WHERE user_id = $2", REFERRAL_COIN_REWARD, referrer_id)
     return True
 
 
 # ============================================================
-# ANTI-SPAM
+# ANTI-SPAM / RATE LIMIT
 # ============================================================
 def contains_bad_words(text):
     if not text:
         return False
     lower = text.lower()
-    for w in BANNED_WORDS:
-        if w in lower:
-            return True
-    return False
+    return any(w in lower for w in BANNED_WORDS)
 
 
-# ============================================================
-# RATE LIMIT
-# ============================================================
 rate_limit_store = {}
 
 
@@ -551,10 +495,7 @@ async def get_active_chat(user_id):
 
 async def remove_active_chat(user_id, partner_id):
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            "DELETE FROM active_chats WHERE user_id = $1 OR user_id = $2",
-            user_id, partner_id
-        )
+        await conn.execute("DELETE FROM active_chats WHERE user_id = $1 OR user_id = $2", user_id, partner_id)
 
 
 async def main_menu_keyboard(lang):
@@ -568,8 +509,9 @@ async def main_menu_keyboard(lang):
          InlineKeyboardButton(t("vip", lang), callback_data="show_vip")],
         [InlineKeyboardButton(t("invite", lang), callback_data="show_link"),
          InlineKeyboardButton(t("leaderboard", lang), callback_data="leaderboard")],
-        [InlineKeyboardButton(f"🟢 {online}", callback_data="refresh_online"),
-         InlineKeyboardButton(t("safety", lang), callback_data="safety"),
+        [InlineKeyboardButton(t("language", lang), callback_data="change_language"),
+         InlineKeyboardButton(f"🟢 {online}", callback_data="refresh_online")],
+        [InlineKeyboardButton(t("safety", lang), callback_data="safety"),
          InlineKeyboardButton(t("help", lang), callback_data="help")],
     ])
 
@@ -630,15 +572,9 @@ async def chat_timer_end(context: ContextTypes.DEFAULT_TYPE):
     partner_id = chat['partner_id']
     await remove_active_chat(user_id, partner_id)
     try:
-        await context.bot.send_message(
-            user_id, t("chat_timer_ended", lang),
-            reply_markup=await main_menu_keyboard(lang)
-        )
+        await context.bot.send_message(user_id, t("chat_timer_ended", lang), reply_markup=await main_menu_keyboard(lang))
         p_lang = await get_user_lang(partner_id)
-        await context.bot.send_message(
-            partner_id, t("chat_timer_ended", p_lang),
-            reply_markup=await main_menu_keyboard(p_lang)
-        )
+        await context.bot.send_message(partner_id, t("chat_timer_ended", p_lang), reply_markup=await main_menu_keyboard(p_lang))
     except Exception:
         pass
 
@@ -673,10 +609,7 @@ async def start(update, context):
                     success = await process_referral(user_id, referrer_id)
                     if success:
                         ref_lang = await get_user_lang(referrer_id)
-                        await context.bot.send_message(
-                            referrer_id,
-                            t("referral_bonus", ref_lang, coins=REFERRAL_COIN_REWARD)
-                        )
+                        await context.bot.send_message(referrer_id, t("referral_bonus", ref_lang, coins=REFERRAL_COIN_REWARD))
                 except Exception as e:
                     logger.error(f"Referral: {e}")
             context.user_data.clear()
@@ -692,25 +625,18 @@ async def start(update, context):
 
     lang = user.get('language') or 'bn'
 
-    # Referral for existing user
     if referrer_id:
         async with db_pool.acquire() as conn:
-            already_ref = await conn.fetchval(
-                "SELECT referred_by FROM users WHERE user_id = $1", user_id
-            )
+            already_ref = await conn.fetchval("SELECT referred_by FROM users WHERE user_id = $1", user_id)
         if already_ref is None:
             success = await process_referral(user_id, referrer_id)
             if success:
                 try:
                     ref_lang = await get_user_lang(referrer_id)
-                    await context.bot.send_message(
-                        referrer_id,
-                        t("referral_bonus", ref_lang, coins=REFERRAL_COIN_REWARD)
-                    )
+                    await context.bot.send_message(referrer_id, t("referral_bonus", ref_lang, coins=REFERRAL_COIN_REWARD))
                 except Exception:
                     pass
 
-    # Daily bonus
     if await try_daily_bonus(user_id):
         await update.message.reply_text(t("daily_bonus", lang, coins=DAILY_BONUS_COINS))
 
@@ -780,10 +706,7 @@ async def start(update, context):
 
     chat = await get_active_chat(user_id)
     if chat:
-        await update.message.reply_text(
-            t("already_in_chat", lang),
-            reply_markup=await chat_keyboard(chat['partner_id'], lang)
-        )
+        await update.message.reply_text(t("already_in_chat", lang), reply_markup=await chat_keyboard(chat['partner_id'], lang))
         return
 
     online = await get_online_count()
@@ -802,12 +725,42 @@ async def language_callback(update, context):
     user_id = query.from_user.id
     lang = "bn" if query.data == "lang_bn" else "en"
     await set_user_lang(user_id, lang)
+    
+    # If existing user (has profile), just switch and go to menu
+    profile = await get_profile(user_id)
+    if profile and profile.get('display_name'):
+        online = await get_online_count()
+        try:
+            await query.edit_message_text(
+                f"{t('language_changed', lang)}\n\n{t('main_menu', lang)}\n\n{t('online_count', lang, n=online)}",
+                reply_markup=await main_menu_keyboard(lang)
+            )
+        except Exception:
+            await query.message.reply_text(
+                t("main_menu", lang),
+                reply_markup=await main_menu_keyboard(lang)
+            )
+        return
+    
+    # New user - continue with age gate
     context.user_data['reg_step'] = 'age_gate'
     await query.edit_message_text(
         t("welcome", lang),
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton(t("age_yes", lang), callback_data="age_yes")],
             [InlineKeyboardButton(t("age_no", lang), callback_data="age_no")]
+        ])
+    )
+
+
+async def change_language(update, context):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(
+        t("language_select", "bn"),
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn")],
+            [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]
         ])
     )
 
@@ -843,7 +796,7 @@ async def handle_text(update, context):
 
     if step == 'name':
         if len(text) < 2 or len(text) > 50:
-            await update.message.reply_text("⚠️ নাম ২-৫০ অক্ষর")
+            await update.message.reply_text("⚠️ Name 2-50 chars")
             return
         await save_profile(user_id, display_name=text)
         context.user_data['reg_step'] = 'age'
@@ -852,7 +805,7 @@ async def handle_text(update, context):
 
     if step == 'age':
         if not text.isdigit() or int(text) < 18 or int(text) > 99:
-            await update.message.reply_text("⚠️ বয়স ১৮-৯৯")
+            await update.message.reply_text("⚠️ Age 18-99")
             return
         await save_profile(user_id, age=int(text))
         context.user_data['reg_step'] = 'gender'
@@ -877,10 +830,9 @@ async def handle_text(update, context):
         return
 
     if step in ('gender', 'pref_gender', 'interest', 'pref_language'):
-        await update.message.reply_text("⚠️ উপরের বাটন ব্যবহার করুন")
+        await update.message.reply_text("⚠️ Use buttons above")
         return
 
-    # Edit profile mode
     edit_step = context.user_data.get('edit_step')
     if edit_step:
         if edit_step == 'name':
@@ -891,7 +843,6 @@ async def handle_text(update, context):
         await update.message.reply_text(t("profile_saved", lang))
         return
 
-    # Normal chat
     await handle_chat_message(update, context)
 
 
@@ -991,7 +942,7 @@ async def refresh_online(update, context):
 
 
 # ============================================================
-# FIND PARTNER (with VIP priority, all filters)
+# FIND PARTNER
 # ============================================================
 async def find_partner(update, context):
     query = update.callback_query
@@ -1013,7 +964,6 @@ async def find_partner(update, context):
         )
         return
 
-    # Daily chat limit
     if not await check_and_increment_chat_limit(user_id):
         await query.edit_message_text(
             t("chat_limit_reached", lang, n=MAX_DAILY_CHATS_FREE),
@@ -1030,13 +980,10 @@ async def find_partner(update, context):
     user_plang = profile.get('pref_language') or 'any'
     user_vip = await is_vip(user_id)
 
-    # Clean old queue entry
     async with db_pool.acquire() as conn:
         await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
 
-    # Find candidate
     async with db_pool.acquire() as conn:
-        # Fetch all candidates and filter in Python for flexibility
         candidates = await conn.fetch("""
             SELECT mq.* FROM match_queue mq
             WHERE mq.user_id != $1
@@ -1049,26 +996,20 @@ async def find_partner(update, context):
             LIMIT 50
         """, user_id)
 
-    # Scoring
     def score_candidate(c):
         score = 0
-        # Gender matching
         if user_pref == 'any' or c['gender'] == user_pref:
             score += 10
         else:
-            return -1  # reject
-        # Their preference should match us
+            return -1
         if c['pref_gender'] == 'any' or c['pref_gender'] == user_gender:
             score += 10
         else:
             return -1
-        # Interest
         if user_interest != 'any' and c['interest'] == user_interest:
             score += 5
-        # Language
         if user_plang != 'any' and c['pref_language'] == user_plang:
             score += 3
-        # VIP priority bonus
         if c['is_vip']:
             score += 2
         return score
@@ -1096,52 +1037,21 @@ async def find_partner(update, context):
 
         partner_lang = await get_user_lang(partner_id)
 
-        await query.edit_message_text(
-            t("partner_found", lang),
-            reply_markup=await chat_keyboard(partner_id, lang)
-        )
+        await query.edit_message_text(t("partner_found", lang), reply_markup=await chat_keyboard(partner_id, lang))
         try:
-            await context.bot.send_message(
-                partner_id,
-                t("partner_found", partner_lang),
-                reply_markup=await chat_keyboard(user_id, partner_lang)
-            )
+            await context.bot.send_message(partner_id, t("partner_found", partner_lang), reply_markup=await chat_keyboard(user_id, partner_lang))
         except Exception as e:
             logger.error(f"Notify partner: {e}")
 
-        # Coins
         reward = CHAT_COIN_REWARD * 2 if user_vip else CHAT_COIN_REWARD
         await add_coins(user_id, reward)
 
-        # Chat timer (VIP gets 2x time)
         timer_sec = CHAT_TIMER_SECONDS * 2 if user_vip else CHAT_TIMER_SECONDS
-        # Warning 2 min before end
-        context.job_queue.run_once(
-            chat_timer_warning,
-            timer_sec - 120,
-            data={'user_id': user_id},
-            name=f"warn1_{user_id}"
-        )
-        context.job_queue.run_once(
-            chat_timer_warning,
-            timer_sec - 120,
-            data={'user_id': partner_id},
-            name=f"warn2_{partner_id}"
-        )
-        context.job_queue.run_once(
-            chat_timer_end,
-            timer_sec,
-            data={'user_id': user_id},
-            name=f"end1_{user_id}"
-        )
-        context.job_queue.run_once(
-            chat_timer_end,
-            timer_sec,
-            data={'user_id': partner_id},
-            name=f"end2_{partner_id}"
-        )
+        context.job_queue.run_once(chat_timer_warning, timer_sec - 120, data={'user_id': user_id}, name=f"warn1_{user_id}")
+        context.job_queue.run_once(chat_timer_warning, timer_sec - 120, data={'user_id': partner_id}, name=f"warn2_{partner_id}")
+        context.job_queue.run_once(chat_timer_end, timer_sec, data={'user_id': user_id}, name=f"end1_{user_id}")
+        context.job_queue.run_once(chat_timer_end, timer_sec, data={'user_id': partner_id}, name=f"end2_{partner_id}")
     else:
-        # No match
         async with db_pool.acquire() as conn:
             await conn.execute("""
                 INSERT INTO match_queue (user_id, gender, pref_gender, pref_language, interest, is_vip)
@@ -1168,19 +1078,13 @@ async def find_partner(update, context):
         job_name = f"queue_timeout_{user_id}"
         for job in context.job_queue.get_jobs_by_name(job_name):
             job.schedule_removal()
-        context.job_queue.run_once(
-            queue_timeout_check,
-            QUEUE_TIMEOUT_SECONDS,
-            data={'user_id': user_id},
-            name=job_name
-        )
+        context.job_queue.run_once(queue_timeout_check, QUEUE_TIMEOUT_SECONDS, data={'user_id': user_id}, name=job_name)
 
 
 # ============================================================
-# CANCEL SEARCH (FIXED)
+# CANCEL SEARCH
 # ============================================================
 async def cancel_search(update, context):
-    """Cancel queue search - fixed version."""
     query = update.callback_query
     await query.answer("Cancelled")
     user_id = query.from_user.id
@@ -1189,12 +1093,10 @@ async def cancel_search(update, context):
         async with db_pool.acquire() as conn:
             await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
 
-        # Remove timeout job
         job_name = f"queue_timeout_{user_id}"
         for job in context.job_queue.get_jobs_by_name(job_name):
             job.schedule_removal()
 
-        # Clear state
         context.user_data.pop('searching', None)
 
         online = await get_online_count()
@@ -1205,16 +1107,13 @@ async def cancel_search(update, context):
     except Exception as e:
         logger.error(f"cancel_search error: {e}")
         try:
-            await query.edit_message_text(
-                t("main_menu", lang),
-                reply_markup=await main_menu_keyboard(lang)
-            )
+            await query.edit_message_text(t("main_menu", lang), reply_markup=await main_menu_keyboard(lang))
         except Exception:
             pass
 
 
 # ============================================================
-# AI CHAT MODE
+# AI CHAT
 # ============================================================
 async def ai_chat_start(update, context):
     query = update.callback_query
@@ -1226,7 +1125,6 @@ async def ai_chat_start(update, context):
         await query.answer("AI not available", show_alert=True)
         return
 
-    # Remove from queue
     async with db_pool.acquire() as conn:
         await conn.execute("DELETE FROM match_queue WHERE user_id = $1", user_id)
         await conn.execute("""
@@ -1258,19 +1156,16 @@ async def handle_chat_message(update, context):
         await update.message.reply_text(t("wait_moment", lang))
         return
 
-    # Anti-spam
     if update.message.text and contains_bad_words(update.message.text):
         await update.message.reply_text(t("spam_warning", lang))
         return
 
-    # AI chat mode
     if chat.get('is_ai'):
         await handle_ai_message(update, context, lang)
         return
 
     partner_id = chat['partner_id']
 
-    # Check if user is in a group room
     room_id = context.user_data.get('room_id')
     if room_id:
         await handle_group_message(update, context, room_id)
@@ -1291,7 +1186,6 @@ async def handle_chat_message(update, context):
 
 
 async def handle_ai_message(update, context, lang):
-    """User is chatting with AI."""
     user_id = update.effective_user.id
     text = update.message.text or ""
     if not text:
@@ -1302,29 +1196,43 @@ async def handle_ai_message(update, context, lang):
         return
 
     typing_msg = await update.message.reply_text("🤖 Typing...")
-    try:
-        history = context.user_data.get('ai_history', [])
-        history.append({"role": "user", "content": text})
-        system = (
-            "You are a friendly anonymous chat partner. "
-            "Reply in the user's language (Bangla/English/Hindi). "
-            "Keep replies short (under 300 chars). Be warm, funny, engaging. "
-            "Use emojis. No markdown. No asterisks. Ask follow-up questions."
-        )
-        resp = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": system}] + history[-10:],
-            temperature=0.8,
-            max_tokens=300,
-        )
-        answer = resp.choices[0].message.content.strip()
-        history.append({"role": "assistant", "content": answer})
-        context.user_data['ai_history'] = history[-10:]
-        await typing_msg.edit_text(answer)
-    except Exception as e:
-        logger.error(f"AI error: {e}")
+    history = context.user_data.get('ai_history', [])
+    history.append({"role": "user", "content": text})
+
+    system = (
+        "You are a friendly anonymous chat partner. "
+        "Reply in the user's language (Bangla/English/Hindi). "
+        "Keep replies short (under 300 chars). Be warm, funny, engaging. "
+        "Use emojis. No markdown. No asterisks. Ask follow-up questions."
+    )
+
+    answer = None
+    last_err = None
+    for model_name in AI_MODELS:
+        try:
+            resp = await asyncio.to_thread(
+                groq_client.chat.completions.create,
+                model=model_name,
+                messages=[{"role": "system", "content": system}] + history[-10:],
+                temperature=0.8,
+                max_tokens=400,
+            )
+            answer = resp.choices[0].message.content.strip()
+            logger.info(f"AI model used: {model_name}")
+            break
+        except Exception as e:
+            last_err = e
+            logger.warning(f"AI model {model_name} failed: {e}")
+            continue
+
+    if not answer:
+        logger.error(f"All AI models failed: {last_err}")
         await typing_msg.edit_text("🤖 AI is having issues. Try again.")
+        return
+
+    history.append({"role": "assistant", "content": answer})
+    context.user_data['ai_history'] = history[-10:]
+    await typing_msg.edit_text(answer)
 
 
 # ============================================================
@@ -1336,7 +1244,6 @@ async def group_menu(update, context):
     user_id = query.from_user.id
     lang = await get_user_lang(user_id)
 
-    # List open rooms
     async with db_pool.acquire() as conn:
         rooms = await conn.fetch("""
             SELECT r.room_id, COUNT(m.user_id) as cnt
@@ -1358,10 +1265,7 @@ async def group_menu(update, context):
     rows.append([InlineKeyboardButton("➕ Create New Room", callback_data="create_room")])
     rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
 
-    await query.edit_message_text(
-        t("group_room_menu", lang),
-        reply_markup=InlineKeyboardMarkup(rows)
-    )
+    await query.edit_message_text(t("group_room_menu", lang), reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def create_room(update, context):
@@ -1371,21 +1275,12 @@ async def create_room(update, context):
     lang = await get_user_lang(user_id)
 
     async with db_pool.acquire() as conn:
-        room_id = await conn.fetchval(
-            "INSERT INTO group_rooms (host_id) VALUES ($1) RETURNING room_id",
-            user_id
-        )
-        await conn.execute(
-            "INSERT INTO group_members (room_id, user_id) VALUES ($1, $2)",
-            room_id, user_id
-        )
+        room_id = await conn.fetchval("INSERT INTO group_rooms (host_id) VALUES ($1) RETURNING room_id", user_id)
+        await conn.execute("INSERT INTO group_members (room_id, user_id) VALUES ($1, $2)", room_id, user_id)
 
     context.user_data['room_id'] = room_id
     await query.edit_message_text(
-        f"✅ Room {room_id} created!\n\n"
-        f"ID: {room_id}\n\n"
-        f"Share with friends:\n/joinroom {room_id}\n\n"
-        f"Send /leaveroom to leave.",
+        f"✅ Room {room_id} created!\n\nID: {room_id}\n\nShare:\n/joinroom {room_id}\n\nSend /leaveroom to leave.",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🛑 Leave", callback_data="leave_room")],
         ])
@@ -1400,31 +1295,15 @@ async def join_room_callback(update, context):
     room_id = int(query.data.split("_")[1])
 
     async with db_pool.acquire() as conn:
-        # Check room
-        room = await conn.fetchrow(
-            "SELECT * FROM group_rooms WHERE room_id = $1 AND is_active = TRUE",
-            room_id
-        )
+        room = await conn.fetchrow("SELECT * FROM group_rooms WHERE room_id = $1 AND is_active = TRUE", room_id)
         if not room:
-            await query.edit_message_text(
-                t("group_room_not_found", lang),
-                reply_markup=await main_menu_keyboard(lang)
-            )
+            await query.edit_message_text(t("group_room_not_found", lang), reply_markup=await main_menu_keyboard(lang))
             return
-        cnt = await conn.fetchval(
-            "SELECT COUNT(*) FROM group_members WHERE room_id = $1",
-            room_id
-        )
+        cnt = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE room_id = $1", room_id)
         if cnt >= GROUP_ROOM_MAX:
-            await query.edit_message_text(
-                t("group_room_full", lang),
-                reply_markup=await main_menu_keyboard(lang)
-            )
+            await query.edit_message_text(t("group_room_full", lang), reply_markup=await main_menu_keyboard(lang))
             return
-        await conn.execute(
-            "INSERT INTO group_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            room_id, user_id
-        )
+        await conn.execute("INSERT INTO group_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", room_id, user_id)
 
     context.user_data['room_id'] = room_id
     await query.edit_message_text(
@@ -1448,28 +1327,18 @@ async def join_room_command(update, context):
         return
 
     async with db_pool.acquire() as conn:
-        room = await conn.fetchrow(
-            "SELECT * FROM group_rooms WHERE room_id = $1 AND is_active = TRUE",
-            room_id
-        )
+        room = await conn.fetchrow("SELECT * FROM group_rooms WHERE room_id = $1 AND is_active = TRUE", room_id)
         if not room:
             await update.message.reply_text(t("group_room_not_found", lang))
             return
-        cnt = await conn.fetchval(
-            "SELECT COUNT(*) FROM group_members WHERE room_id = $1", room_id
-        )
+        cnt = await conn.fetchval("SELECT COUNT(*) FROM group_members WHERE room_id = $1", room_id)
         if cnt >= GROUP_ROOM_MAX:
             await update.message.reply_text(t("group_room_full", lang))
             return
-        await conn.execute(
-            "INSERT INTO group_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            room_id, user_id
-        )
+        await conn.execute("INSERT INTO group_members (room_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", room_id, user_id)
 
     context.user_data['room_id'] = room_id
-    await update.message.reply_text(
-        f"✅ Joined Room {room_id}!\n\n/leaveroom to exit."
-    )
+    await update.message.reply_text(f"✅ Joined Room {room_id}!\n\n/leaveroom to exit.")
 
 
 async def leave_room_callback(update, context):
@@ -1480,14 +1349,8 @@ async def leave_room_callback(update, context):
     room_id = context.user_data.pop('room_id', None)
     if room_id:
         async with db_pool.acquire() as conn:
-            await conn.execute(
-                "DELETE FROM group_members WHERE room_id = $1 AND user_id = $2",
-                room_id, user_id
-            )
-    await query.edit_message_text(
-        t("group_room_left", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+            await conn.execute("DELETE FROM group_members WHERE room_id = $1 AND user_id = $2", room_id, user_id)
+    await query.edit_message_text(t("group_room_left", lang), reply_markup=await main_menu_keyboard(lang))
 
 
 async def leave_room_command(update, context):
@@ -1498,21 +1361,14 @@ async def leave_room_command(update, context):
         await update.message.reply_text("❌ You're not in a room.")
         return
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            "DELETE FROM group_members WHERE room_id = $1 AND user_id = $2",
-            room_id, user_id
-        )
+        await conn.execute("DELETE FROM group_members WHERE room_id = $1 AND user_id = $2", room_id, user_id)
     await update.message.reply_text(t("group_room_left", lang))
 
 
 async def handle_group_message(update, context, room_id):
-    """Forward message to all other members in the room."""
     user_id = update.effective_user.id
     async with db_pool.acquire() as conn:
-        members = await conn.fetch(
-            "SELECT user_id FROM group_members WHERE room_id = $1 AND user_id != $2",
-            room_id, user_id
-        )
+        members = await conn.fetch("SELECT user_id FROM group_members WHERE room_id = $1 AND user_id != $2", room_id, user_id)
     for m in members:
         try:
             await context.bot.copy_message(
@@ -1534,34 +1390,23 @@ async def end_chat_callback(update, context):
     lang = await get_user_lang(user_id)
     chat = await get_active_chat(user_id)
     if not chat:
-        await query.edit_message_text(
-            t("not_in_chat", lang),
-            reply_markup=await main_menu_keyboard(lang)
-        )
+        await query.edit_message_text(t("not_in_chat", lang), reply_markup=await main_menu_keyboard(lang))
         return
     partner_id = chat['partner_id']
     is_ai = chat.get('is_ai', False)
 
     await remove_active_chat(user_id, partner_id)
 
-    # Cancel timers
     for name in [f"warn1_{user_id}", f"warn2_{user_id}", f"end1_{user_id}", f"end2_{user_id}",
                  f"warn1_{partner_id}", f"warn2_{partner_id}", f"end1_{partner_id}", f"end2_{partner_id}"]:
         for job in context.job_queue.get_jobs_by_name(name):
             job.schedule_removal()
 
-    await query.edit_message_text(
-        t("chat_ended", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(t("chat_ended", lang), reply_markup=await main_menu_keyboard(lang))
     if not is_ai:
         try:
             p_lang = await get_user_lang(partner_id)
-            await context.bot.send_message(
-                partner_id,
-                t("partner_ended", p_lang),
-                reply_markup=await main_menu_keyboard(p_lang)
-            )
+            await context.bot.send_message(partner_id, t("partner_ended", p_lang), reply_markup=await main_menu_keyboard(p_lang))
         except Exception:
             pass
 
@@ -1586,11 +1431,7 @@ async def next_partner(update, context):
         if not is_ai:
             try:
                 p_lang = await get_user_lang(partner_id)
-                await context.bot.send_message(
-                    partner_id,
-                    t("partner_left", p_lang),
-                    reply_markup=await main_menu_keyboard(p_lang)
-                )
+                await context.bot.send_message(partner_id, t("partner_left", p_lang), reply_markup=await main_menu_keyboard(p_lang))
             except Exception:
                 pass
 
@@ -1615,10 +1456,7 @@ async def report_callback(update, context):
     ]
     rows = [[InlineKeyboardButton(r[0], callback_data=f"report_reason_{r[1]}_{reported_id}")] for r in reasons]
     rows.append([InlineKeyboardButton("❌ Cancel", callback_data="end_chat")])
-    await query.edit_message_text(
-        "⚠️ Report reason / কারণ:",
-        reply_markup=InlineKeyboardMarkup(rows)
-    )
+    await query.edit_message_text("⚠️ Report reason:", reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def report_reason_callback(update, context):
@@ -1631,47 +1469,26 @@ async def report_reason_callback(update, context):
     lang = await get_user_lang(reporter_id)
 
     async with db_pool.acquire() as conn:
-        await conn.execute(
-            "INSERT INTO reports (reporter_id, reported_id, reason) VALUES ($1, $2, $3)",
-            reporter_id, reported_id, reason
-        )
-        await conn.execute(
-            "INSERT INTO blocks (blocker_id, blocked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-            reporter_id, reported_id
-        )
-        await conn.execute(
-            "DELETE FROM active_chats WHERE user_id = $1 OR user_id = $2",
-            reporter_id, reported_id
-        )
+        await conn.execute("INSERT INTO reports (reporter_id, reported_id, reason) VALUES ($1, $2, $3)", reporter_id, reported_id, reason)
+        await conn.execute("INSERT INTO blocks (blocker_id, blocked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING", reporter_id, reported_id)
+        await conn.execute("DELETE FROM active_chats WHERE user_id = $1 OR user_id = $2", reporter_id, reported_id)
         unique_reporters = await conn.fetchval(
             "SELECT COUNT(DISTINCT reporter_id) FROM reports WHERE reported_id = $1 AND status = 'pending'",
             reported_id
         )
-        auto_banned = False
         if unique_reporters and unique_reporters >= AUTO_BAN_REPORT_COUNT:
             await conn.execute("UPDATE users SET is_banned = TRUE WHERE user_id = $1", reported_id)
             await conn.execute("UPDATE reports SET status = 'actioned' WHERE reported_id = $1", reported_id)
-            auto_banned = True
             for admin_id in ADMIN_IDS:
                 try:
-                    await context.bot.send_message(
-                        admin_id,
-                        f"🚨 Auto-Ban\n👤 ID: {reported_id}\n📊 Reports: {unique_reporters}"
-                    )
+                    await context.bot.send_message(admin_id, f"🚨 Auto-Ban\n👤 ID: {reported_id}\n📊 Reports: {unique_reporters}")
                 except Exception:
                     pass
 
-    await query.edit_message_text(
-        t("report_blocked", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(t("report_blocked", lang), reply_markup=await main_menu_keyboard(lang))
     try:
         p_lang = await get_user_lang(reported_id)
-        await context.bot.send_message(
-            reported_id,
-            t("partner_ended", p_lang),
-            reply_markup=await main_menu_keyboard(p_lang)
-        )
+        await context.bot.send_message(reported_id, t("partner_ended", p_lang), reply_markup=await main_menu_keyboard(p_lang))
     except Exception:
         pass
 
@@ -1733,8 +1550,6 @@ async def edit_profile(update, context):
 async def edit_name(update, context):
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
-    lang = await get_user_lang(user_id)
     context.user_data['edit_step'] = 'name'
     await query.edit_message_text("✏️ Send new name:")
 
@@ -1742,8 +1557,6 @@ async def edit_name(update, context):
 async def edit_bio(update, context):
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
-    lang = await get_user_lang(user_id)
     context.user_data['edit_step'] = 'bio'
     await query.edit_message_text("✏️ Send new bio (max 200):")
 
@@ -1770,17 +1583,12 @@ async def set_pref_gender_edit(update, context):
     lang = await get_user_lang(user_id)
     pref = query.data.split("_")[1]
     await save_profile(user_id, pref_gender=pref)
-    await query.edit_message_text(
-        t("profile_saved", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(t("profile_saved", lang), reply_markup=await main_menu_keyboard(lang))
 
 
 async def edit_interest(update, context):
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
-    lang = await get_user_lang(user_id)
     await query.edit_message_text(
         "💡 Choose:",
         reply_markup=InlineKeyboardMarkup([
@@ -1801,17 +1609,12 @@ async def set_interest_edit(update, context):
     lang = await get_user_lang(user_id)
     interest = query.data.split("_")[1]
     await save_profile(user_id, interest=interest)
-    await query.edit_message_text(
-        t("profile_saved", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(t("profile_saved", lang), reply_markup=await main_menu_keyboard(lang))
 
 
 async def edit_lang(update, context):
     query = update.callback_query
     await query.answer()
-    user_id = query.from_user.id
-    lang = await get_user_lang(user_id)
     await query.edit_message_text(
         "🌐 Choose:",
         reply_markup=InlineKeyboardMarkup([
@@ -1830,10 +1633,7 @@ async def set_plang_edit(update, context):
     lang = await get_user_lang(user_id)
     plang = query.data.split("_")[1]
     await save_profile(user_id, pref_language=plang)
-    await query.edit_message_text(
-        t("profile_saved", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(t("profile_saved", lang), reply_markup=await main_menu_keyboard(lang))
 
 
 # ============================================================
@@ -1844,33 +1644,26 @@ async def safety_callback(update, context):
     await query.answer()
     lang = await get_user_lang(query.from_user.id)
     if lang == 'bn':
-        text = (
-            "🛡 নিরাপত্তা টিপস\n\n"
-            "• কখনো পাসওয়ার্ড বা OTP শেয়ার করবেন না\n"
-            "• অনলাইনে কাউকে টাকা পাঠাবেন না\n"
-            "• বাড়ির ঠিকানা/GPS শেয়ার করবেন না\n"
-            "• সন্দেহজনক লিংকে ক্লিক করবেন না\n"
-            "• খারাপ ব্যবহার হলে Report করুন\n\n"
-            "🚫 ৫টি রিপোর্ট = অটো-ব্যান\n"
-            "🚫 খারাপ শব্দ স্বয়ংক্রিয় ফিল্টার"
-        )
+        text = ("🛡 নিরাপত্তা টিপস\n\n"
+                "• কখনো পাসওয়ার্ড বা OTP শেয়ার করবেন না\n"
+                "• অনলাইনে কাউকে টাকা পাঠাবেন না\n"
+                "• বাড়ির ঠিকানা/GPS শেয়ার করবেন না\n"
+                "• সন্দেহজনক লিংকে ক্লিক করবেন না\n"
+                "• খারাপ ব্যবহার হলে Report করুন\n\n"
+                "🚫 ৫টি রিপোর্ট = অটো-ব্যান\n"
+                "🚫 খারাপ শব্দ স্বয়ংক্রিয় ফিল্টার")
     else:
-        text = (
-            "🛡 Safety Tips\n\n"
-            "• Never share passwords or OTPs\n"
-            "• Never send money online\n"
-            "• Don't share home address/GPS\n"
-            "• Don't click suspicious links\n"
-            "• Report bad behavior\n\n"
-            "🚫 5 reports = auto-ban\n"
-            "🚫 Bad words auto-filtered"
-        )
-    await query.edit_message_text(
-        text,
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
-        ])
-    )
+        text = ("🛡 Safety Tips\n\n"
+                "• Never share passwords or OTPs\n"
+                "• Never send money online\n"
+                "• Don't share home address/GPS\n"
+                "• Don't click suspicious links\n"
+                "• Report bad behavior\n\n"
+                "🚫 5 reports = auto-ban\n"
+                "🚫 Bad words auto-filtered")
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
+    ]))
 
 
 async def help_callback(update, context):
@@ -1878,43 +1671,22 @@ async def help_callback(update, context):
     await query.answer()
     lang = await get_user_lang(query.from_user.id)
     if lang == 'bn':
-        text = (
-            "📖 সাহায্য\n\n"
-            "/start — মেইন মেনু\n"
-            "/stop — চ্যাট শেষ\n"
-            "/reset — প্রোফাইল রিসেট\n"
-            "/stats — পরিসংখ্যান\n"
-            "/link — ইনভাইট লিংক\n"
-            "/coins — কয়েন\n"
-            "/vip — VIP কিনুন\n"
-            "/leaderboard — টপ চ্যাটার\n"
-            "/language — ভাষা\n"
-            "/joinroom — Group room join\n"
-            "/leaveroom — Group থেকে বের\n\n"
-            "🔒 সম্পূর্ণ Anonymous।"
-        )
+        text = ("📖 সাহায্য\n\n"
+                "/start — মেইন মেনু\n/stop — চ্যাট শেষ\n/reset — প্রোফাইল রিসেট\n"
+                "/stats — পরিসংখ্যান\n/link — ইনভাইট লিংক\n/coins — কয়েন\n"
+                "/vip — VIP কিনুন\n/leaderboard — টপ চ্যাটার\n/language — ভাষা\n"
+                "/joinroom — Group room join\n/leaveroom — Group থেকে বের\n\n"
+                "🔒 সম্পূর্ণ Anonymous।")
     else:
-        text = (
-            "📖 Help\n\n"
-            "/start — Main menu\n"
-            "/stop — End chat\n"
-            "/reset — Reset profile\n"
-            "/stats — Statistics\n"
-            "/link — Invite link\n"
-            "/coins — Coins\n"
-            "/vip — Buy VIP\n"
-            "/leaderboard — Top chatters\n"
-            "/language — Change language\n"
-            "/joinroom — Join group room\n"
-            "/leaveroom — Leave group\n\n"
-            "🔒 Fully anonymous."
-        )
-    await query.edit_message_text(
-        text,
-        reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
-        ])
-    )
+        text = ("📖 Help\n\n"
+                "/start — Main menu\n/stop — End chat\n/reset — Reset profile\n"
+                "/stats — Statistics\n/link — Invite link\n/coins — Coins\n"
+                "/vip — Buy VIP\n/leaderboard — Top chatters\n/language — Change language\n"
+                "/joinroom — Join group room\n/leaveroom — Leave group\n\n"
+                "🔒 Fully anonymous.")
+    await query.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
+    ]))
 
 
 # ============================================================
@@ -1943,12 +1715,9 @@ async def show_vip(update, context):
     user_id = query.from_user.id
     lang = await get_user_lang(user_id)
     if await is_vip(user_id):
-        await query.edit_message_text(
-            t("already_vip", lang),
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
-            ])
-        )
+        await query.edit_message_text(t("already_vip", lang), reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]
+        ]))
         return
     await query.edit_message_text(
         t("vip_buy_msg", lang, price=VIP_PRICE_COINS, stars=VIP_STARS_PRICE, days=VIP_DURATION_DAYS),
@@ -1978,13 +1747,9 @@ async def vip_with_coins(update, context):
             ])
         )
         return
-    success = await deduct_coins(user_id, VIP_PRICE_COINS)
-    if success:
+    if await deduct_coins(user_id, VIP_PRICE_COINS):
         await set_vip(user_id, VIP_DURATION_DAYS)
-        await query.edit_message_text(
-            t("vip_bought", lang, days=VIP_DURATION_DAYS),
-            reply_markup=await main_menu_keyboard(lang)
-        )
+        await query.edit_message_text(t("vip_bought", lang, days=VIP_DURATION_DAYS), reply_markup=await main_menu_keyboard(lang))
 
 
 async def vip_with_stars(update, context):
@@ -2018,10 +1783,7 @@ async def successful_payment(update, context):
     user_id = update.effective_user.id
     lang = await get_user_lang(user_id)
     await set_vip(user_id, VIP_DURATION_DAYS)
-    await update.message.reply_text(
-        t("vip_bought", lang, days=VIP_DURATION_DAYS),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await update.message.reply_text(t("vip_bought", lang, days=VIP_DURATION_DAYS), reply_markup=await main_menu_keyboard(lang))
 
 
 # ============================================================
@@ -2091,35 +1853,23 @@ async def leaderboard(update, context):
     await query.answer()
     user_id = query.from_user.id
     lang = await get_user_lang(user_id)
-
     async with db_pool.acquire() as conn:
         rows = await conn.fetch("""
             SELECT u.user_id, p.display_name, u.total_chats
-            FROM users u
-            JOIN profiles p ON p.user_id = u.user_id
+            FROM users u JOIN profiles p ON p.user_id = u.user_id
             WHERE u.total_chats > 0
-            ORDER BY u.total_chats DESC
-            LIMIT 10
+            ORDER BY u.total_chats DESC LIMIT 10
         """)
-
     if not rows:
-        await query.edit_message_text(
-            t("leaderboard_empty", lang),
-            reply_markup=await main_menu_keyboard(lang)
-        )
+        await query.edit_message_text(t("leaderboard_empty", lang), reply_markup=await main_menu_keyboard(lang))
         return
-
     text = t("leaderboard_title", lang) + "\n\n"
     medals = ["🥇", "🥈", "🥉"]
     for i, r in enumerate(rows):
         m = medals[i] if i < 3 else f"{i+1}."
         name = r['display_name'] or f"User{r['user_id']}"
         text += f"{m} {name} — {r['total_chats']} chats\n"
-
-    await query.edit_message_text(
-        text,
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await query.edit_message_text(text, reply_markup=await main_menu_keyboard(lang))
 
 
 async def leaderboard_command(update, context):
@@ -2161,18 +1911,11 @@ async def stop_chat(update, context):
                  f"warn1_{partner_id}", f"warn2_{partner_id}", f"end1_{partner_id}", f"end2_{partner_id}"]:
         for job in context.job_queue.get_jobs_by_name(name):
             job.schedule_removal()
-    await update.message.reply_text(
-        t("chat_ended", lang),
-        reply_markup=await main_menu_keyboard(lang)
-    )
+    await update.message.reply_text(t("chat_ended", lang), reply_markup=await main_menu_keyboard(lang))
     if not is_ai:
         try:
             p_lang = await get_user_lang(partner_id)
-            await context.bot.send_message(
-                partner_id,
-                t("partner_ended", p_lang),
-                reply_markup=await main_menu_keyboard(p_lang)
-            )
+            await context.bot.send_message(partner_id, t("partner_ended", p_lang), reply_markup=await main_menu_keyboard(p_lang))
         except Exception:
             pass
 
@@ -2197,22 +1940,16 @@ async def stats_command(update, context):
         in_queue = await conn.fetchval("SELECT COUNT(*) FROM match_queue") or 0
         active_chats = (await conn.fetchval("SELECT COUNT(*) FROM active_chats") or 0) // 2
     if lang == 'bn':
-        text = (f"📊 পরিসংখ্যান\n\n"
-                f"👥 মোট ইউজার: {total_users}\n"
-                f"🟢 অনলাইনে: {online}\n"
-                f"⏳ খুঁজছেন: {in_queue}\n"
-                f"💬 চলমান চ্যাট: {active_chats}")
+        text = (f"📊 পরিসংখ্যান\n\n👥 মোট ইউজার: {total_users}\n🟢 অনলাইনে: {online}\n"
+                f"⏳ খুঁজছেন: {in_queue}\n💬 চলমান চ্যাট: {active_chats}")
     else:
-        text = (f"📊 Statistics\n\n"
-                f"👥 Total: {total_users}\n"
-                f"🟢 Online: {online}\n"
-                f"⏳ Searching: {in_queue}\n"
-                f"💬 Active: {active_chats}")
+        text = (f"📊 Statistics\n\n👥 Total: {total_users}\n🟢 Online: {online}\n"
+                f"⏳ Searching: {in_queue}\n💬 Active: {active_chats}")
     await update.message.reply_text(text)
 
 
 # ============================================================
-# ADMIN PANEL
+# ADMIN
 # ============================================================
 async def admin_stats(update, context):
     user_id = update.effective_user.id
@@ -2231,14 +1968,9 @@ async def admin_stats(update, context):
         group_rooms = await conn.fetchval("SELECT COUNT(*) FROM group_rooms WHERE is_active = TRUE") or 0
     await update.message.reply_text(
         f"📊 Admin Dashboard\n\n"
-        f"👥 Users: {total_users}\n"
-        f"🟢 Online: {online}\n"
-        f"⏳ Queue: {in_queue}\n"
-        f"💬 Chats: {active_chats}\n"
-        f"👥 Group Rooms: {group_rooms}\n"
-        f"⚠️ Reports: {pending}\n"
-        f"🚫 Banned: {banned}\n"
-        f"⭐ VIP: {vip_count}\n"
+        f"👥 Users: {total_users}\n🟢 Online: {online}\n⏳ Queue: {in_queue}\n"
+        f"💬 Chats: {active_chats}\n👥 Group Rooms: {group_rooms}\n"
+        f"⚠️ Reports: {pending}\n🚫 Banned: {banned}\n⭐ VIP: {vip_count}\n"
         f"🪙 Total Coins: {total_coins}"
     )
 
@@ -2339,15 +2071,15 @@ def main():
     app.add_handler(CommandHandler("unban", unban_command))
     app.add_handler(CommandHandler("broadcast", broadcast_command))
 
-    # Callbacks — order matters! More specific patterns first
+    # Callbacks (specific first)
     app.add_handler(CallbackQueryHandler(language_callback, pattern="^lang_"))
+    app.add_handler(CallbackQueryHandler(change_language, pattern="^change_language$"))
     app.add_handler(CallbackQueryHandler(age_gate_callback, pattern="^age_"))
     app.add_handler(CallbackQueryHandler(gender_callback, pattern="^gender_"))
     app.add_handler(CallbackQueryHandler(pref_gender_callback, pattern="^pref_"))
     app.add_handler(CallbackQueryHandler(interest_callback, pattern="^int_"))
     app.add_handler(CallbackQueryHandler(pref_lang_callback, pattern="^plang_"))
 
-    # Edit callbacks (specific set* first)
     app.add_handler(CallbackQueryHandler(set_pref_gender_edit, pattern="^setpg_"))
     app.add_handler(CallbackQueryHandler(set_interest_edit, pattern="^setint_"))
     app.add_handler(CallbackQueryHandler(set_plang_edit, pattern="^setplang_"))
@@ -2358,7 +2090,6 @@ def main():
     app.add_handler(CallbackQueryHandler(edit_lang, pattern="^edit_lang$"))
     app.add_handler(CallbackQueryHandler(edit_profile, pattern="^edit_profile$"))
 
-    # Main features
     app.add_handler(CallbackQueryHandler(main_menu_callback, pattern="^main_menu$"))
     app.add_handler(CallbackQueryHandler(refresh_online, pattern="^refresh_online$"))
     app.add_handler(CallbackQueryHandler(find_partner, pattern="^find_partner$"))
@@ -2378,17 +2109,14 @@ def main():
     app.add_handler(CallbackQueryHandler(help_callback, pattern="^help$"))
     app.add_handler(CallbackQueryHandler(leaderboard, pattern="^leaderboard$"))
 
-    # Group rooms
     app.add_handler(CallbackQueryHandler(group_menu, pattern="^group_menu$"))
     app.add_handler(CallbackQueryHandler(create_room, pattern="^create_room$"))
     app.add_handler(CallbackQueryHandler(join_room_callback, pattern="^joinroom_"))
     app.add_handler(CallbackQueryHandler(leave_room_callback, pattern="^leave_room$"))
 
-    # Payment
     app.add_handler(PreCheckoutQueryHandler(precheckout_callback))
     app.add_handler(MessageHandler(filters.SUCCESSFUL_PAYMENT, successful_payment))
 
-    # Messages — ONLY ONE handler for everything
     app.add_handler(MessageHandler(~filters.COMMAND, handle_text))
 
     logger.info("Bot starting...")
