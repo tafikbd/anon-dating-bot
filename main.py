@@ -13,13 +13,6 @@ try:
 except ImportError:
     HAS_GROQ = False
 
-try:
-    from googletrans import Translator
-    HAS_TRANSLATOR = True
-    translator = Translator()
-except Exception:
-    HAS_TRANSLATOR = False
-    translator = None
 
 # ============ CONFIG ============
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -600,14 +593,24 @@ def rate_limited(uid, max_r=20, win=10):
 
 # ============ TRANSLATION ============
 async def translate_text(text, target="en"):
-    if not HAS_TRANSLATOR or not translator: return None
-    try:
-        r = await asyncio.to_thread(translator.translate, text, dest=target)
-        return r.text
-    except Exception as e:
-        logger.error(f"Trans err: {e}")
+    """Use Groq for translation"""
+    if not groq_client:
         return None
-
+    try:
+        lang_map = {"bn": "Bangla", "en": "English", "hi": "Hindi"}
+        target_name = lang_map.get(target, "English")
+        prompt = f"Translate the following text to {target_name}. Return ONLY the translation, nothing else:\n\n{text}"
+        resp = await asyncio.to_thread(
+            groq_client.chat.completions.create,
+            model="llama-3.1-8b-instant",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+            max_tokens=500,
+        )
+        return resp.choices[0].message.content.strip()
+    except Exception as e:
+        logger.error(f"Translate error: {e}")
+        return None
 
 # ============ CHAT HELPERS ============
 async def get_chat(uid):
