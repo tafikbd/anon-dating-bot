@@ -196,75 +196,130 @@ async def init_db():
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=10)
     async with db_pool.acquire() as conn:
+        # ---------- USERS TABLE ----------
         await conn.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id BIGINT PRIMARY KEY,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_18_plus BOOLEAN DEFAULT FALSE,
                 is_banned BOOLEAN DEFAULT FALSE,
-                ban_reason TEXT,
                 last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 language VARCHAR(5) DEFAULT 'bn',
                 coins INTEGER DEFAULT 0,
                 is_vip BOOLEAN DEFAULT FALSE,
                 vip_until TIMESTAMP,
-                referred_by BIGINT,
-                chats_today INTEGER DEFAULT 0,
-                chats_today_date DATE DEFAULT CURRENT_DATE,
-                daily_bonus_date DATE,
-                total_chats INTEGER DEFAULT 0
+                referred_by BIGINT
             );
+        """)
+        # Add missing columns (for old databases)
+        user_cols = [
+            ("ban_reason", "TEXT"),
+            ("chats_today", "INTEGER DEFAULT 0"),
+            ("chats_today_date", "DATE DEFAULT CURRENT_DATE"),
+            ("daily_bonus_date", "DATE"),
+            ("total_chats", "INTEGER DEFAULT 0"),
+        ]
+        for col_name, col_def in user_cols:
+            try:
+                await conn.execute(
+                    f"ALTER TABLE users ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
+                )
+            except Exception as e:
+                logger.warning(f"users.{col_name} skip: {e}")
 
+        # ---------- PROFILES ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id BIGINT PRIMARY KEY,
                 display_name VARCHAR(100),
                 age INTEGER,
                 gender VARCHAR(20),
                 pref_gender VARCHAR(20) DEFAULT 'any',
-                pref_language VARCHAR(10) DEFAULT 'any',
-                interest VARCHAR(30) DEFAULT 'any',
                 bio TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+        profile_cols = [
+            ("pref_language", "VARCHAR(10) DEFAULT 'any'"),
+            ("interest", "VARCHAR(30) DEFAULT 'any'"),
+        ]
+        for col_name, col_def in profile_cols:
+            try:
+                await conn.execute(
+                    f"ALTER TABLE profiles ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
+                )
+            except Exception as e:
+                logger.warning(f"profiles.{col_name} skip: {e}")
 
+        # ---------- MATCH QUEUE ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS match_queue (
                 user_id BIGINT PRIMARY KEY,
                 gender VARCHAR(20),
                 pref_gender VARCHAR(20),
-                pref_language VARCHAR(10),
-                interest VARCHAR(30),
-                is_vip BOOLEAN DEFAULT FALSE,
                 queued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+        mq_cols = [
+            ("pref_language", "VARCHAR(10) DEFAULT 'any'"),
+            ("interest", "VARCHAR(30) DEFAULT 'any'"),
+            ("is_vip", "BOOLEAN DEFAULT FALSE"),
+        ]
+        for col_name, col_def in mq_cols:
+            try:
+                await conn.execute(
+                    f"ALTER TABLE match_queue ADD COLUMN IF NOT EXISTS {col_name} {col_def}"
+                )
+            except Exception as e:
+                logger.warning(f"match_queue.{col_name} skip: {e}")
 
+        # ---------- ACTIVE CHATS ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS active_chats (
                 user_id BIGINT PRIMARY KEY,
                 partner_id BIGINT,
-                is_ai BOOLEAN DEFAULT FALSE,
                 started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+        try:
+            await conn.execute(
+                "ALTER TABLE active_chats ADD COLUMN IF NOT EXISTS is_ai BOOLEAN DEFAULT FALSE"
+            )
+        except Exception as e:
+            logger.warning(f"active_chats.is_ai skip: {e}")
 
+        # ---------- GROUP ROOMS ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS group_rooms (
                 room_id SERIAL PRIMARY KEY,
                 host_id BIGINT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_active BOOLEAN DEFAULT TRUE
             );
+        """)
 
+        # ---------- GROUP MEMBERS ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS group_members (
                 room_id INTEGER,
                 user_id BIGINT,
                 joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (room_id, user_id)
             );
+        """)
 
+        # ---------- BLOCKS ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS blocks (
                 blocker_id BIGINT,
                 blocked_id BIGINT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (blocker_id, blocked_id)
             );
+        """)
 
+        # ---------- REPORTS ----------
+        await conn.execute("""
             CREATE TABLE IF NOT EXISTS reports (
                 report_id SERIAL PRIMARY KEY,
                 reporter_id BIGINT,
@@ -274,6 +329,7 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
+
     logger.info("Database initialized.")
 
 
