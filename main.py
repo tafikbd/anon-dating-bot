@@ -136,8 +136,9 @@ DARES = ["Send a selfie!", "Voice note singing!", "Type with eyes closed!",
 BANNED = ["fuck","shit","bitch","asshole","dick","pussy","bastard",
     "madarchod","bhadwa","chutiya","chod","harami","kutta","kuti"]
 
-# ========== STRINGS ==========
+# ========== STRINGS (4 LANG) ==========
 STRINGS = {
+    # ===== Onboarding =====
     "welcome": {"bn":"👋 স্বাগতম! অ্যানোনিমাস চ্যাটিং বট।\n\n১৮+ নিশ্চিত করুন।","en":"👋 Welcome! Anonymous chat bot.\n\nConfirm 18+.","hi":"👋 स्वागत! गुमनाम चैट बॉट।\n\n18+ पुष्टि करें।","ru":"👋 Добро пожаловать! Анонимный чат.\n\nПодтвердите 18+."},
     "age_yes": {"bn":"✅ হ্যাঁ, ১৮+","en":"✅ Yes, 18+","hi":"✅ हाँ, 18+","ru":"✅ Да, 18+"},
     "age_no": {"bn":"❌ না","en":"❌ No","hi":"❌ नहीं","ru":"❌ Нет"},
@@ -153,6 +154,52 @@ STRINGS = {
     "female": {"bn":"👧 মেয়ে","en":"👧 Female","hi":"👧 महिला","ru":"👧 Женский"},
     "other": {"bn":"🌈 অন্যান্য","en":"🌈 Other","hi":"🌈 अन्य","ru":"🌈 Другое"},
     "any": {"bn":"🌍 যে কেউ","en":"🌍 Anyone","hi":"🌍 कोई","ru":"🌍 Любой"},
+    
+    # ===== Main Menu Buttons (NEW) =====
+    "btn_profile": {"bn":"👤 প্রোফাইল","en":"👤 Profile","hi":"👤 प्रोफाइल","ru":"👤 Профиль"},
+    "btn_stories": {"bn":"📖 স্টোরি","en":"📖 Stories","hi":"📖 स्टोरी","ru":"📖 Истории"},
+    "btn_missions": {"bn":"🎯 মিশন","en":"🎯 Missions","hi":"🎯 मिशन","ru":"🎯 Миссии"},
+    "btn_achievements": {"bn":"🏅 অ্যাচিভমেন্ট","en":"🏅 Achievements","hi":"🏅 उपलब्धियाँ","ru":"🏅 Достижения"},
+    "btn_leaderboard": {"bn":"🏆 লিডারবোর্ড","en":"🏆 Leaderboard","hi":"🏆 लीडरबोर्ड","ru":"🏆 Рейтинг"},
+    "btn_invite": {"bn":"🎁 ইনভাইট (+10🪙)","en":"🎁 Invite (+10🪙)","hi":"🎁 आमंत्रण (+10🪙)","ru":"🎁 Пригласить (+10🪙)"},
+    "btn_anon_link": {"bn":"🔗 অ্যানন লিংক","en":"🔗 Anon Link","hi":"🔗 एनॉन लिंक","ru":"🔗 Анонимная ссылка"},
+    "btn_vip": {"bn":"⭐ VIP","en":"⭐ VIP","hi":"⭐ VIP","ru":"⭐ VIP"},
+    "btn_credit": {"bn":"🪙 ক্রেডিট","en":"🪙 Credit","hi":"🪙 क्रेडिट","ru":"🪙 Баланс"},
+    "btn_pricing": {"bn":"📋 প্রাইসিং","en":"📋 Pricing","hi":"📋 मूल्य","ru":"📋 Цены"},
+    "btn_language": {"bn":"🌐 ভাষা","en":"🌐 Language","hi":"🌐 भाषा","ru":"🌐 Язык"},
+    "btn_support": {"bn":"🎫 সাপোর্ট","en":"🎫 Support","hi":"🎫 सहायता","ru":"🎫 Поддержка"},
+    "btn_menu": {"bn":"🏠 মেনু","en":"🏠 Menu","hi":"🏠 मेनू","ru":"🏠 Меню"},
+    "btn_cancel": {"bn":"❌ বাতিল","en":"❌ Cancel","hi":"❌ रद्द","ru":"❌ Отмена"},
+
+    # ===== Search / Chat Buttons (NEW) =====
+    "btn_gift": {"bn":"🎁 গিফট","en":"🎁 Gift","hi":"🎁 उपहार","ru":"🎁 Подарок"},
+    "btn_ai_opener": {"bn":"🤖 AI অপেনার","en":"🤖 AI Opener","hi":"🤖 AI ओपनर","ru":"🤖 AI Открытие"},
+    "btn_tod": {"bn":"🎲 সত্য/সাহস","en":"🎲 Truth/Dare","hi":"🎲 सच/चुनौती","ru":"🎲 Правда/Действие"},
+    "btn_icebreaker": {"bn":"🧊 আইস-ব্রেকার","en":"🧊 Ice-Breaker","hi":"🧊 आइस-ब्रेकर","ru":"🧊 Лёд-брейкер"},
+    "btn_compat": {"bn":"💯 মিল","en":"💯 Compat","hi":"💯 अनुकूलता","ru":"💯 Совместимость"},
+    "btn_like": {"bn":"❤️ লাইক","en":"❤️ Like","hi":"❤️ पसंद","ru":"❤️ Лайк"},
+    "btn_report": {"bn":"🚫 রিপোর্ট","en":"🚫 Report","hi":"🚫 रिपोर्ट","ru":"🚫 Жалоба"},
+    "btn_chat_guy": {"bn":"👨‍🌾 ছেলের সাথে (২🪙)","en":"👨‍🌾 Chat With Guy (2🪙)","hi":"👨‍🌾 लड़के से (2🪙)","ru":"👨‍🌾 С парнем (2🪙)"},
+    "btn_chat_girl": {"bn":"💃 মেয়ের সাথে (৩🪙)","en":"💃 Chat With Girl (3🪙)","hi":"💃 लड़की से (3🪙)","ru":"💃 С девушкой (3🪙)"},
+    "btn_random": {"bn":"🔀 র‍্যান্ডম (ফ্রি)","en":"🔀 Random (Free)","hi":"🔀 रैंडम (फ्री)","ru":"🔀 Случайный (бесплатно)"},
+    "btn_ai_chat": {"bn":"🤖 AI চ্যাট","en":"🤖 AI Chat","hi":"🤖 AI चैट","ru":"🤖 AI Чат"},
+    "btn_same_age": {"bn":"⚙️ একই বয়স","en":"⚙️ Same Age","hi":"⚙️ समान उम्र","ru":"⚙️ Один возраст"},
+
+    # ===== Profile Buttons (NEW) =====
+    "btn_voice_intro": {"bn":"🎙️ ভয়েস ইন্ট্রো","en":"🎙️ Voice Intro","hi":"🎙️ वॉइस इंट्रो","ru":"🎙️ Голосовое"},
+    "btn_post_story": {"bn":"📖 স্টোরি পোস্ট","en":"📖 Post Story","hi":"📖 स्टोरी पोस्ट","ru":"📖 Опубликовать"},
+    "btn_view_likers": {"bn":"👀 লাইকার","en":"👀 View Likers","hi":"👀 लाइकर्स","ru":"👀 Лайкнувшие"},
+    "btn_like_active": {"bn":"💚 লাইক করুন","en":"💚 Like","hi":"💚 लाइक","ru":"💚 Лайк"},
+    "btn_contact_list": {"bn":"🗣️ কন্টাক্ট","en":"🗣️ Contact List","hi":"🗣️ संपर्क","ru":"🗣️ Контакты"},
+    "btn_blocked": {"bn":"🚫 ব্লকড","en":"🚫 Blocked","hi":"🚫 ब्लॉक","ru":"🚫 Блок"},
+    "btn_settings": {"bn":"⚙️ সেটিংস","en":"⚙️ Settings","hi":"⚙️ सेटिंग्स","ru":"⚙️ Настройки"},
+    "btn_edit_profile": {"bn":"📝 প্রোফাইল এডিট","en":"📝 Edit Profile","hi":"📝 प्रोफाइल","ru":"📝 Профиль"},
+    
+    # ===== Credit / VIP (NEW) =====
+    "btn_buy_coins": {"bn":"💰 কয়েন কিনুন","en":"💰 Buy Coins","hi":"💰 सिक्के खरीदें","ru":"💰 Купить монеты"},
+    "btn_daily": {"bn":"📅 ডেইলি (+5🪙)","en":"📅 Daily (+5🪙)","hi":"📅 डेली (+5🪙)","ru":"📅 Ежедневно (+5🪙)"},
+
+    # ===== General Messages =====
     "main_menu": {"bn":"🏠 মেইন মেনু:","en":"🏠 Main Menu:","hi":"🏠 मुख्य मेनू:","ru":"🏠 Меню:"},
     "new_chat": {"bn":"🌹 নতুন অ্যানোনিমাস চ্যাট!","en":"🌹 New Anonymous Chat!","hi":"🌹 नई चैट!","ru":"🌹 Новый чат!"},
     "browse_people": {"bn":"💥 সবাইকে দেখুন","en":"💥 Browse People","hi":"💥 लोग देखें","ru":"💥 Обзор"},
@@ -857,7 +904,7 @@ async def missions_status(uid):
     return out
 
 
-# ========== KEYBOARDS ==========
+# ========== KEYBOARDS (NOW TRANSLATED!) ==========
 def bottom_kb(lang):
     return ReplyKeyboardMarkup([
         [KeyboardButton(t("new_chat", lang))],
@@ -868,56 +915,56 @@ async def main_menu_kb(lang):
     on = await online_count()
     return InlineKeyboardMarkup([
         [InlineKeyboardButton(t("new_chat", lang), callback_data="newchat")],
-        [InlineKeyboardButton("👤 Profile", callback_data="my_profile"),
-         InlineKeyboardButton("📖 Stories", callback_data="view_stories")],
-        [InlineKeyboardButton("🎯 Missions", callback_data="show_missions"),
-         InlineKeyboardButton("🏅 Achievements", callback_data="show_achievements")],
-        [InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard"),
-         InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link")],
-        [InlineKeyboardButton("🔗 Anon Link", callback_data="show_anon_link"),
-         InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-        [InlineKeyboardButton("🪙 Credit", callback_data="show_credit"),
-         InlineKeyboardButton("📋 Pricing", callback_data="pricing_table")],
-        [InlineKeyboardButton("🌐 Language", callback_data="change_language"),
-         InlineKeyboardButton("🎫 Support", callback_data="support_ticket")],
-        [InlineKeyboardButton(f"🟢 {on} online", callback_data="refresh_online")],
+        [InlineKeyboardButton(t("btn_profile", lang), callback_data="my_profile"),
+         InlineKeyboardButton(t("btn_stories", lang), callback_data="view_stories")],
+        [InlineKeyboardButton(t("btn_missions", lang), callback_data="show_missions"),
+         InlineKeyboardButton(t("btn_achievements", lang), callback_data="show_achievements")],
+        [InlineKeyboardButton(t("btn_leaderboard", lang), callback_data="leaderboard"),
+         InlineKeyboardButton(t("btn_invite", lang), callback_data="show_link")],
+        [InlineKeyboardButton(t("btn_anon_link", lang), callback_data="show_anon_link"),
+         InlineKeyboardButton(t("btn_vip", lang), callback_data="show_vip")],
+        [InlineKeyboardButton(t("btn_credit", lang), callback_data="show_credit"),
+         InlineKeyboardButton(t("btn_pricing", lang), callback_data="pricing_table")],
+        [InlineKeyboardButton(t("btn_language", lang), callback_data="change_language"),
+         InlineKeyboardButton(t("btn_support", lang), callback_data="support_ticket")],
+        [InlineKeyboardButton(t("online_count", lang, n=on), callback_data="refresh_online")],
     ])
 
 def newchat_kb(lang):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(t("random_free", lang), callback_data="search_random")],
-        [InlineKeyboardButton(t("chat_guy", lang), callback_data="search_guy"),
-         InlineKeyboardButton(t("chat_girl", lang), callback_data="search_girl")],
-        [InlineKeyboardButton("📖 Stories", callback_data="view_stories"),
-         InlineKeyboardButton("🌐 Language", callback_data="change_language")],
+        [InlineKeyboardButton(t("btn_random", lang), callback_data="search_random")],
+        [InlineKeyboardButton(t("btn_chat_guy", lang), callback_data="search_guy"),
+         InlineKeyboardButton(t("btn_chat_girl", lang), callback_data="search_girl")],
+        [InlineKeyboardButton(t("btn_stories", lang), callback_data="view_stories"),
+         InlineKeyboardButton(t("btn_language", lang), callback_data="change_language")],
     ])
 
 def active_chat_kb(pid, lang):
     return InlineKeyboardMarkup([
         [InlineKeyboardButton(t("secure_chat", lang), callback_data="secure_chat"),
          InlineKeyboardButton(t("contact_profile", lang), callback_data=f"viewprof_{pid}")],
-        [InlineKeyboardButton("🎁 Gift", callback_data=f"gift_menu_{pid}"),
-         InlineKeyboardButton("🤖 AI Opener", callback_data="ai_opener")],
+        [InlineKeyboardButton(t("btn_gift", lang), callback_data=f"gift_menu_{pid}"),
+         InlineKeyboardButton(t("btn_ai_opener", lang), callback_data="ai_opener")],
         [InlineKeyboardButton(t("end_chat", lang), callback_data="end_chat"),
          InlineKeyboardButton(t("delete_msgs", lang), callback_data="delete_msgs")],
-        [InlineKeyboardButton("🎲 Truth/Dare", callback_data="tod_start"),
-         InlineKeyboardButton("🧊 Ice-Breaker", callback_data="ice_breaker")],
-        [InlineKeyboardButton("💯 Compat", callback_data="compat"),
-         InlineKeyboardButton("❤️ Like", callback_data=f"like_{pid}")],
-        [InlineKeyboardButton("🚫 Report", callback_data=f"report_{pid}")],
+        [InlineKeyboardButton(t("btn_tod", lang), callback_data="tod_start"),
+         InlineKeyboardButton(t("btn_icebreaker", lang), callback_data="ice_breaker")],
+        [InlineKeyboardButton(t("btn_compat", lang), callback_data="compat"),
+         InlineKeyboardButton(t("btn_like", lang), callback_data=f"like_{pid}")],
+        [InlineKeyboardButton(t("btn_report", lang), callback_data=f"report_{pid}")],
     ])
 
 def profile_kb(lang):
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎙️ Voice Intro", callback_data="voice_menu"),
-         InlineKeyboardButton("📖 Post Story", callback_data="post_story")],
-        [InlineKeyboardButton(t("view_likers", lang), callback_data="view_likers"),
-         InlineKeyboardButton(t("like_active", lang), callback_data="my_likes")],
-        [InlineKeyboardButton(t("contact_list", lang), callback_data="contact_list"),
-         InlineKeyboardButton(t("blocked_users", lang), callback_data="show_blocked")],
-        [InlineKeyboardButton(t("advanced_settings", lang), callback_data="advanced_settings"),
-         InlineKeyboardButton(t("edit_profile", lang), callback_data="edit_profile")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")],
+        [InlineKeyboardButton(t("btn_voice_intro", lang), callback_data="voice_menu"),
+         InlineKeyboardButton(t("btn_post_story", lang), callback_data="post_story")],
+        [InlineKeyboardButton(t("btn_view_likers", lang), callback_data="view_likers"),
+         InlineKeyboardButton(t("btn_like_active", lang), callback_data="my_likes")],
+        [InlineKeyboardButton(t("btn_contact_list", lang), callback_data="contact_list"),
+         InlineKeyboardButton(t("btn_blocked", lang), callback_data="show_blocked")],
+        [InlineKeyboardButton(t("btn_settings", lang), callback_data="advanced_settings"),
+         InlineKeyboardButton(t("btn_edit_profile", lang), callback_data="edit_profile")],
+        [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")],
     ])
 
 def city_kb(lang):
@@ -928,7 +975,7 @@ def city_kb(lang):
             rows.append(row); row = []
     if row: rows.append(row)
     rows.append([InlineKeyboardButton("✏️ Custom", callback_data="custom_city")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     return InlineKeyboardMarkup(rows)
 
 
@@ -1206,12 +1253,11 @@ async def voice_menu_cb(update, context):
             [InlineKeyboardButton("🎙️ Replace Voice Intro", callback_data="voice_replace")],
             [InlineKeyboardButton("▶️ Preview", callback_data="voice_preview"),
              InlineKeyboardButton("🗑️ Delete", callback_data="voice_delete")],
-            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]])
-        await safe_edit(q, "🎙️ Your Voice Intro is active!\n\nOthers will hear it when they view your profile.", kb)
+            [InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]])
+        await safe_edit(q, "🎙️ Your Voice Intro is active!", kb)
     else:
         context.user_data['awaiting_voice'] = True
-        await safe_edit(q, "🎙️ Send a voice message (max 30 sec) as your intro.\n\nOthers will hear it on your profile.",
-            InlineKeyboardMarkup([[InlineKeyboardButton("❌ Cancel", callback_data="main_menu")]]))
+        await safe_edit(q, "🎙️ Send a voice message (max 30 sec):")
 
 
 async def voice_replace_cb(update, context):
@@ -1227,7 +1273,7 @@ async def voice_preview_cb(update, context):
     if not fid:
         await q.answer("No voice intro", show_alert=True); return
     try:
-        await context.bot.send_voice(chat_id=uid, voice=fid, caption="🎙️ Your Voice Intro")
+        await context.bot.send_voice(chat_id=uid, voice=fid)
     except Exception as e:
         logger.error(f"Voice preview: {e}")
 
@@ -1236,7 +1282,7 @@ async def voice_delete_cb(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
     await save_voice_intro(uid, None)
-    await safe_edit(q, "🗑️ Voice Intro deleted.", await main_menu_kb(await get_lang(uid)))
+    await safe_edit(q, "🗑️ Deleted.", await main_menu_kb(await get_lang(uid)))
 
 
 async def voice_message_handler(update, context):
@@ -1249,7 +1295,7 @@ async def voice_message_handler(update, context):
         if not voice:
             await update.message.reply_text("❌ Please send a voice message"); return
         if voice.duration > 30:
-            await update.message.reply_text("❌ Max 30 seconds allowed"); return
+            await update.message.reply_text("❌ Max 30 seconds"); return
         await save_voice_intro(uid, voice.file_id)
         context.user_data.pop('awaiting_voice', None)
         await update.message.reply_text("✅ Voice Intro saved! 🎙️", reply_markup=bottom_kb(await get_lang(uid)))
@@ -1270,10 +1316,8 @@ async def voice_message_handler(update, context):
             logger.error(f"Voice relay: {e}")
         return
 
-    await update.message.reply_text("💡 Use /voice in Profile to set your Voice Intro.")
 
-
-# ========== GIFT SYSTEM ==========
+# ========== GIFT ==========
 async def gift_menu_cb(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
@@ -1285,13 +1329,13 @@ async def gift_menu_cb(update, context):
     rows = []
     for key, info in GIFT_TYPES.items():
         rows.append([InlineKeyboardButton(f"{info['name']} — {info['coins']}🪙", callback_data=f"gift_send_{key}_{pid}")])
-    rows.append([InlineKeyboardButton("❌ Cancel", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_cancel", "en"), callback_data="main_menu")])
     await safe_edit(q, f"🎁 Choose a gift:\n\n🪙 Your coins: {coins}", InlineKeyboardMarkup(rows))
 
 
 async def gift_send_cb(update, context):
     q = update.callback_query
-    uid = q.from_user.id; lang = await get_lang(uid)
+    uid = q.from_user.id
     parts = q.data.split("_")
     gift_type = parts[2]; pid = int(parts[3])
     ok, info = await send_gift(uid, pid, gift_type)
@@ -1304,43 +1348,41 @@ async def gift_send_cb(update, context):
         await context.bot.send_message(pid,
             f"🎁 You received a {info['name']} from {sender_name}!\n\n💡 Total gifts: {(await get_gift_count(pid))}")
     except: pass
-    await safe_edit(q, f"✅ You sent {info['name']}!\n\n🪙 Remaining coins: {await get_coins(uid)}",
-        InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+    await safe_edit(q, f"✅ Sent {info['name']}!\n\n🪙 Remaining: {await get_coins(uid)}",
+        InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]]))
     await check_ach(uid, context)
 
 
-# ========== STORY SYSTEM ==========
+# ========== STORY ==========
 async def post_story_cb(update, context):
     q = update.callback_query; await q.answer()
     context.user_data['awaiting_story'] = True
-    await safe_edit(q, "📖 Send a text or photo for your 24-hour story:\n\n(Type anything or send photo)",
-        InlineKeyboardMarkup([[InlineKeyboardButton("❌ Cancel", callback_data="main_menu")]]))
+    await safe_edit(q, "📖 Send text or photo for 24h story:")
 
 
 async def story_cmd(update, context):
     context.user_data['awaiting_story'] = True
-    await update.message.reply_text("📖 Send a text or photo for your 24-hour story:")
+    await update.message.reply_text("📖 Send text or photo for 24h story:")
 
 
 async def view_stories_cb(update, context):
     q = update.callback_query; await q.answer()
-    uid = q.from_user.id
     await expire_stories()
     stories = await get_active_stories(15)
     if not stories:
-        await safe_edit(q, "📖 No active stories right now.\n\nBe the first to post one!",
+        await safe_edit(q, "📖 No stories yet. Be first!",
             InlineKeyboardMarkup([
                 [InlineKeyboardButton("📖 Post Story", callback_data="post_story")],
-                [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+                [InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]]))
         return
     rows = []
     for s in stories:
         nm = s.get('display_name') or "Anon"
         icon = "📷" if s.get('file_id') else "📝"
         rows.append([InlineKeyboardButton(f"{icon} {nm}", callback_data=f"story_view_{s['story_id']}")])
-    rows.append([InlineKeyboardButton("📖 Post Your Story", callback_data="post_story")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
-    await safe_edit(q, f"📖 {len(stories)} active stories (24h):", InlineKeyboardMarkup(rows))
+    rows.append([InlineKeyboardButton("📖 Post Story", callback_data="post_story")])
+    rows.append([InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")])
+    await safe_edit(q, f"📖 {len(stories)} stories (24h):", InlineKeyboardMarkup(rows))
 
 
 async def story_view_cb(update, context):
@@ -1361,8 +1403,7 @@ async def story_view_cb(update, context):
                 caption=f"📖 {s.get('display_name') or 'Anon'} (@{s.get('anon_id') or 'user'})\n\n{s.get('content') or ''}")
         except: pass
     else:
-        await q.message.reply_text(
-            f"📖 Story by {s.get('display_name') or 'Anon'} (@{s.get('anon_id') or 'user'}):\n\n{s.get('content') or ''}")
+        await q.message.reply_text(f"📖 {s.get('display_name')}:\n\n{s.get('content') or ''}")
 
 
 async def story_message_handler(update, context):
@@ -1377,15 +1418,15 @@ async def story_message_handler(update, context):
         await msg.reply_text("❌ Send text or photo"); return True
     await post_story(uid, content=content[:300] if content else None, file_id=file_id)
     context.user_data.pop('awaiting_story', None)
-    await msg.reply_text("✅ Story posted! Visible for 24 hours 📖")
+    await msg.reply_text("✅ Story posted!")
     await check_ach(uid, context)
     return True
 
 
-# ========== AI ICEBREAKER ==========
+# ========== AI OPENER ==========
 async def ai_opener_cb(update, context):
     q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
+    uid = q.from_user.id
     if not groq_client:
         await q.answer("AI off", show_alert=True); return
     chat = await get_chat(uid)
@@ -1394,26 +1435,21 @@ async def ai_opener_cb(update, context):
     pid = chat['partner_id']
     partner_prof = await get_profile(pid)
     if not partner_prof:
-        await q.answer("Partner has no profile", show_alert=True); return
+        await q.answer("No profile", show_alert=True); return
     name = partner_prof.get('display_name') or "them"
     bio = (partner_prof.get('bio') or "")[:200]
     interest = partner_prof.get('interest') or "any"
     age = partner_prof.get('age') or "?"
-    prompt = (f"Generate ONE short, fun, personalized icebreaker opener (under 100 chars) in the user's language (bn/en/hi). "
-              f"Partner: {name}, {age}, interest={interest}, bio='{bio}'. "
-              f"Make it witty, warm, with 1 emoji. Just the message text, no quotes.")
+    prompt = f"Generate ONE short icebreaker (under 100 chars) in user's language. Partner: {name}, {age}, interest={interest}, bio='{bio}'. Make it witty with 1 emoji."
     try:
         r = await asyncio.to_thread(groq_client.chat.completions.create,
-            model=AI_MODELS[0],
-            messages=[{"role": "user", "content": prompt}],
+            model=AI_MODELS[0], messages=[{"role": "user", "content": prompt}],
             temperature=0.9, max_tokens=120)
         opener = r.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"AI opener: {e}")
-        opener = None
+    except: opener = None
     if not opener:
-        await q.message.reply_text("🤖 AI busy, try again"); return
-    await q.message.reply_text(f"💡 Try this opener:\n\n{opener}\n\n(Copy & paste to send 👆)")
+        await q.message.reply_text("🤖 Busy, try again"); return
+    await q.message.reply_text(f"💡 Try:\n\n{opener}")
 
 
 # ========== TEXT HANDLER ==========
@@ -1430,7 +1466,7 @@ async def handle_text(update, context):
         await story_message_handler(update, context); return
 
     if context.user_data.get('awaiting_voice'):
-        await update.message.reply_text("🎙️ Please send a VOICE message, not text. Tap 🎙️ icon to record.")
+        await update.message.reply_text("🎙️ Send a VOICE message, not text.")
         return
 
     if context.user_data.get('awaiting_payment'):
@@ -1446,7 +1482,7 @@ async def handle_text(update, context):
         async with db_pool.acquire() as c:
             await c.execute("INSERT INTO payments (user_id,tier,method,transaction_id,status) VALUES ($1,$2,$3,$4,'pending')",
                             uid, tier, method, text[:200])
-        await update.message.reply_text("✅ Sent to admin. Verify in 5-10 min.")
+        await update.message.reply_text("✅ Sent to admin.")
         for k in ['awaiting_payment','payment_tier','payment_method']: context.user_data.pop(k, None)
         return
 
@@ -1454,7 +1490,7 @@ async def handle_text(update, context):
         async with db_pool.acquire() as c:
             await c.execute("INSERT INTO support_tickets (user_id,message) VALUES ($1,$2)", uid, text)
         for aid in ADMIN_IDS:
-            try: await context.bot.send_message(aid, f"🎫 Ticket\n👤 `{uid}`\n📝 {text[:400]}\n\nReply: `/reply_ticket <id> <msg>`")
+            try: await context.bot.send_message(aid, f"🎫 Ticket\n👤 `{uid}`\n📝 {text[:400]}")
             except: pass
         await update.message.reply_text(t("support_sent", lang))
         context.user_data.pop('awaiting_support', None); return
@@ -1495,7 +1531,7 @@ async def handle_text(update, context):
         if anon_t:
             try: await connect_users(uid, anon_t, context, lang); return
             except: pass
-        await update.message.reply_text("✅ Registration complete! 🎉", reply_markup=bottom_kb(lang))
+        await update.message.reply_text("✅ Done! 🎉", reply_markup=bottom_kb(lang))
         await update.message.reply_text(t("main_menu", lang), reply_markup=await main_menu_kb(lang))
         return
 
@@ -1511,8 +1547,8 @@ async def handle_text(update, context):
                 bd = datetime.strptime(text, "%d-%m-%Y").date()
                 async with db_pool.acquire() as c:
                     await c.execute("UPDATE users SET birthday=$1 WHERE user_id=$2", bd, uid)
-                await update.message.reply_text("✅ Birthday saved!")
-            except: await update.message.reply_text("❌ Use DD-MM-YYYY")
+                await update.message.reply_text("✅ Saved!")
+            except: await update.message.reply_text("❌ DD-MM-YYYY")
         context.user_data.pop('edit_step', None)
         await update.message.reply_text(t("profile_saved", lang))
         return
@@ -1528,41 +1564,30 @@ async def handle_text(update, context):
 
 
 async def handle_text_photo_story(update, context):
-    """Handle photo input for stories OR payment proof."""
     uid = update.effective_user.id
     await touch(uid)
 
-    # 1) Story photo
     if context.user_data.get('awaiting_story'):
-        await story_message_handler(update, context)
-        return
+        await story_message_handler(update, context); return
 
-    # 2) Payment proof photo
     if context.user_data.get('awaiting_payment'):
         tier = context.user_data.get('payment_tier', 'vip_1m')
         method = context.user_data.get('payment_method', 'unknown')
         for aid in ADMIN_IDS:
             try:
-                await context.bot.forward_message(
-                    chat_id=aid, from_chat_id=uid,
+                await context.bot.forward_message(chat_id=aid, from_chat_id=uid,
                     message_id=update.message.message_id)
                 await context.bot.send_message(aid,
                     f"💰 Payment Screenshot\n👤 {update.effective_user.full_name}\n"
-                    f"🆔 `{uid}`\n📦 {tier}\n💳 {method}\n\n"
-                    f"Approve: `/approve {uid} {tier}`")
+                    f"🆔 `{uid}`\n📦 {tier}\n💳 {method}\n\nApprove: `/approve {uid} {tier}`")
             except: pass
         async with db_pool.acquire() as c:
-            await c.execute("""INSERT INTO payments
-                (user_id,tier,method,transaction_id,status)
-                VALUES ($1,$2,$3,$4,'pending')""",
-                uid, tier, method, "[Photo Screenshot]")
-        await update.message.reply_text(
-            "✅ Screenshot sent to admin. Verify in 5-10 min.")
-        for k in ['awaiting_payment','payment_tier','payment_method']:
-            context.user_data.pop(k, None)
+            await c.execute("""INSERT INTO payments (user_id,tier,method,transaction_id,status)
+                VALUES ($1,$2,$3,$4,'pending')""", uid, tier, method, "[Photo]")
+        await update.message.reply_text("✅ Screenshot sent. Verify in 5-10 min.")
+        for k in ['awaiting_payment','payment_tier','payment_method']: context.user_data.pop(k, None)
         return
 
-    # 3) Normal photo in active chat
     await chat_relay(update, context)
 
 
@@ -1633,10 +1658,10 @@ async def do_search(update, context, mode):
             await safe_edit(q,
                 t("need_coins", lang, n=cost, have=coins),
                 InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link")],
-                    [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup")],
-                    [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-                    [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+                    [InlineKeyboardButton(t("btn_invite", lang), callback_data="show_link")],
+                    [InlineKeyboardButton(t("btn_buy_coins", lang), callback_data="coins_topup")],
+                    [InlineKeyboardButton(t("btn_vip", lang), callback_data="show_vip")],
+                    [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
             return
         ok = await deduct_coins(uid, cost)
         if not ok:
@@ -1720,10 +1745,10 @@ async def do_search(update, context, mode):
         sa = "🟢 ON" if same_age else "⚪ OFF"
         text = t("searching", lang, sa=sa)
         kb = InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"⚙️ Same Age: {sa}", callback_data="toggle_sa")],
-            [InlineKeyboardButton("❌ Cancel", callback_data="cancel_search")],
-            [InlineKeyboardButton("🤖 AI Chat", callback_data="ai_chat")],
-            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]])
+            [InlineKeyboardButton(f"{t('btn_same_age', lang)}: {sa}", callback_data="toggle_sa")],
+            [InlineKeyboardButton(t("btn_cancel", lang), callback_data="cancel_search")],
+            [InlineKeyboardButton(t("btn_ai_chat", lang), callback_data="ai_chat")],
+            [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]])
         await safe_edit(q, text, kb)
         jn = f"queue_timeout_{uid}"
         for j in context.job_queue.get_jobs_by_name(jn): j.schedule_removal()
@@ -1745,10 +1770,10 @@ async def toggle_sa(update, context):
     sa = "🟢 ON" if new else "⚪ OFF"
     try:
         await q.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton(f"⚙️ Same Age: {sa}", callback_data="toggle_sa")],
-            [InlineKeyboardButton("❌ Cancel", callback_data="cancel_search")],
-            [InlineKeyboardButton("🤖 AI Chat", callback_data="ai_chat")],
-            [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+            [InlineKeyboardButton(f"{t('btn_same_age', lang)}: {sa}", callback_data="toggle_sa")],
+            [InlineKeyboardButton(t("btn_cancel", lang), callback_data="cancel_search")],
+            [InlineKeyboardButton(t("btn_ai_chat", lang), callback_data="ai_chat")],
+            [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
     except: pass
     await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang))
 
@@ -1775,9 +1800,9 @@ async def queue_timeout(ctx):
         try:
             await ctx.bot.send_message(uid, t("no_partner_ai", lang),
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🤖 AI Chat", callback_data="ai_chat")],
-                    [InlineKeyboardButton("❌ Cancel", callback_data="cancel_search")],
-                    [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+                    [InlineKeyboardButton(t("btn_ai_chat", lang), callback_data="ai_chat")],
+                    [InlineKeyboardButton(t("btn_cancel", lang), callback_data="cancel_search")],
+                    [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
         except: pass
 
 
@@ -1828,11 +1853,9 @@ async def chat_relay(update, context):
         await handle_ai_msg(update, context, lang); return
     pid = chat['partner_id']
     rid = context.user_data.get('room_id')
-    if rid:
-        await relay_group(update, context, rid); return
+    if rid: await relay_group(update, context, rid); return
     vrid = context.user_data.get('voice_room_id')
-    if vrid:
-        await relay_voice(update, context, vrid); return
+    if vrid: await relay_voice(update, context, vrid); return
     try:
         await context.bot.copy_message(chat_id=pid, from_chat_id=uid,
             message_id=update.message.message_id)
@@ -1845,7 +1868,7 @@ async def handle_ai_msg(update, context, lang):
     typing = await update.message.reply_text("🤖...")
     hist = context.user_data.get('ai_history', [])
     hist.append({"role": "user", "content": text})
-    sys = "You are a friendly anonymous chat partner. Reply in user's language. Short replies under 300 chars. Warm, funny. Use emojis."
+    sys = "You are a friendly anonymous chat partner. Reply in user's language. Short replies under 300 chars."
     ans = None
     for m in AI_MODELS:
         try:
@@ -1855,13 +1878,13 @@ async def handle_ai_msg(update, context, lang):
             ans = r.choices[0].message.content.strip(); break
         except: continue
     if not ans:
-        await typing.edit_text("🤖 Busy, try later."); return
+        await typing.edit_text("🤖 Busy"); return
     hist.append({"role": "assistant", "content": ans})
     context.user_data['ai_history'] = hist[-10:]
     await typing.edit_text(ans)
 
 
-# ========== END CHAT / NEXT ==========
+# ========== END CHAT ==========
 async def end_chat_cb(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
@@ -1904,17 +1927,17 @@ async def like_cmd(update, context):
     lang = await get_lang(uid)
     chat = await get_chat(uid)
     if not chat or chat.get('is_ai'):
-        await update.message.reply_text("❌ No partner to like."); return
+        await update.message.reply_text("❌ No partner"); return
     pid = chat['partner_id']
     ok = await add_like(uid, pid)
     if not ok:
-        await update.message.reply_text("✅ Already liked."); return
+        await update.message.reply_text("✅ Already liked"); return
     if await check_match_back(uid, pid):
-        try: await context.bot.send_message(pid, "💖 It's a MATCH! You both liked each other!")
+        try: await context.bot.send_message(pid, "💖 It's a MATCH!")
         except: pass
-        await update.message.reply_text("💖 It's a MATCH! You both liked each other!")
+        await update.message.reply_text("💖 It's a MATCH!")
     else:
-        await update.message.reply_text("❤️ Liked! Waiting for them to like back...")
+        await update.message.reply_text("❤️ Liked!")
 
 
 async def daily_cmd(update, context):
@@ -1923,7 +1946,7 @@ async def daily_cmd(update, context):
     if await daily_bonus(uid):
         await update.message.reply_text(t("daily_bonus", lang, n=DAILY_BONUS))
     else:
-        await update.message.reply_text("⏳ Already claimed today. Come back tomorrow!")
+        await update.message.reply_text("⏳ Already claimed today.")
 
 
 async def delete_msgs_cb(update, context):
@@ -1958,17 +1981,13 @@ async def my_profile(update, context):
         voice_badge = "🎙️" if st.get('voice_intro_file_id') else ""
         text = (
             f"👤 {prof.get('display_name', 'N/A')} {voice_badge}\n🆔 /{aid}\n"
-            f"🎂 Age: {prof.get('age', '?')} {gm.get(prof.get('gender'), '?')}\n"
-            f"🏙️ City: {st.get('city') or 'N/A'}\n"
-            f"❤️ Likes: {st.get('likes_received') or 0}\n"
-            f"👀 Views: {st.get('profile_views') or 0}\n"
-            f"🎁 Gifts: {st.get('gifts_received') or 0}\n"
-            f"💡 Interest: {prof.get('interest', 'any')}\n"
+            f"🎂 {prof.get('age', '?')} {gm.get(prof.get('gender'), '?')}\n"
+            f"🏙️ {st.get('city') or 'N/A'}\n"
+            f"❤️ {st.get('likes_received') or 0} | 👀 {st.get('profile_views') or 0} | 🎁 {st.get('gifts_received') or 0}\n"
             f"📈 Lv{lvl} • XP {st.get('xp') or 0}/{nx}\n"
-            f"🪙 Coins: {st.get('coins') or 0}\n"
-            f"🔥 Streak: {st.get('streak') or 0}\n"
-            f"💬 Chats: {st.get('total_chats') or 0}\n"
-            f"⭐ {tier or 'Free'}\n\n💬 {(prof.get('bio') or 'N/A')[:150]}")
+            f"🪙 {st.get('coins') or 0} | 🔥 {st.get('streak') or 0}\n"
+            f"💬 {st.get('total_chats') or 0} | ⭐ {tier or 'Free'}\n\n"
+            f"💬 {(prof.get('bio') or 'N/A')[:150]}")
         try: await q.edit_message_text(text, reply_markup=profile_kb(lang))
         except: await q.message.reply_text(text, reply_markup=profile_kb(lang))
     except Exception as e: logger.error(f"my_profile: {e}")
@@ -1977,18 +1996,14 @@ async def my_profile(update, context):
 async def view_likers(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
-    try:
-        likers = await get_likers(uid, 20)
-    except Exception as e:
-        logger.error(f"view_likers: {e}")
-        await safe_edit(q, "❌ Data error. Try again.", await main_menu_kb(lang))
-        return
+    try: likers = await get_likers(uid, 20)
+    except: likers = []
     if not likers:
         await safe_edit(q, t("no_likers", lang), await main_menu_kb(lang)); return
     text = f"👀 {t('view_likers', lang)}\n\n"
     for l in likers:
         aid = l.get('anon_id') or f"user_{l['liker_id']}"
-        nm = l.get('display_name') or "Anonymous"
+        nm = l.get('display_name') or "Anon"
         text += f"• {nm} (@{aid})\n"
     await safe_edit(q, text[:4000], await main_menu_kb(lang))
 
@@ -2002,8 +2017,8 @@ async def show_blocked(update, context):
     rows = []
     for b in blocked[:10]:
         nm = b.get('display_name') or f"User {b['blocked_id']}"
-        rows.append([InlineKeyboardButton(f"🔓 Unblock {nm[:20]}", callback_data=f"unblock_{b['blocked_id']}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+        rows.append([InlineKeyboardButton(f"🔓 {nm[:20]}", callback_data=f"unblock_{b['blocked_id']}")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     await safe_edit(q, t("blocked_users", lang), InlineKeyboardMarkup(rows))
 
 
@@ -2020,8 +2035,8 @@ async def unblock_cb(update, context):
     rows = []
     for b in blocked[:10]:
         nm = b.get('display_name') or f"User {b['blocked_id']}"
-        rows.append([InlineKeyboardButton(f"🔓 Unblock {nm[:20]}", callback_data=f"unblock_{b['blocked_id']}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+        rows.append([InlineKeyboardButton(f"🔓 {nm[:20]}", callback_data=f"unblock_{b['blocked_id']}")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     await safe_edit(q, t("blocked_users", lang), InlineKeyboardMarkup(rows))
 
 
@@ -2036,7 +2051,7 @@ async def contact_list_cb(update, context):
         await safe_edit(q, t("no_contacts", lang), await main_menu_kb(lang)); return
     text = f"🗣️ {t('contact_list', lang)}\n\n"
     for r in rows:
-        text += f"• {r['display_name'] or 'Anon'} (@{r['anon_id'] or ''})\n"
+        text += f"• {r['display_name'] or 'Anon'}\n"
     await safe_edit(q, text[:4000], await main_menu_kb(lang))
 
 
@@ -2044,12 +2059,12 @@ async def advanced_settings(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     sa = await get_same_age(uid)
-    sa_lbl = "🟢 ON" if sa else "⚪ OFF"
+    sa_lbl = "🟢" if sa else "⚪"
     rows = [
-        [InlineKeyboardButton(f"⚙️ Same Age: {sa_lbl}", callback_data="toggle_sa_setting")],
+        [InlineKeyboardButton(f"{t('btn_same_age', lang)}: {sa_lbl}", callback_data="toggle_sa_setting")],
         [InlineKeyboardButton("🏙️ Change City", callback_data="choose_city")],
         [InlineKeyboardButton("🎂 Birthday", callback_data="edit_birthday")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
+        [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]
     await safe_edit(q, t("advanced_settings", lang), InlineKeyboardMarkup(rows))
 
 
@@ -2057,12 +2072,12 @@ async def toggle_sa_setting(update, context):
     q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     new = await toggle_same_age(uid)
-    sa_lbl = "🟢 ON" if new else "⚪ OFF"
+    sa_lbl = "🟢" if new else "⚪"
     rows = [
-        [InlineKeyboardButton(f"⚙️ Same Age: {sa_lbl}", callback_data="toggle_sa_setting")],
+        [InlineKeyboardButton(f"{t('btn_same_age', lang)}: {sa_lbl}", callback_data="toggle_sa_setting")],
         [InlineKeyboardButton("🏙️ Change City", callback_data="choose_city")],
         [InlineKeyboardButton("🎂 Birthday", callback_data="edit_birthday")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
+        [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]
     try: await q.edit_message_text(t("advanced_settings", lang), reply_markup=InlineKeyboardMarkup(rows))
     except: pass
     await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang))
@@ -2076,11 +2091,11 @@ async def edit_profile(update, context):
         [InlineKeyboardButton("🎯 Pref", callback_data="edit_pref_gender"),
          InlineKeyboardButton("💡 Interest", callback_data="edit_interest")],
         [InlineKeyboardButton("🌐 Lang", callback_data="edit_lang"),
-         InlineKeyboardButton("📅 Age Range", callback_data="edit_age_range")],
+         InlineKeyboardButton("📅 Age", callback_data="edit_age_range")],
         [InlineKeyboardButton("🏙️ City", callback_data="choose_city"),
          InlineKeyboardButton("🎂 Birthday", callback_data="edit_birthday")],
-        [InlineKeyboardButton("🎙️ Voice Intro", callback_data="voice_menu")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
+        [InlineKeyboardButton("🎙️ Voice", callback_data="voice_menu")],
+        [InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]]
     await safe_edit(q, "✏️ Edit Profile:", InlineKeyboardMarkup(rows))
 
 
@@ -2099,7 +2114,7 @@ async def edit_bio(update, context):
 async def edit_birthday(update, context):
     q = update.callback_query; await q.answer()
     context.user_data['edit_step'] = 'birthday'
-    await safe_edit(q, "🎂 DD-MM-YYYY format:")
+    await safe_edit(q, "🎂 DD-MM-YYYY:")
 
 
 async def edit_pref_gender(update, context):
@@ -2191,7 +2206,7 @@ async def set_city_cb(update, context):
 async def custom_city_cb(update, context):
     q = update.callback_query; await q.answer()
     context.user_data['awaiting_city'] = True
-    await safe_edit(q, "✏️ Type your city name:")
+    await safe_edit(q, "✏️ Type your city:")
 
 
 # ========== VIEW PROFILE ==========
@@ -2202,7 +2217,7 @@ async def view_profile_cb(update, context):
     except: await q.answer(); return
     prof = await get_profile(pid)
     if not prof:
-        await q.answer("Profile not found", show_alert=True); return
+        await q.answer("Not found", show_alert=True); return
     await q.answer()
     await record_view(uid, pid)
     try:
@@ -2218,34 +2233,32 @@ async def view_profile_cb(update, context):
         f"🎂 {prof.get('age', '?')} {gm.get(prof.get('gender'), '?')}\n"
         f"🏙️ {(st or {}).get('city') or 'N/A'}\n"
         f"💡 {prof.get('interest', 'any')}\n"
-        f"❤️ Likes: {(st or {}).get('likes_received', 0)}\n"
-        f"👀 Views: {(st or {}).get('profile_views', 0)}\n"
-        f"🎁 Gifts: {(st or {}).get('gifts_received', 0)}\n"
+        f"❤️ {(st or {}).get('likes_received', 0)} | 👀 {(st or {}).get('profile_views', 0)}\n"
         f"⭐ {'Premium' if (st or {}).get('is_vip') else 'Free'}\n\n"
         f"💬 {(prof.get('bio') or 'N/A')[:200]}")
     rows = [
-        [InlineKeyboardButton("❤️ Like", callback_data=f"like_{pid}"),
+        [InlineKeyboardButton(t("btn_like", lang), callback_data=f"like_{pid}"),
          InlineKeyboardButton("💬 Message", callback_data=f"msg_{pid}")],
-        [InlineKeyboardButton("🎁 Send Gift", callback_data=f"gift_menu_{pid}"),
-         InlineKeyboardButton("🚫 Block", callback_data=f"block_{pid}")],
+        [InlineKeyboardButton(t("btn_gift", lang), callback_data=f"gift_menu_{pid}"),
+         InlineKeyboardButton(t("btn_blocked", lang), callback_data=f"block_{pid}")],
     ]
     if (st or {}).get('voice_intro_file_id'):
-        rows.insert(0, [InlineKeyboardButton("🎙️ Hear Voice Intro", callback_data=f"hear_voice_{pid}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+        rows.insert(0, [InlineKeyboardButton(t("btn_voice_intro", lang), callback_data=f"hear_voice_{pid}")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     kb = InlineKeyboardMarkup(rows)
     try: await q.edit_message_text(text, reply_markup=kb)
     except: await q.message.reply_text(text, reply_markup=kb)
 
 
 async def hear_voice_cb(update, context):
-    q = update.callback_query; await q.answer("🎙️ Playing...")
+    q = update.callback_query; await q.answer("🎙️")
     try: pid = int(q.data.split("_")[2])
     except: return
     fid = await get_voice_intro(pid)
     if not fid:
         await q.message.reply_text("❌ No voice intro"); return
     try:
-        await context.bot.send_voice(chat_id=q.from_user.id, voice=fid, caption="🎙️ Voice Intro")
+        await context.bot.send_voice(chat_id=q.from_user.id, voice=fid)
     except Exception as e:
         logger.error(f"Hear voice: {e}")
 
@@ -2264,9 +2277,9 @@ async def like_cb(update, context):
             await context.bot.send_message(pid, t("liked_you", pl))
         except: pass
         if await check_match_back(uid, pid):
-            try: await context.bot.send_message(pid, "💖 It's a MATCH!")
+            try: await context.bot.send_message(pid, "💖 MATCH!")
             except: pass
-            try: await context.bot.send_message(uid, "💖 It's a MATCH!")
+            try: await context.bot.send_message(uid, "💖 MATCH!")
             except: pass
     else:
         await q.answer(t("already_liked", lang))
@@ -2325,7 +2338,7 @@ async def browse_people(update, context):
         v = "✅" if u.get('is_verified') else ""
         voice = "🎙️" if u.get('voice_intro_file_id') else ""
         rows.append([InlineKeyboardButton(f"{v}{voice} {nm} (@{aid})", callback_data=f"viewprof_{u['user_id']}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     text = t("browse_title", lang)
     if q: await safe_edit(q, text, InlineKeyboardMarkup(rows))
     else: await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(rows))
@@ -2359,7 +2372,7 @@ async def nearby_people(update, context):
         nm = u.get('display_name') or "Anon"
         voice = "🎙️" if u.get('voice_intro_file_id') else ""
         rows.append([InlineKeyboardButton(f"📍{voice} {nm} ({u.get('city', '')})", callback_data=f"viewprof_{u['user_id']}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     text = t("nearby_title", lang, city=city)
     if q: await safe_edit(q, text, InlineKeyboardMarkup(rows))
     else: await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(rows))
@@ -2376,7 +2389,7 @@ async def show_anon_link(update, context):
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=anon_{code}"
     await safe_edit(q, t("anon_link_msg", lang, link=link),
-        InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
 
 
 async def link_anon_cmd(update, context):
@@ -2400,21 +2413,21 @@ async def tod_start(update, context):
 
 async def tod_truth_cb(update, context):
     q = update.callback_query; await q.answer()
-    await q.message.reply_text(f"🎯 Truth:\n\n{random.choice(TRUTHS)}")
+    await q.message.reply_text(f"🎯 {random.choice(TRUTHS)}")
 
 
 async def tod_dare_cb(update, context):
     q = update.callback_query; await q.answer()
-    await q.message.reply_text(f"🔥 Dare:\n\n{random.choice(DARES)}")
+    await q.message.reply_text(f"🔥 {random.choice(DARES)}")
 
 
 async def tod_random_cb(update, context):
     q = update.callback_query
     await q.answer()
     if random.random() > 0.5:
-        await q.message.reply_text(f"🎯 Truth:\n\n{random.choice(TRUTHS)}")
+        await q.message.reply_text(f"🎯 {random.choice(TRUTHS)}")
     else:
-        await q.message.reply_text(f"🔥 Dare:\n\n{random.choice(DARES)}")
+        await q.message.reply_text(f"🔥 {random.choice(DARES)}")
 
 
 async def ice_breaker(update, context):
@@ -2440,7 +2453,7 @@ async def compat(update, context):
     if p1.get('gender') == p2.get('pref_gender') or p2.get('pref_gender') == 'any': s += 20
     s = min(s, 100)
     bar = "🟩"*(s//10) + "⬜"*(10-s//10)
-    await q.message.reply_text(f"💯 Compatibility: {s}%\n\n{bar}")
+    await q.message.reply_text(f"💯 {s}%\n\n{bar}")
 
 
 async def chat_summary(update, context):
@@ -2448,7 +2461,7 @@ async def chat_summary(update, context):
     if not groq_client:
         await q.answer("AI off", show_alert=True); return
     await q.answer()
-    await q.message.reply_text("📝 Chat Summary:\n\nFriendly chat session ended. Nice talking!")
+    await q.message.reply_text("📝 Chat Summary")
 
 
 # ========== REPORT ==========
@@ -2459,7 +2472,7 @@ async def report_cb(update, context):
     reasons = [("Spam","spam"),("Harass","harass"),("Scam","scam"),
                ("Fake","fake"),("18-","under"),("Other","other")]
     rows = [[InlineKeyboardButton(r[0], callback_data=f"rpr_{r[1]}_{pid}")] for r in reasons]
-    rows.append([InlineKeyboardButton("❌ Cancel", callback_data="end_chat")])
+    rows.append([InlineKeyboardButton(t("btn_cancel", "en"), callback_data="end_chat")])
     await safe_edit(q, "⚠️ Report reason:", InlineKeyboardMarkup(rows))
 
 
@@ -2487,7 +2500,7 @@ async def show_achievements(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
     unlocked = await user_ach(uid)
-    text = "🏅 Achievements\n\n"
+    text = "🏅\n\n"
     for k, (e, title) in ACHIEVEMENTS.items():
         text += f"{'✅' if k in unlocked else '🔒'} {e} {title}\n"
     await safe_edit(q, text[:4000], await main_menu_kb(await get_lang(uid)))
@@ -2497,10 +2510,10 @@ async def show_missions(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
     st = await missions_status(uid)
-    text = "🎯 Daily Missions\n\n"
+    text = "🎯\n\n"
     for k, m in st.items():
-        if m['completed']: text += f"✅ {m['text']} — +{m['reward']}\n"
-        else: text += f"⏳ {m['text']} ({m['progress']}/{m['target']}) — +{m['reward']}\n"
+        if m['completed']: text += f"✅ {m['text']}\n"
+        else: text += f"⏳ {m['text']} ({m['progress']}/{m['target']})\n"
     await safe_edit(q, text, await main_menu_kb(await get_lang(uid)))
 
 
@@ -2512,12 +2525,12 @@ async def leaderboard(update, context):
             FROM users u JOIN profiles p ON p.user_id=u.user_id WHERE u.total_chats>0
             ORDER BY u.xp DESC LIMIT 10""")
     if not rows:
-        await safe_edit(q, "No data yet.", await main_menu_kb(lang)); return
-    text = "🏆 Top Chatters\n\n"
+        await safe_edit(q, "No data", await main_menu_kb(lang)); return
+    text = "🏆\n\n"
     medals = ["🥇","🥈","🥉"]
     for i, r in enumerate(rows):
         m = medals[i] if i < 3 else f"{i+1}."
-        text += f"{m} {r['display_name'] or 'Anon'} — Lv{r['level']} • {r['total_chats']} chats\n"
+        text += f"{m} {r['display_name'] or 'Anon'} — Lv{r['level']}\n"
     await safe_edit(q, text, await main_menu_kb(lang))
 
 
@@ -2536,12 +2549,12 @@ async def show_credit(update, context):
     text = t("credit", lang, coins=st.get('coins') or 0,
              vip=(f"✅ {tier}" if vip else "❌"))
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link"),
-         InlineKeyboardButton("📅 Daily (+5🪙)", callback_data="daily_claim")],
-        [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup"),
-         InlineKeyboardButton("📋 Pricing", callback_data="pricing_table")],
-        [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]])
+        [InlineKeyboardButton(t("btn_invite", lang), callback_data="show_link"),
+         InlineKeyboardButton(t("btn_daily", lang), callback_data="daily_claim")],
+        [InlineKeyboardButton(t("btn_buy_coins", lang), callback_data="coins_topup"),
+         InlineKeyboardButton(t("btn_pricing", lang), callback_data="pricing_table")],
+        [InlineKeyboardButton(t("btn_vip", lang), callback_data="show_vip")],
+        [InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]])
     if q: await safe_edit(q, text, kb)
     else: await update.message.reply_text(text, reply_markup=kb)
 
@@ -2550,32 +2563,24 @@ async def daily_claim_cb(update, context):
     q = update.callback_query
     uid = q.from_user.id
     if await daily_bonus(uid):
-        await q.answer(f"🎁 +{DAILY_BONUS} coins!", show_alert=True)
+        await q.answer(f"🎁 +{DAILY_BONUS}!", show_alert=True)
     else:
-        await q.answer("⏳ Already claimed today.", show_alert=True)
+        await q.answer("⏳ Already claimed", show_alert=True)
 
 
 async def coins_topup(update, context):
     q = update.callback_query; await q.answer()
-    lines = "💰 COIN TOP-UP\n\n"
-    lines += "💡 Coins দিয়ে কী করবে?\n"
-    lines += "• 👦 Guy chat = 2 coins\n"
-    lines += "• 👩 Girl chat = 3 coins\n"
-    lines += "• 🎲 Random = FREE ✅\n"
-    lines += "• 🎁 Gift = 10-200 coins\n\n"
-    lines += "🎁 Invite = 10 Coins FREE → /invite\n\n"
-    lines += "👇 Select Package:"
+    lines = "💰 COIN TOP-UP\n\n👇 Select Package:"
     rows = []
     for k, info in TOPUP_PACKAGES.items():
         label = f"{info['coins']} Coins — {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}"
         if info.get('popular'): label += " 🔥"
         rows.append([InlineKeyboardButton(label, callback_data=f"topup_{k}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")])
     await safe_edit(q, lines, InlineKeyboardMarkup(rows))
 
 
 async def topup_select(update, context):
-    """Package selected → show payment methods."""
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
     key = q.data.split("_")[1]
@@ -2592,14 +2597,13 @@ async def topup_select(update, context):
         [InlineKeyboardButton("💎 Binance", callback_data=f"topup_pay_binance_{key}")],
         [InlineKeyboardButton("🪙 USDT BSC20", callback_data=f"topup_pay_bsc20_{key}"),
          InlineKeyboardButton("🪙 USDT TRC20", callback_data=f"topup_pay_trc20_{key}")],
-        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
+        [InlineKeyboardButton(t("btn_cancel", "en"), callback_data="cancel_payment")]]))
 
 
 async def topup_payment_method(update, context):
-    """Handle payment method selection for coin top-up."""
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
-    parts = q.data.split("_")   # ["topup", "pay", "bkash", "350"]
+    parts = q.data.split("_")
     method = parts[2]
     key = parts[3] if len(parts) > 3 else "120"
     info = TOPUP_PACKAGES.get(key)
@@ -2612,118 +2616,79 @@ async def topup_payment_method(update, context):
     if method not in m: return
     num, mname = m[method]
     context.user_data['awaiting_payment'] = True
-    context.user_data['payment_method'] = f"{mname} (Topup {info['coins']} coins)"
+    context.user_data['payment_method'] = f"{mname} (Topup {info['coins']})"
     context.user_data['payment_tier'] = f"topup_{info['coins']}"
-    text = (f"💳 {mname} Payment\n\n"
-            f"📦 {info['coins']} Coins\n"
+    text = (f"💳 {mname}\n\n📦 {info['coins']} Coins\n"
             f"💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n\n"
-            f"Send to:\n`{num}`\n\n"
-            f"✅ After sending, send TrxID/Screenshot here.\n\n"
-            f"⏱️ Verify in 5-10 min.")
+            f"Send to:\n`{num}`\n\n✅ After sending, send TrxID/Screenshot here.")
     await safe_edit(q, text, InlineKeyboardMarkup([
         [InlineKeyboardButton("📋 Copy", callback_data=f"copy_{method}")],
-        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton(t("btn_cancel", "en"), callback_data="cancel_payment")]]))
 
 
 async def topup_stars(update, context):
-    """Send Stars invoice for coin top-up."""
     q = update.callback_query
     uid = q.from_user.id
     key = q.data.replace("topup_stars_", "")
     info = TOPUP_PACKAGES.get(key)
     if not info:
-        await q.answer("❌ Invalid package", show_alert=True); return
+        await q.answer("❌ Invalid", show_alert=True); return
     await q.answer()
     try:
         await context.bot.send_invoice(
-            chat_id=uid,
-            title=f"🪙 {info['coins']} Coins",
-            description=f"Top-up {info['coins']} coins for anonymous chat",
+            chat_id=uid, title=f"🪙 {info['coins']} Coins",
+            description=f"Top-up {info['coins']} coins",
             payload=f"topup_{info['coins']}_{uid}",
             provider_token="", currency="XTR",
             prices=[LabeledPrice(label=f"{info['coins']} Coins", amount=info['stars'])])
     except Exception as e:
         logger.error(f"Topup invoice FAILED: {e}", exc_info=True)
-        await q.message.reply_text(
-            f"❌ Star payment failed.\n\n"
-            f"Reason: {str(e)[:150]}\n\n"
-            f"💡 Please use bKash/Rocket instead, or update Telegram app.")
+        await q.message.reply_text(f"❌ Star payment failed.\n\nReason: {str(e)[:150]}\n\n💡 Use bKash/Rocket.")
 
 
 async def pricing_table_cb(update, context):
     q = update.callback_query; await q.answer()
-    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
+    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚
 
-━━━━━━━━━━━━━━━━━━━━━━
 🪙 𝗖𝗢𝗜𝗡 𝗧𝗢𝗣-𝗨𝗣
-━━━━━━━━━━━━━━━━━━━━━━
- 120 coins =  30৳ /  15⭐ / $0.35
- 350 coins =  80৳ /  40⭐ / $0.90  🔥
- 800 coins = 180৳ /  90⭐ / $2.00
-2000 coins = 400৳ / 200⭐ / $4.50
+ 120 = 30৳ / 15⭐ / $0.35
+ 350 = 80৳ / 40⭐ / $0.90  🔥
+ 800 = 180৳ / 90⭐ / $2.00
+2000 = 400৳ / 200⭐ / $4.50
 
-━━━━━━━━━━━━━━━━━━━━━━
-⭐ 𝗩𝗜𝗣 𝗦𝗨𝗕𝗦𝗖𝗥𝗜𝗣𝗧𝗜𝗢𝗡
-━━━━━━━━━━━━━━━━━━━━━━
- 1 Month   = 149৳ /  75⭐ / $1.50  +150🪙
- 3 Months  = 399৳ / 200⭐ / $4.00  +500🪙  🔥
- 6 Months  = 699৳ / 350⭐ / $7.00  +1200🪙
-            ♾️ Unlimited Chat!
+⭐ 𝗩𝗜𝗣
+ 1M = 149৳ / 75⭐ / $1.50  +150🪙
+ 3M = 399৳ / 200⭐ / $4.00  +500🪙
+ 6M = 699৳ / 350⭐ / $7.00  +1200🪙
 
-━━━━━━━━━━━━━━━━━━━━━━
 💡 𝗖𝗢𝗜𝗡 𝗖𝗢𝗦𝗧
-━━━━━━━━━━━━━━━━━━━━━━
-👦 Guy chat    = 2 coins
-👩 Girl chat   = 3 coins
-🎲 Random chat = FREE ✅
+👦 Guy = 2 | 👩 Girl = 3 | 🎲 Random = FREE
 
-━━━━━━━━━━━━━━━━━━━━━━
-🎁 𝗙𝗥𝗘𝗘 𝗖𝗢𝗜𝗡𝗦
-━━━━━━━━━━━━━━━━━━━━━━
-/invite = +10 coins per friend
-🆕 New user = +10 coins
-📅 Daily = +5 coins
-🎉 80 Invites = FREE VIP 1M!"""
+🎁 /invite = +10 coins | 80 invites = FREE VIP 1M!"""
     await safe_edit(q, text, InlineKeyboardMarkup([
-        [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup")],
-        [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton(t("btn_buy_coins", "en"), callback_data="coins_topup")],
+        [InlineKeyboardButton(t("btn_vip", "en"), callback_data="show_vip")],
+        [InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]]))
 
 
 async def pricing_cmd(update, context):
-    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
+    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚
 
-━━━━━━━━━━━━━━━━━━━━━━
 🪙 𝗖𝗢𝗜𝗡 𝗧𝗢𝗣-𝗨𝗣
-━━━━━━━━━━━━━━━━━━━━━━
- 120 coins =  30৳ /  15⭐ / $0.35
- 350 coins =  80৳ /  40⭐ / $0.90  🔥
- 800 coins = 180৳ /  90⭐ / $2.00
-2000 coins = 400৳ / 200⭐ / $4.50
+ 120 = 30৳ / 15⭐ / $0.35
+ 350 = 80৳ / 40⭐ / $0.90  🔥
+ 800 = 180৳ / 90⭐ / $2.00
+2000 = 400৳ / 200⭐ / $4.50
 
-━━━━━━━━━━━━━━━━━━━━━━
-⭐ 𝗩𝗜𝗣 𝗦𝗨𝗕𝗦𝗖𝗥𝗜𝗣𝗧𝗜𝗢𝗡
-━━━━━━━━━━━━━━━━━━━━━━
- 1 Month   = 149৳ /  75⭐ / $1.50  +150🪙
- 3 Months  = 399৳ / 200⭐ / $4.00  +500🪙  🔥
- 6 Months  = 699৳ / 350⭐ / $7.00  +1200🪙
-            ♾️ Unlimited Chat!
+⭐ 𝗩𝗜𝗣
+ 1M = 149৳ / 75⭐ / $1.50  +150🪙
+ 3M = 399৳ / 200⭐ / $4.00  +500🪙
+ 6M = 699৳ / 350⭐ / $7.00  +1200🪙
 
-━━━━━━━━━━━━━━━━━━━━━━
 💡 𝗖𝗢𝗜𝗡 𝗖𝗢𝗦𝗧
-━━━━━━━━━━━━━━━━━━━━━━
-👦 Guy chat    = 2 coins
-👩 Girl chat   = 3 coins
-🎲 Random chat = FREE ✅
+👦 Guy = 2 | 👩 Girl = 3 | 🎲 Random = FREE
 
-━━━━━━━━━━━━━━━━━━━━━━
-🎁 𝗙𝗥𝗘𝗘 𝗖𝗢𝗜𝗡𝗦
-━━━━━━━━━━━━━━━━━━━━━━
-/invite = +10 coins per friend
-🆕 New user = +10 coins
-📅 Daily = +5 coins
-🎉 80 Invites = FREE VIP 1M!"""
+🎁 /invite = +10 coins | 80 invites = FREE VIP 1M!"""
     await update.message.reply_text(text)
 
 
@@ -2733,20 +2698,19 @@ async def show_vip(update, context):
     if await is_vip(uid):
         tier = await get_tier(uid)
         tinfo = PREMIUM_TIERS.get(tier, {})
-        await safe_edit(q, f"⭐ You're Premium!\n\nTier: {tinfo.get('name', tier)}",
-            InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        await safe_edit(q, f"⭐ Premium!\n\n{tinfo.get('name', tier)}",
+            InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
         return
     rows = []
     for k, info in PREMIUM_TIERS.items():
         rows.append([InlineKeyboardButton(f"{info['name']} — {info['price']}৳ / {info['stars']}⭐", callback_data=f"tier_{k}")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    rows.append([InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")])
     text = "💎 VIP SUBSCRIPTION\n\n"
     for k, info in PREMIUM_TIERS.items():
         text += (f"{info['name']}\n"
-                 f"📅 {info['days']} days • 💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n"
+                 f"📅 {info['days']}d • 💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n"
                  f"{info['features']}\n\n")
-    text += "💡 VIP = features + bonus coins.\n"
-    text += f"💡 FREE VIP: {FREE_VIP_INVITES} Invites = 1 Month FREE! → /invite"
+    text += f"💡 FREE: {FREE_VIP_INVITES} Invites = 1M VIP FREE! → /invite"
     await safe_edit(q, text[:4000], InlineKeyboardMarkup(rows))
 
 
@@ -2757,8 +2721,8 @@ async def tier_select(update, context):
     if not info: return
     context.user_data['payment_tier'] = tier
     text = (f"{info['name']}\n💰 {info['price']}৳ — {info['days']} days\n"
-            f"⭐ {info['stars']} Telegram Stars / ${info['usd']}\n"
-            f"🪙 +{info['coins']} Bonus Coins\n✨ {info['features']}")
+            f"⭐ {info['stars']} Stars / ${info['usd']}\n"
+            f"🪙 +{info['coins']} Coins\n✨ {info['features']}")
     await safe_edit(q, text, InlineKeyboardMarkup([
         [InlineKeyboardButton(f"⭐ Pay {info['stars']} Stars", callback_data=f"stars_{tier}")],
         [InlineKeyboardButton("📱 bKash", callback_data=f"pay_bkash_{tier}"),
@@ -2766,7 +2730,7 @@ async def tier_select(update, context):
         [InlineKeyboardButton("💎 Binance", callback_data=f"pay_binance_{tier}")],
         [InlineKeyboardButton("🪙 USDT BSC20", callback_data=f"pay_bsc20_{tier}"),
          InlineKeyboardButton("🪙 USDT TRC20", callback_data=f"pay_trc20_{tier}")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton(t("btn_menu", "en"), callback_data="main_menu")]]))
 
 
 async def stars_payment(update, context):
@@ -2775,22 +2739,18 @@ async def stars_payment(update, context):
     tier = q.data.replace("stars_", "")
     info = PREMIUM_TIERS.get(tier)
     if not info:
-        await q.answer("❌ Invalid tier", show_alert=True); return
+        await q.answer("❌ Invalid", show_alert=True); return
     await q.answer()
     try:
         await context.bot.send_invoice(
-            chat_id=uid,
-            title=f"⭐ {info['name']}",
-            description=f"{info['days']} days VIP subscription",
+            chat_id=uid, title=f"⭐ {info['name']}",
+            description=f"{info['days']}d VIP",
             payload=f"premium_{tier}_{uid}",
             provider_token="", currency="XTR",
             prices=[LabeledPrice(label=info['name'], amount=info['stars'])])
     except Exception as e:
         logger.error(f"VIP invoice FAILED: {e}", exc_info=True)
-        await q.message.reply_text(
-            f"❌ Star payment failed.\n\n"
-            f"Reason: {str(e)[:150]}\n\n"
-            f"💡 Please use bKash/Rocket instead.")
+        await q.message.reply_text(f"❌ Star payment failed.\n\nReason: {str(e)[:150]}\n\n💡 Use bKash/Rocket.")
 
 
 async def payment_method(update, context):
@@ -2806,12 +2766,11 @@ async def payment_method(update, context):
     num, mname = m[method]
     context.user_data['awaiting_payment'] = True
     context.user_data['payment_method'] = mname
-    text = (f"💳 {mname} Payment\n\n📦 {info['name']}\n💰 {info['price']}৳ ({info['days']} days)\n\n"
-            f"Send to:\n`{num}`\n\n✅ After sending, send TrxID/Screenshot here.\n\n⏱️ Verify in 5-10 min.")
+    text = (f"💳 {mname}\n\n📦 {info['name']}\n💰 {info['price']}৳\n\n"
+            f"Send to:\n`{num}`\n\n✅ After sending, send TrxID/Screenshot.")
     await safe_edit(q, text, InlineKeyboardMarkup([
         [InlineKeyboardButton("📋 Copy", callback_data=f"copy_{method}")],
-        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton(t("btn_cancel", "en"), callback_data="cancel_payment")]]))
 
 
 async def copy_num(update, context):
@@ -2819,25 +2778,21 @@ async def copy_num(update, context):
     m = q.data.replace("copy_", "")
     nums = {"bkash": BKASH_NUMBER, "rocket": ROCKET_NUMBER, "binance": BINANCE_ID,
             "bsc20": USDT_BSC20, "trc20": USDT_TRC20}
-    await q.message.reply_text(f"`{nums.get(m, 'N/A')}`\n\n👇 Tap to copy")
+    await q.message.reply_text(f"`{nums.get(m, 'N/A')}`")
 
 
 async def cancel_payment(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     for k in ['awaiting_payment','payment_tier','payment_method']: context.user_data.pop(k, None)
-    await safe_edit(q, "✅ Cancelled.", await main_menu_kb(lang))
+    await safe_edit(q, "✅ Cancelled", await main_menu_kb(lang))
 
 
 async def precheckout(update, context):
     try:
         await update.pre_checkout_query.answer(ok=True)
     except Exception as e:
-        logger.error(f"Precheckout failed: {e}")
-        try:
-            await update.pre_checkout_query.answer(
-                ok=False, error_message="Payment failed. Try again or use bKash.")
-        except: pass
+        logger.error(f"Precheckout: {e}")
 
 
 async def successful_payment(update, context):
@@ -2847,20 +2802,15 @@ async def successful_payment(update, context):
 
     if payload.startswith("topup_"):
         parts = payload.split("_")
-        try:
-            coins = int(parts[1])
-        except:
-            coins = 0
+        try: coins = int(parts[1])
+        except: coins = 0
         if coins > 0:
             await add_coins(uid, coins)
             async with db_pool.acquire() as c:
                 await c.execute("""INSERT INTO payments (user_id,tier,method,amount_bdt,status,approved_at)
-                    VALUES ($1,$2,'Telegram Stars',0,'approved',NOW())""", uid, f"topup_{coins}")
-            await update.message.reply_text(
-                f"🎉 +{coins} Coins added!\n\n🪙 Total: {await get_coins(uid)}",
+                    VALUES ($1,$2,'Stars',0,'approved',NOW())""", uid, f"topup_{coins}")
+            await update.message.reply_text(f"🎉 +{coins} Coins!\n\n🪙 Total: {await get_coins(uid)}",
                 reply_markup=await main_menu_kb(lang))
-        else:
-            await update.message.reply_text("❌ Error processing topup.")
         return
 
     try:
@@ -2870,30 +2820,29 @@ async def successful_payment(update, context):
     except:
         tier = "vip_1m"; info = PREMIUM_TIERS["vip_1m"]
     await set_vip(uid, tier, info['days'])
-    if info['coins'] > 0:
-        await add_coins(uid, info['coins'])
+    if info['coins'] > 0: await add_coins(uid, info['coins'])
     async with db_pool.acquire() as c:
         await c.execute("""INSERT INTO payments (user_id,tier,method,amount_bdt,status,approved_at)
-            VALUES ($1,$2,'Telegram Stars',$3,'approved',NOW())""", uid, tier, info['price'])
+            VALUES ($1,$2,'Stars',$3,'approved',NOW())""", uid, tier, info['price'])
     await update.message.reply_text(
         f"🎉 VIP activated!\n{info['name']}\n📅 {info['days']} days" +
-        (f"\n🪙 +{info['coins']} bonus coins" if info['coins'] > 0 else ""),
+        (f"\n🪙 +{info['coins']} coins" if info['coins'] > 0 else ""),
         reply_markup=await main_menu_kb(lang))
 
 
-# ========== INVITE / LINK ==========
+# ========== INVITE ==========
 async def show_link(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=ref_{uid}"
     invite_count = await get_invite_count(uid)
-    text = (f"🎁 Your Invite Link\n\n{link}\n\n"
-            f"💡 Each friend joining = +{REFERRAL_REWARD} Coins FREE!\n"
-            f"🎉 {FREE_VIP_INVITES} Invites = 1 Month VIP FREE!\n\n"
+    text = (f"🎁 Invite Link\n\n{link}\n\n"
+            f"💡 +{REFERRAL_REWARD} Coins FREE per friend!\n"
+            f"🎉 {FREE_VIP_INVITES} Invites = 1M VIP FREE!\n\n"
             f"📊 Your Invites: {invite_count}/{FREE_VIP_INVITES}")
     await safe_edit(q, text,
-        InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        InlineKeyboardMarkup([[InlineKeyboardButton(t("btn_menu", lang), callback_data="main_menu")]]))
 
 
 async def link_cmd(update, context):
@@ -2901,9 +2850,9 @@ async def link_cmd(update, context):
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=ref_{uid}"
     invite_count = await get_invite_count(uid)
-    text = (f"🎁 Your Invite Link\n\n{link}\n\n"
-            f"💡 Each friend joining = +{REFERRAL_REWARD} Coins FREE!\n"
-            f"🎉 {FREE_VIP_INVITES} Invites = 1 Month VIP FREE!\n\n"
+    text = (f"🎁 Invite Link\n\n{link}\n\n"
+            f"💡 +{REFERRAL_REWARD} Coins per friend!\n"
+            f"🎉 {FREE_VIP_INVITES} Invites = 1M VIP FREE!\n\n"
             f"📊 Your Invites: {invite_count}/{FREE_VIP_INVITES}")
     await update.message.reply_text(text)
 
@@ -2927,14 +2876,12 @@ async def refresh_online(update, context):
 async def support_ticket(update, context):
     q = update.callback_query; await q.answer()
     context.user_data['awaiting_support'] = True
-    await safe_edit(q, "🎫 Send your support message:")
+    await safe_edit(q, "🎫 Send your message:")
 
 
 async def support_cmd(update, context):
     context.user_data['awaiting_support'] = True
-    await update.message.reply_text(
-        "🎫 Support\n\nType your message below. Team replies within 24h.",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Cancel", callback_data="main_menu")]]))
+    await update.message.reply_text("🎫 Send your support message:")
 
 
 async def reply_ticket_cmd(update, context):
@@ -2948,178 +2895,10 @@ async def reply_ticket_cmd(update, context):
             if not r:
                 await update.message.reply_text("❌ Not found"); return
             await c.execute("UPDATE support_tickets SET admin_reply=$1,status='closed' WHERE ticket_id=$2", msg, tid)
-        try: await context.bot.send_message(r['user_id'], f"📩 Support Reply:\n\n{msg}")
+        try: await context.bot.send_message(r['user_id'], f"📩 Support:\n\n{msg}")
         except: pass
         await update.message.reply_text("✅ Sent")
     except Exception as e: await update.message.reply_text(f"❌ {e}")
-
-
-# ========== GROUP ROOMS ==========
-async def group_menu(update, context):
-    q = update.callback_query; await q.answer()
-    async with db_pool.acquire() as c:
-        rooms = await c.fetch("""SELECT r.room_id,r.name,COUNT(m.user_id) cnt
-            FROM group_rooms r LEFT JOIN group_members m ON m.room_id=r.room_id
-            WHERE r.is_active=TRUE GROUP BY r.room_id,r.name
-            HAVING COUNT(m.user_id) < $1 ORDER BY r.room_id DESC LIMIT 5""", GROUP_ROOM_MAX)
-    rows = []
-    for r in rooms:
-        nm = r['name'] or f"Room {r['room_id']}"
-        rows.append([InlineKeyboardButton(f"👥 {nm} ({r['cnt']}/{GROUP_ROOM_MAX})", callback_data=f"joinroom_{r['room_id']}")])
-    rows.append([InlineKeyboardButton("➕ Create Room", callback_data="create_room")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
-    await safe_edit(q, "👥 Group Rooms (3-10):", InlineKeyboardMarkup(rows))
-
-
-async def create_room(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id
-    async with db_pool.acquire() as c:
-        rid = await c.fetchval("INSERT INTO group_rooms (host_id) VALUES ($1) RETURNING room_id", uid)
-        await c.execute("INSERT INTO group_members (room_id,user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", rid, uid)
-    context.user_data['room_id'] = rid
-    await safe_edit(q, f"✅ Room {rid} created!\n\nShare: /joinroom {rid}",
-        InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Leave", callback_data="leave_room")]]))
-
-
-async def join_room_cb(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
-    rid = int(q.data.split("_")[1])
-    async with db_pool.acquire() as c:
-        room = await c.fetchrow("SELECT * FROM group_rooms WHERE room_id=$1 AND is_active=TRUE", rid)
-        if not room:
-            await safe_edit(q, "❌ Room not found", await main_menu_kb(lang)); return
-        cnt = await c.fetchval("SELECT COUNT(*) FROM group_members WHERE room_id=$1", rid)
-        if cnt >= GROUP_ROOM_MAX:
-            await safe_edit(q, "❌ Room full", await main_menu_kb(lang)); return
-        await c.execute("INSERT INTO group_members (room_id,user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", rid, uid)
-    context.user_data['room_id'] = rid
-    await safe_edit(q, f"✅ Joined Room {rid}!", InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Leave", callback_data="leave_room")]]))
-
-
-async def join_room_cmd(update, context):
-    uid = update.effective_user.id
-    if not context.args:
-        await update.message.reply_text("Usage: /joinroom <id>"); return
-    try: rid = int(context.args[0])
-    except: await update.message.reply_text("❌ Invalid"); return
-    async with db_pool.acquire() as c:
-        room = await c.fetchrow("SELECT * FROM group_rooms WHERE room_id=$1 AND is_active=TRUE", rid)
-        if not room:
-            await update.message.reply_text("❌ Not found"); return
-        cnt = await c.fetchval("SELECT COUNT(*) FROM group_members WHERE room_id=$1", rid)
-        if cnt >= GROUP_ROOM_MAX:
-            await update.message.reply_text("❌ Full"); return
-        await c.execute("INSERT INTO group_members (room_id,user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", rid, uid)
-    context.user_data['room_id'] = rid
-    await update.message.reply_text(f"✅ Joined Room {rid}!")
-
-
-async def leave_room(update, context):
-    q = update.callback_query
-    try: await q.answer()
-    except: pass
-    uid = q.from_user.id if q else update.effective_user.id
-    lang = await get_lang(uid)
-    rid = context.user_data.pop('room_id', None)
-    if rid:
-        async with db_pool.acquire() as c:
-            await c.execute("DELETE FROM group_members WHERE room_id=$1 AND user_id=$2", rid, uid)
-    if q:
-        try: await safe_edit(q, "🚪 Left.", await main_menu_kb(lang))
-        except: pass
-    else:
-        await update.message.reply_text("🚪 Left.")
-
-
-async def relay_group(update, context, rid):
-    uid = update.effective_user.id
-    async with db_pool.acquire() as c:
-        mem = await c.fetch("SELECT user_id FROM group_members WHERE room_id=$1 AND user_id!=$2", rid, uid)
-    for m in mem:
-        try: await context.bot.copy_message(chat_id=m['user_id'], from_chat_id=uid, message_id=update.message.message_id)
-        except: pass
-
-
-# ========== VOICE ROOMS ==========
-async def voice_room_menu(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id
-    if not await is_vip(uid):
-        await safe_edit(q, "⭐ Voice Room = VIP only!\n\nGet 6-Month VIP for unlimited.",
-            InlineKeyboardMarkup([
-                [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-                [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
-        return
-    async with db_pool.acquire() as c:
-        rooms = await c.fetch("""SELECT r.room_id,COUNT(m.user_id) cnt FROM voice_rooms r
-            LEFT JOIN voice_members m ON m.room_id=r.room_id WHERE r.is_active=TRUE
-            GROUP BY r.room_id HAVING COUNT(m.user_id) < 6 ORDER BY r.room_id DESC LIMIT 5""")
-    rows = []
-    for r in rooms:
-        rows.append([InlineKeyboardButton(f"🎤 Room {r['room_id']} ({r['cnt']}/6)", callback_data=f"jvr_{r['room_id']}")])
-    rows.append([InlineKeyboardButton("➕ Create", callback_data="create_vr")])
-    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
-    await safe_edit(q, "🎤 Voice Rooms", InlineKeyboardMarkup(rows))
-
-
-async def create_vr(update, context):
-    q = update.callback_query
-    uid = q.from_user.id
-    if not await is_vip(uid):
-        await q.answer("VIP only", show_alert=True); return
-    await q.answer()
-    async with db_pool.acquire() as c:
-        rid = await c.fetchval("INSERT INTO voice_rooms (host_id) VALUES ($1) RETURNING room_id", uid)
-        await c.execute("INSERT INTO voice_members (room_id,user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", rid, uid)
-    context.user_data['voice_room_id'] = rid
-    await safe_edit(q, f"🎤 Voice Room {rid}!",
-        InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Leave", callback_data="leave_vr")]]))
-
-
-async def join_vr(update, context):
-    q = update.callback_query
-    uid = q.from_user.id
-    if not await is_vip(uid):
-        await q.answer("VIP only", show_alert=True); return
-    rid = int(q.data.replace("jvr_", ""))
-    async with db_pool.acquire() as c:
-        cnt = await c.fetchval("SELECT COUNT(*) FROM voice_members WHERE room_id=$1", rid)
-        if cnt >= 6:
-            await q.answer("Full", show_alert=True); return
-        await c.execute("INSERT INTO voice_members (room_id,user_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", rid, uid)
-    await q.answer("✅ Joined", show_alert=True)
-    context.user_data['voice_room_id'] = rid
-    await safe_edit(q, f"🎤 Joined Room {rid}!",
-        InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Leave", callback_data="leave_vr")]]))
-
-
-async def leave_voice(update, context):
-    q = update.callback_query
-    try: await q.answer()
-    except: pass
-    uid = q.from_user.id if q else update.effective_user.id
-    lang = await get_lang(uid)
-    rid = context.user_data.pop('voice_room_id', None)
-    if rid:
-        async with db_pool.acquire() as c:
-            await c.execute("DELETE FROM voice_members WHERE room_id=$1 AND user_id=$2", rid, uid)
-    if q:
-        try: await safe_edit(q, "🎤 Left.", await main_menu_kb(lang))
-        except: pass
-    else:
-        await update.message.reply_text("🎤 Left.")
-
-
-async def relay_voice(update, context, rid):
-    uid = update.effective_user.id
-    if not (update.message.voice or update.message.audio): return
-    async with db_pool.acquire() as c:
-        mem = await c.fetch("SELECT user_id FROM voice_members WHERE room_id=$1 AND user_id!=$2", rid, uid)
-    for m in mem:
-        try: await context.bot.copy_message(chat_id=m['user_id'], from_chat_id=uid, message_id=update.message.message_id)
-        except: pass
 
 
 # ========== COMMANDS ==========
@@ -3173,8 +2952,8 @@ async def profile_cmd(update, context):
     await update.message.reply_text(
         f"👤 {prof.get('display_name')} {voice_badge}\n🆔 /{aid}\n"
         f"🎂 {prof.get('age')} • {st.get('city') or 'N/A'}\n"
-        f"❤️ Likes: {st.get('likes_received') or 0}\n👀 Views: {st.get('profile_views') or 0}\n"
-        f"🎁 Gifts: {st.get('gifts_received') or 0}\n"
+        f"❤️ {st.get('likes_received') or 0} | 👀 {st.get('profile_views') or 0}\n"
+        f"🎁 {st.get('gifts_received') or 0}\n"
         f"📈 Lv{lvl} • XP {st.get('xp') or 0}/{nx}\n🪙 {st.get('coins') or 0}\n💬 {st.get('total_chats') or 0}",
         reply_markup=profile_kb(lang))
 
@@ -3187,37 +2966,36 @@ async def voice_cmd(update, context):
             [InlineKeyboardButton("🎙️ Replace", callback_data="voice_replace"),
              InlineKeyboardButton("▶️ Preview", callback_data="voice_preview")],
             [InlineKeyboardButton("🗑️ Delete", callback_data="voice_delete")]])
-        await update.message.reply_text("🎙️ Your Voice Intro is active!", reply_markup=kb)
+        await update.message.reply_text("🎙️ Voice Intro active!", reply_markup=kb)
     else:
         context.user_data['awaiting_voice'] = True
-        await update.message.reply_text("🎙️ Send a voice message (max 30 sec) as your intro:")
+        await update.message.reply_text("🎙️ Send a voice message (max 30 sec):")
 
 
 async def gift_cmd(update, context):
     uid = update.effective_user.id
     chat = await get_chat(uid)
     if not chat or chat.get('is_ai'):
-        await update.message.reply_text("❌ No partner to gift."); return
+        await update.message.reply_text("❌ No partner"); return
     pid = chat['partner_id']
     coins = await get_coins(uid)
     rows = [[InlineKeyboardButton(f"{info['name']} — {info['coins']}🪙", callback_data=f"gift_send_{k}_{pid}")] for k, info in GIFT_TYPES.items()]
-    await update.message.reply_text(f"🎁 Choose a gift for your partner:\n\n🪙 Your coins: {coins}", reply_markup=InlineKeyboardMarkup(rows))
+    await update.message.reply_text(f"🎁 Choose gift:\n\n🪙 Your coins: {coins}", reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def help_cmd(update, context):
     text = (
         "📖 Help\n\n"
         "/start — Main menu\n/newchat — Start chat\n/next — Skip partner\n"
-        "/like — Like current partner\n/daily — Daily bonus (+5🪙)\n"
-        "/voice — Set Voice Intro\n/gift — Send Gift\n/story — Post Story\n"
-        "/profile — Your profile\n/credit — Coins + Top-Up\n/pricing — All prices\n"
+        "/like — Like partner\n/daily — Daily bonus (+5🪙)\n"
+        "/voice — Voice Intro\n/gift — Send Gift\n/story — Post Story\n"
+        "/profile — Profile\n/credit — Coins + Top-Up\n/pricing — All prices\n"
         "/vip — VIP plans\n/link or /invite — Invite (+10🪙)\n"
         "/link_anon — Anonymous link\n/leaderboard — Top chatters\n"
-        "/language — Change language\n/stop — End chat\n/reset — Reset profile\n\n"
-        "💡 Random = FREE | Guy = 2 coins | Girl = 3 coins\n"
+        "/language — Change language\n/stop — End chat\n/reset — Reset\n\n"
+        "💡 Random = FREE | Guy = 2 | Girl = 3\n"
         "🎁 Invite = +10 Coins | 🆕 New = +10 Coins\n"
-        "🎉 80 Invites = 1 Month VIP FREE!\n"
-        "📅 Daily = +5 coins\n\n"
+        "🎉 80 Invites = 1 Month VIP FREE!\n\n"
         "🔒 Anonymous. 18+ only."
     )
     await update.message.reply_text(text)
@@ -3256,7 +3034,7 @@ async def leaderboard_cmd(update, context):
     medals = ["🥇","🥈","🥉"]
     for i, r in enumerate(rows):
         m = medals[i] if i < 3 else f"{i+1}."
-        text += f"{m} {r['display_name'] or 'Anon'} — Lv{r['level']} • {r['total_chats']}\n"
+        text += f"{m} {r['display_name'] or 'Anon'} — Lv{r['level']}\n"
     await update.message.reply_text(text)
 
 
@@ -3270,16 +3048,11 @@ async def admin_stats(update, context):
         pend = await c.fetchval("SELECT COUNT(*) FROM reports WHERE status='pending'") or 0
         bn = await c.fetchval("SELECT COUNT(*) FROM users WHERE is_banned=TRUE") or 0
         vp = await c.fetchval("SELECT COUNT(*) FROM users WHERE is_vip=TRUE") or 0
-        co = await c.fetchval("SELECT SUM(coins) FROM users") or 0
         pp = await c.fetchval("SELECT COUNT(*) FROM payments WHERE status='pending'") or 0
         rev = await c.fetchval("SELECT COALESCE(SUM(amount_bdt),0) FROM payments WHERE status='approved'") or 0
-        st = await c.fetchval("SELECT COUNT(*) FROM stories WHERE expires_at > NOW()") or 0
-        gf = await c.fetchval("SELECT COUNT(*) FROM gifts") or 0
     await update.message.reply_text(
-        f"📊 Dashboard\n\n👥 {tu}\n🟢 {await online_count()}\n⏳ {q}\n💬 {ch}\n"
-        f"⚠️ Reports: {pend}\n🚫 Banned: {bn}\n⭐ VIP: {vp}\n🪙 Coins: {co}\n"
-        f"📖 Stories: {st}\n🎁 Gifts: {gf}\n\n"
-        f"💳 Pending: {pp}\n💰 Revenue: {rev}৳")
+        f"📊 Admin\n\n👥 {tu}\n🟢 {await online_count()}\n⏳ {q}\n💬 {ch}\n"
+        f"⚠️ {pend}\n🚫 {bn}\n⭐ {vp}\n💳 {pp}\n💰 {rev}৳")
 
 
 async def ban_cmd(update, context):
@@ -3309,29 +3082,25 @@ async def unban_cmd(update, context):
 async def approve_cmd(update, context):
     if update.effective_user.id not in ADMIN_IDS: return
     if len(context.args) < 2:
-        await update.message.reply_text("Usage: /approve <uid> <vip_1m|vip_3m|vip_6m|topup_XXX>"); return
+        await update.message.reply_text("Usage: /approve <uid> <tier|topup_XXX>"); return
     try:
         tid = int(context.args[0]); key = context.args[1]
         if key.startswith("topup_"):
             coins = int(key.replace("topup_", ""))
             await add_coins(tid, coins)
-            try:
-                await context.bot.send_message(tid, f"🎉 +{coins} Coins added!\n\n🪙 Now: {await get_coins(tid)}")
+            try: await context.bot.send_message(tid, f"🎉 +{coins} Coins!")
             except: pass
-            await update.message.reply_text(f"✅ +{coins} coins to {tid}")
+            await update.message.reply_text(f"✅ +{coins} to {tid}")
         else:
             info = PREMIUM_TIERS.get(key)
             if not info:
-                await update.message.reply_text("❌ Invalid tier"); return
+                await update.message.reply_text("❌ Invalid"); return
             await set_vip(tid, key, info['days'])
-            if info['coins'] > 0:
-                await add_coins(tid, info['coins'])
+            if info['coins'] > 0: await add_coins(tid, info['coins'])
             try:
-                await context.bot.send_message(tid,
-                    f"🎉 VIP activated!\n{info['name']}\n📅 {info['days']} days" +
-                    (f"\n🪙 +{info['coins']} coins" if info['coins'] > 0 else ""))
+                await context.bot.send_message(tid, f"🎉 VIP!\n{info['name']}\n📅 {info['days']}d")
             except: pass
-            await update.message.reply_text(f"✅ VIP for {tid} ({key})")
+            await update.message.reply_text(f"✅ VIP {tid}")
         async with db_pool.acquire() as c:
             await c.execute("UPDATE payments SET status='approved',approved_at=NOW() WHERE user_id=$1 AND status='pending'", tid)
     except Exception as e: await update.message.reply_text(f"❌ {e}")
@@ -3345,8 +3114,8 @@ async def verify_cmd(update, context):
         tid = int(context.args[0])
         async with db_pool.acquire() as c:
             await c.execute("UPDATE users SET is_verified=TRUE WHERE user_id=$1", tid)
-        await context.bot.send_message(tid, "✅ You're now Verified!")
-        await update.message.reply_text("✅ Verified")
+        await context.bot.send_message(tid, "✅ Verified!")
+        await update.message.reply_text("✅")
     except Exception as e: await update.message.reply_text(f"❌ {e}")
 
 
@@ -3374,32 +3143,32 @@ async def pending_cmd(update, context):
         await update.message.reply_text("✅ None"); return
     text = "💳 Pending:\n\n"
     for r in rows:
-        text += f"🆔 #{r['payment_id']} 👤 `{r['user_id']}`\n📦 {r['tier']} • {r['method']}\n➡️ /approve {r['user_id']} {r['tier']}\n\n"
+        text += f"🆔 #{r['payment_id']} 👤 `{r['user_id']}`\n📦 {r['tier']}\n➡️ /approve {r['user_id']} {r['tier']}\n\n"
     await update.message.reply_text(text[:4000])
 
 
-# ========== SETUP COMMANDS ==========
+# ========== SETUP ==========
 async def setup_bot_commands(app):
     commands = [
-        BotCommand("start",       "🏠 Open main menu"),
-        BotCommand("profile",     "👤 View your profile"),
-        BotCommand("newchat",     "💬 Start new chat"),
-        BotCommand("next",        "⏭️ Skip to next partner"),
-        BotCommand("like",        "❤️ Like current partner"),
-        BotCommand("daily",       "🎁 Daily bonus coins"),
-        BotCommand("voice",       "🎙️ Set Voice Intro"),
-        BotCommand("gift",        "🎁 Send gift to partner"),
-        BotCommand("story",       "📖 Post 24h story"),
-        BotCommand("credit",      "💰 Check your coins"),
-        BotCommand("pricing",     "📋 View all prices"),
-        BotCommand("vip",         "⭐ Upgrade to VIP"),
-        BotCommand("invite",      "🎁 Invite friends (+10 coins)"),
-        BotCommand("link",        "🔗 Your invite link"),
-        BotCommand("link_anon",   "👀 Get anonymous link"),
-        BotCommand("leaderboard", "🏆 Top chatters"),
-        BotCommand("language",    "🌐 Change language"),
-        BotCommand("support",     "🎫 Contact support"),
-        BotCommand("help",        "❓ How it works"),
+        BotCommand("start",       "🏠 Main menu"),
+        BotCommand("profile",     "👤 Profile"),
+        BotCommand("newchat",     "💬 New chat"),
+        BotCommand("next",        "⏭️ Next"),
+        BotCommand("like",        "❤️ Like"),
+        BotCommand("daily",       "🎁 Daily"),
+        BotCommand("voice",       "🎙️ Voice Intro"),
+        BotCommand("gift",        "🎁 Gift"),
+        BotCommand("story",       "📖 Story"),
+        BotCommand("credit",      "💰 Credit"),
+        BotCommand("pricing",     "📋 Pricing"),
+        BotCommand("vip",         "⭐ VIP"),
+        BotCommand("invite",      "🎁 Invite"),
+        BotCommand("link",        "🔗 Link"),
+        BotCommand("link_anon",   "👀 Anon Link"),
+        BotCommand("leaderboard", "🏆 Leaderboard"),
+        BotCommand("language",    "🌐 Language"),
+        BotCommand("support",     "🎫 Support"),
+        BotCommand("help",        "❓ Help"),
     ]
     await app.bot.set_my_commands(commands)
     logger.info("Bot commands menu set.")
@@ -3435,8 +3204,6 @@ def main():
         ("voice", voice_cmd), ("gift", gift_cmd), ("story", story_cmd),
         ("support", support_cmd),
         ("link_anon", link_anon_cmd), ("leaderboard", leaderboard_cmd),
-        ("joinroom", join_room_cmd), ("leaveroom", leave_room),
-        ("leavevoice", leave_voice),
         ("adminstats", admin_stats), ("ban", ban_cmd), ("unban", unban_cmd),
         ("approve", approve_cmd), ("verify", verify_cmd),
         ("broadcast", broadcast_cmd), ("pending", pending_cmd),
@@ -3444,7 +3211,7 @@ def main():
     ]
     for n, f in cmds: app.add_handler(CommandHandler(n, f))
 
-    # ⚠️ IMPORTANT ORDER: specific patterns BEFORE generic ones!
+    # ⚠️ ORDER MATTERS: specific BEFORE generic!
     callbacks = [
         ("^lang_", language_callback), ("^change_language$", change_language),
         ("^age_", age_gate_callback),
@@ -3477,7 +3244,7 @@ def main():
         ("^show_link$", show_link), ("^show_anon_link$", show_anon_link),
         ("^show_credit$", show_credit), ("^show_vip$", show_vip),
         ("^daily_claim$", daily_claim_cb),
-        # ⚠️ Payment order: specific → generic
+        # Payment order CRITICAL
         ("^coins_topup$", coins_topup),
         ("^topup_stars_", topup_stars),
         ("^topup_pay_", topup_payment_method),
@@ -3499,10 +3266,6 @@ def main():
         ("^rpr_", report_reason_cb), ("^report_", report_cb),
         ("^my_profile$", my_profile), ("^leaderboard$", leaderboard),
         ("^support_ticket$", support_ticket),
-        ("^group_menu$", group_menu), ("^create_room$", create_room),
-        ("^joinroom_", join_room_cb), ("^leave_room$", leave_room),
-        ("^voice_room_menu$", voice_room_menu), ("^create_vr$", create_vr),
-        ("^jvr_", join_vr), ("^leave_vr$", leave_voice),
         ("^tod_start$", tod_start), ("^tod_truth$", tod_truth_cb),
         ("^tod_dare$", tod_dare_cb), ("^tod_random$", tod_random_cb),
         ("^ice_breaker$", ice_breaker), ("^compat$", compat),
