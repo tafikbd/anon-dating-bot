@@ -1,4 +1,4 @@
-import os, logging, asyncio, threading, random, json, re
+import os, logging, asyncio, threading, random
 from datetime import datetime, timedelta
 from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
@@ -12,7 +12,6 @@ try:
     HAS_GROQ = True
 except ImportError:
     HAS_GROQ = False
-
 
 # ============ CONFIG ============
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
@@ -60,11 +59,24 @@ XP_PER_CHAT = 10
 XP_PER_MESSAGE = 1
 LEVEL_THRESHOLDS = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500, 5500, 6600, 7800, 9100, 10500]
 
+# ============ PREMIUM TIERS (REDUCED PRICES) ============
 PREMIUM_TIERS = {
-    "bronze": {"name": "🥉 Bronze", "price": 99, "days": 30, "coins": 50, "features": "Ads-free + Priority+1"},
-    "silver": {"name": "🥈 Silver", "price": 199, "days": 30, "coins": 150, "features": "Adv Filters + 2x Coins + Unlimited"},
-    "gold": {"name": "🥇 Gold", "price": 499, "days": 30, "coins": 500, "features": "Verified + Super Chat + Friends"},
-    "diamond": {"name": "💎 Diamond", "price": 999, "days": 30, "coins": 1500, "features": "ALL + AI Trans + Voice Notes + Voice Room"},
+    "bronze": {
+        "name": "🥉 Bronze", "price": 49, "stars": 50, "days": 30, "coins": 50,
+        "features": "Ads-free • Priority+1 • 50 Coins"
+    },
+    "silver": {
+        "name": "🥈 Silver", "price": 99, "stars": 100, "days": 30, "coins": 150,
+        "features": "Adv Filters • 2x Coins • Unlimited Chats"
+    },
+    "gold": {
+        "name": "🥇 Gold", "price": 199, "stars": 200, "days": 30, "coins": 500,
+        "features": "Verified • Super Chat • Friends List"
+    },
+    "diamond": {
+        "name": "💎 Diamond", "price": 399, "stars": 400, "days": 30, "coins": 1500,
+        "features": "ALL + AI Translate + Voice Notes + Voice Rooms"
+    },
 }
 
 ACHIEVEMENTS = {
@@ -76,7 +88,6 @@ ACHIEVEMENTS = {
     "coins_100": ("🪙", "Rich"), "coins_1000": ("💰", "Wealthy"),
     "premium": ("⭐", "Premium"), "level_5": ("📈", "Rising Star"),
     "level_10": ("🌟", "Superstar"), "truth_5": ("🎲", "Truth Master"),
-    "voice_10": ("🎤", "Voice King"), "super_chat_1": ("💌", "Super Chatter"),
 }
 
 DAILY_MISSIONS = {
@@ -117,100 +128,96 @@ DARE_TASKS = [
 BANNED_WORDS = ["fuck","shit","bitch","asshole","dick","pussy","bastard",
     "madarchod","bhadwa","chutiya","chod","harami","kutta","kuti"]
 
-# ============ LANGUAGE STRINGS ============
+# ============ LANGUAGE STRINGS (4 LANGUAGES) ============
 STRINGS = {
-    "welcome": {"bn":"👋 স্বাগতম! এটি অ্যানোনিমাস চ্যাটিং বট।\n\n১৮+ নিশ্চিত করুন।","en":"👋 Welcome! Anonymous chat bot.\n\nConfirm 18+."},
-    "age_yes": {"bn":"✅ হ্যাঁ, ১৮+","en":"✅ Yes, 18+"},
-    "age_no": {"bn":"❌ না","en":"❌ No"},
-    "age_denied": {"bn":"❌ শুধু ১৮+","en":"❌ Only 18+"},
-    "ask_name": {"bn":"✅ নাম লিখুন:","en":"✅ Enter your name:"},
-    "ask_age": {"bn":"🎂 বয়স (18-99):","en":"🎂 Age (18-99):"},
-    "ask_gender": {"bn":"⚧ জেন্ডার:","en":"⚧ Gender:"},
-    "ask_pref": {"bn":"🎯 কার সাথে চ্যাট:","en":"🎯 Chat preference:"},
-    "ask_interest": {"bn":"💡 আগ্রহ:","en":"💡 Interest:"},
-    "ask_lang_pref": {"bn":"🌐 ভাষা:","en":"🌐 Language:"},
-    "ask_bio": {"bn":"📝 বায়ো (max 200):","en":"📝 Bio (max 200):"},
-    "male": {"bn":"👦 ছেলে","en":"👦 Male"},
-    "female": {"bn":"👧 মেয়ে","en":"👧 Female"},
-    "other": {"bn":"🌈 অন্যান্য","en":"🌈 Other"},
-    "any": {"bn":"🌍 যে কেউ","en":"🌍 Anyone"},
-    "main_menu": {"bn":"🏠 মেইন মেনু:","en":"🏠 Main Menu:"},
-    "find_partner": {"bn":"🔍 Find Partner","en":"🔍 Find Partner"},
-    "group_rooms": {"bn":"👥 Group Rooms","en":"👥 Group Rooms"},
-    "voice_room": {"bn":"🎤 Voice Room","en":"🎤 Voice Room"},
-    "my_profile": {"bn":"👤 My Profile","en":"👤 My Profile"},
-    "edit_profile": {"bn":"✏️ Edit Profile","en":"✏️ Edit Profile"},
-    "safety": {"bn":"🛡 Safety","en":"🛡 Safety"},
-    "help": {"bn":"ℹ️ Help","en":"ℹ️ Help"},
-    "coins": {"bn":"🪙 Coins","en":"🪙 Coins"},
-    "premium": {"bn":"⭐ Premium","en":"⭐ Premium"},
-    "invite": {"bn":"🔗 Invite","en":"🔗 Invite"},
-    "leaderboard": {"bn":"🏆 Leaderboard","en":"🏆 Leaderboard"},
-    "language": {"bn":"🌐 ভাষা","en":"🌐 Language"},
-    "achievements": {"bn":"🏅 Achievements","en":"🏅 Achievements"},
-    "missions": {"bn":"🎯 Daily Missions","en":"🎯 Daily Missions"},
-    "friends": {"bn":"👫 Friends","en":"👫 Friends"},
-    "status": {"bn":"📸 Status","en":"📸 Status"},
-    "end_chat": {"bn":"🛑 End","en":"🛑 End"},
-    "next_person": {"bn":"➡️ Next","en":"➡️ Next"},
-    "report": {"bn":"🚫 Report","en":"🚫 Report"},
-    "reg_done": {"bn":"✅ রেজিস্ট্রেশন সম্পন্ন! 🎉","en":"✅ Registration complete! 🎉"},
-    "searching": {"bn":"⏳ খোঁজা হচ্ছে...","en":"⏳ Searching..."},
-    "partner_found": {"bn":"✅ পার্টনার পাওয়া গেছে!\n💬 মেসেজ পাঠান।\n🔒 গোপন।","en":"✅ Partner found!\n💬 Send messages.\n🔒 Anonymous."},
-    "chat_ended": {"bn":"🛑 চ্যাট শেষ।","en":"🛑 Chat ended."},
-    "partner_ended": {"bn":"🛑 পার্টনার চ্যাট শেষ করেছেন।","en":"🛑 Partner ended."},
-    "not_in_chat": {"bn":"⚠️ চ্যাটে নেই। /start","en":"⚠️ Not in a chat. /start"},
-    "reg_first": {"bn":"❌ আগে /start","en":"❌ /start first"},
-    "already_in_chat": {"bn":"❌ ইতিমধ্যে চ্যাটে আছেন।","en":"❌ Already in chat."},
-    "search_cancelled": {"bn":"✅ বাতিল।","en":"✅ Cancelled."},
-    "online_count": {"bn":"🟢 {n} জন অনলাইনে","en":"🟢 {n} online"},
-    "referral_msg": {"bn":"🔗 লিংক:\n\n{link}\n\n💡 প্রতি ইনভাইটে {coins} কয়েন!","en":"🔗 Link:\n\n{link}\n\n💡 {coins} coins/invite!"},
-    "coins_balance": {"bn":"🪙 কয়েন: {coins}\n⭐ Premium: {vip}","en":"🪙 Coins: {coins}\n⭐ Premium: {vip}"},
-    "vip_active": {"bn":"✅ Active","en":"✅ Active"},
-    "vip_inactive": {"bn":"❌ Inactive","en":"❌ Inactive"},
-    "language_select": {"bn":"🌍 ভাষা:","en":"🌍 Language:"},
-    "language_changed": {"bn":"✅ ভাষা: বাংলা","en":"✅ Language: English"},
-    "report_blocked": {"bn":"✅ রিপোর্ট + ব্লকড।","en":"✅ Reported + blocked."},
-    "referral_bonus": {"bn":"🎁 {coins} কয়েন!","en":"🎁 {coins} coins!"},
-    "daily_bonus": {"bn":"🎁 ডেইলি বোনাস: +{coins} কয়েন!","en":"🎁 Daily bonus: +{coins} coins!"},
-    "streak_msg": {"bn":"🔥 Streak: {n} দিন!","en":"🔥 Streak: {n} days!"},
-    "chat_limit_reached": {"bn":"❌ আজকের লিমিট শেষ। Premium নিন।","en":"❌ Daily limit reached. Get Premium."},
-    "spam_warning": {"bn":"⚠️ ভদ্রভাবে বলুন।","en":"⚠️ Be respectful."},
-    "no_partner_ai": {"bn":"🤖 পার্টনার নেই। AI চ্যাট?","en":"🤖 No partner. Chat with AI?"},
-    "ai_mode_on": {"bn":"🤖 AI মোড চালু। /stop বন্ধ।","en":"🤖 AI mode ON. /stop to end."},
-    "profile_saved": {"bn":"✅ সেভ!","en":"✅ Saved!"},
-    "leaderboard_title": {"bn":"🏆 টপ চ্যাটার","en":"🏆 Top Chatters"},
-    "leaderboard_empty": {"bn":"ডেটা নেই।","en":"No data."},
-    "group_room_menu": {"bn":"👥 Group Rooms (3-10 জন):","en":"👥 Group Rooms (3-10 users):"},
-    "group_room_full": {"bn":"❌ রুম ফুল।","en":"❌ Room full."},
-    "group_room_not_found": {"bn":"❌ রুম নেই।","en":"❌ Room not found."},
-    "group_room_left": {"bn":"🚪 বেরিয়ে গেছেন।","en":"🚪 Left."},
-    "wait_moment": {"bn":"⏳ অপেক্ষা।","en":"⏳ Wait."},
-    "choose_tier": {"bn":"💎 প্যাকেজ:","en":"💎 Package:"},
-    "choose_payment": {"bn":"💳 পেমেন্ট:","en":"💳 Payment:"},
-    "payment_sent": {"bn":"✅ পাঠানো হয়েছে। ৫-১০ মিনিটে অ্যাডমিন verify করবে।","en":"✅ Sent. Admin will verify in 5-10 min."},
-    "premium_activated": {"bn":"🎉 Premium চালু!\n🌟 {tier}\n📅 {days} days\n🪙 +{coins} coins","en":"🎉 Premium activated!\n🌟 {tier}\n📅 {days} days\n🪙 +{coins} coins"},
-    "achievements_title": {"bn":"🏅 Achievements","en":"🏅 Achievements"},
-    "missions_title": {"bn":"🎯 Daily Missions","en":"🎯 Daily Missions"},
-    "xp_level": {"bn":"📈 Lv{level} • XP {xp}/{next}","en":"📈 Lv{level} • XP {xp}/{next}"},
-    "level_up": {"bn":"🎉 Level Up! Lv{level}!","en":"🎉 Level Up! Lv{level}!"},
-    "truth_or_dare": {"bn":"🎲 Truth or Dare","en":"🎲 Truth or Dare"},
-    "chat_summary": {"bn":"📝 Chat Summary","en":"📝 Chat Summary"},
-    "compatibility": {"bn":"💯 Compatibility","en":"💯 Compatibility"},
-    "ice_breaker": {"bn":"🧊 Ice-Breaker","en":"🧊 Ice-Breaker"},
-    "chat_extend": {"bn":"⏱️ +10 Min (20 coins)","en":"⏱️ +10 Min (20 coins)"},
-    "voice_notes": {"bn":"🎤 Voice Note","en":"🎤 Voice Note"},
-    "disappearing": {"bn":"👻 Disappearing","en":"👻 Disappearing"},
-    "super_boost": {"bn":"🚀 Super Boost","en":"🚀 Super Boost"},
-    "super_chat": {"bn":"💌 Super Chat","en":"💌 Super Chat"},
-    "verified": {"bn":"✅ Verified Badge","en":"✅ Verified Badge"},
-    "support": {"bn":"🎫 Support Ticket","en":"🎫 Support Ticket"},
+    "welcome": {"bn":"👋 স্বাগতম! এটি অ্যানোনিমাস চ্যাটিং বট।\n\n১৮+ নিশ্চিত করুন।","en":"👋 Welcome! Anonymous chat bot.\n\nConfirm you are 18+.","hi":"👋 स्वागत! गुमनाम चैट बॉट।\n\n18+ पुष्टि करें।","ru":"👋 Добро пожаловать! Анонимный чат-бот.\n\nПодтвердите, что вам 18+."},
+    "age_yes": {"bn":"✅ হ্যাঁ, ১৮+","en":"✅ Yes, 18+","hi":"✅ हाँ, 18+","ru":"✅ Да, 18+"},
+    "age_no": {"bn":"❌ না","en":"❌ No","hi":"❌ नहीं","ru":"❌ Нет"},
+    "age_denied": {"bn":"❌ শুধু ১৮+","en":"❌ Only 18+","hi":"❌ केवल 18+","ru":"❌ Только 18+"},
+    "ask_name": {"bn":"✅ নাম লিখুন:","en":"✅ Enter your name:","hi":"✅ नाम लिखें:","ru":"✅ Введите имя:"},
+    "ask_age": {"bn":"🎂 বয়স (18-99):","en":"🎂 Age (18-99):","hi":"🎂 उम्र (18-99):","ru":"🎂 Возраст (18-99):"},
+    "ask_gender": {"bn":"⚧ জেন্ডার:","en":"⚧ Gender:","hi":"⚧ लिंग:","ru":"⚧ Пол:"},
+    "ask_pref": {"bn":"🎯 কার সাথে চ্যাট:","en":"🎯 Chat preference:","hi":"🎯 चैट वरीयता:","ru":"🎯 Предпочтение:"},
+    "ask_interest": {"bn":"💡 আগ্রহ:","en":"💡 Interest:","hi":"💡 रुचि:","ru":"💡 Интерес:"},
+    "ask_lang_pref": {"bn":"🌐 ভাষা:","en":"🌐 Language:","hi":"🌐 भाषा:","ru":"🌐 Язык:"},
+    "ask_bio": {"bn":"📝 বায়ো (max 200):","en":"📝 Bio (max 200):","hi":"📝 बायो (max 200):","ru":"📝 О себе (макс 200):"},
+    "male": {"bn":"👦 ছেলে","en":"👦 Male","hi":"👦 पुरुष","ru":"👦 Мужской"},
+    "female": {"bn":"👧 মেয়ে","en":"👧 Female","hi":"👧 महिला","ru":"👧 Женский"},
+    "other": {"bn":"🌈 অন্যান্য","en":"🌈 Other","hi":"🌈 अन्य","ru":"🌈 Другое"},
+    "any": {"bn":"🌍 যে কেউ","en":"🌍 Anyone","hi":"🌍 कोई भी","ru":"🌍 Любой"},
+    "main_menu": {"bn":"🏠 মেইন মেনু:","en":"🏠 Main Menu:","hi":"🏠 मुख्य मेनू:","ru":"🏠 Главное меню:"},
+    "find_partner": {"bn":"🔍 পার্টনার খুঁজুন","en":"🔍 Find Partner","hi":"🔍 पार्टनर खोजें","ru":"🔍 Найти партнёра"},
+    "group_rooms": {"bn":"👥 গ্রুপ রুম","en":"👥 Group Rooms","hi":"👥 ग्रुप रूम","ru":"👥 Групповые комнаты"},
+    "voice_room": {"bn":"🎤 ভয়েস রুম","en":"🎤 Voice Room","hi":"🎤 वॉइस रूम","ru":"🎤 Голосовая комната"},
+    "my_profile": {"bn":"👤 আমার প্রোফাইল","en":"👤 My Profile","hi":"👤 मेरी प्रोफ़ाइल","ru":"👤 Мой профиль"},
+    "edit_profile": {"bn":"✏️ প্রোফাইল এডিট","en":"✏️ Edit Profile","hi":"✏️ प्रोफ़ाइल संपादित","ru":"✏️ Редактировать"},
+    "safety": {"bn":"🛡 নিরাপত্তা","en":"🛡 Safety","hi":"🛡 सुरक्षा","ru":"🛡 Безопасность"},
+    "help": {"bn":"ℹ️ সাহায্য","en":"ℹ️ Help","hi":"ℹ️ मदद","ru":"ℹ️ Помощь"},
+    "coins": {"bn":"🪙 কয়েন","en":"🪙 Coins","hi":"🪙 सिक्के","ru":"🪙 Монеты"},
+    "premium": {"bn":"⭐ প্রিমিয়াম","en":"⭐ Premium","hi":"⭐ प्रीमियम","ru":"⭐ Премиум"},
+    "invite": {"bn":"🔗 ইনভাইট","en":"🔗 Invite","hi":"🔗 आमंत्रित","ru":"🔗 Пригласить"},
+    "leaderboard": {"bn":"🏆 লিডারবোর্ড","en":"🏆 Leaderboard","hi":"🏆 लीडरबोर्ड","ru":"🏆 Рейтинг"},
+    "language": {"bn":"🌐 ভাষা","en":"🌐 Language","hi":"🌐 भाषा","ru":"🌐 Язык"},
+    "achievements": {"bn":"🏅 অ্যাচিভমেন্ট","en":"🏅 Achievements","hi":"🏅 उपलब्धियाँ","ru":"🏅 Достижения"},
+    "missions": {"bn":"🎯 ডেইলি মিশন","en":"🎯 Daily Missions","hi":"🎯 दैनिक मिशन","ru":"🎯 Миссии"},
+    "friends": {"bn":"👫 বন্ধু","en":"👫 Friends","hi":"👫 दोस्त","ru":"👫 Друзья"},
+    "status": {"bn":"📸 স্ট্যাটাস","en":"📸 Status","hi":"📸 स्टेटस","ru":"📸 Статус"},
+    "end_chat": {"bn":"🛑 শেষ","en":"🛑 End","hi":"🛑 समाप्त","ru":"🛑 Конец"},
+    "next_person": {"bn":"➡️ পরবর্তী","en":"➡️ Next","hi":"➡️ अगला","ru":"➡️ Следующий"},
+    "report": {"bn":"🚫 রিপোর্ট","en":"🚫 Report","hi":"🚫 रिपोर्ट","ru":"🚫 Жалоба"},
+    "reg_done": {"bn":"✅ রেজিস্ট্রেশন সম্পন্ন! 🎉","en":"✅ Registration complete! 🎉","hi":"✅ पंजीकरण पूरा! 🎉","ru":"✅ Регистрация завершена! 🎉"},
+    "searching": {"bn":"⏳ খোঁজা হচ্ছে...","en":"⏳ Searching...","hi":"⏳ खोज रहे हैं...","ru":"⏳ Поиск..."},
+    "partner_found": {"bn":"✅ পার্টনার পাওয়া গেছে!\n💬 মেসেজ পাঠান।\n🔒 গোপন।","en":"✅ Partner found!\n💬 Send messages.\n🔒 Anonymous.","hi":"✅ पार्टनर मिला!\n💬 संदेश भेजें।\n🔒 गुमनाम।","ru":"✅ Партнёр найден!\n💬 Отправляйте сообщения.\n🔒 Анонимно."},
+    "chat_ended": {"bn":"🛑 চ্যাট শেষ।","en":"🛑 Chat ended.","hi":"🛑 चैट समाप्त।","ru":"🛑 Чат завершён."},
+    "partner_ended": {"bn":"🛑 পার্টনার চ্যাট শেষ করেছেন।","en":"🛑 Partner ended the chat.","hi":"🛑 पार्टनर ने चैट समाप्त की।","ru":"🛑 Партнёр завершил чат."},
+    "not_in_chat": {"bn":"⚠️ চ্যাটে নেই। /start","en":"⚠️ Not in a chat. /start","hi":"⚠️ चैट में नहीं। /start","ru":"⚠️ Не в чате. /start"},
+    "reg_first": {"bn":"❌ আগে /start","en":"❌ /start first","hi":"❌ पहले /start","ru":"❌ Сначала /start"},
+    "already_in_chat": {"bn":"❌ ইতিমধ্যে চ্যাটে আছেন।","en":"❌ Already in chat.","hi":"❌ पहले से चैट में।","ru":"❌ Уже в чате."},
+    "search_cancelled": {"bn":"✅ বাতিল।","en":"✅ Cancelled.","hi":"✅ रद्द।","ru":"✅ Отменено."},
+    "online_count": {"bn":"🟢 {n} জন অনলাইনে","en":"🟢 {n} online","hi":"🟢 {n} ऑनलाइन","ru":"🟢 {n} онлайн"},
+    "referral_msg": {"bn":"🔗 লিংক:\n\n{link}\n\n💡 প্রতি ইনভাইটে {coins} কয়েন!","en":"🔗 Link:\n\n{link}\n\n💡 {coins} coins per invite!","hi":"🔗 लिंक:\n\n{link}\n\n💡 हर आमंत्रण पर {coins} सिक्के!","ru":"🔗 Ссылка:\n\n{link}\n\n💡 {coins} монет за приглашение!"},
+    "coins_balance": {"bn":"🪙 কয়েন: {coins}\n⭐ প্রিমিয়াম: {vip}","en":"🪙 Coins: {coins}\n⭐ Premium: {vip}","hi":"🪙 सिक्के: {coins}\n⭐ प्रीमियम: {vip}","ru":"🪙 Монеты: {coins}\n⭐ Премиум: {vip}"},
+    "vip_active": {"bn":"✅ সক্রিয়","en":"✅ Active","hi":"✅ सक्रिय","ru":"✅ Активен"},
+    "vip_inactive": {"bn":"❌ নিষ্ক্রিয়","en":"❌ Inactive","hi":"❌ निष्क्रिय","ru":"❌ Неактивен"},
+    "language_select": {"bn":"🌍 ভাষা নির্বাচন করুন:","en":"🌍 Choose your language:","hi":"🌍 अपनी भाषा चुनें:","ru":"🌍 Выберите язык:"},
+    "language_changed": {"bn":"✅ ভাষা: বাংলা","en":"✅ Language: English","hi":"✅ भाषा: हिन्दी","ru":"✅ Язык: Русский"},
+    "report_blocked": {"bn":"✅ রিপোর্ট + ব্লকড।","en":"✅ Reported + blocked.","hi":"✅ रिपोर्ट + ब्लॉक।","ru":"✅ Жалоба + блок."},
+    "referral_bonus": {"bn":"🎁 {coins} কয়েন!","en":"🎁 {coins} coins!","hi":"🎁 {coins} सिक्के!","ru":"🎁 {coins} монет!"},
+    "daily_bonus": {"bn":"🎁 ডেইলি বোনাস: +{coins} কয়েন!","en":"🎁 Daily bonus: +{coins} coins!","hi":"🎁 दैनिक बोनस: +{coins} सिक्के!","ru":"🎁 Ежедневный бонус: +{coins} монет!"},
+    "streak_msg": {"bn":"🔥 Streak: {n} দিন!","en":"🔥 Streak: {n} days!","hi":"🔥 स्ट्रीक: {n} दिन!","ru":"🔥 Серия: {n} дней!"},
+    "chat_limit_reached": {"bn":"❌ আজকের লিমিট শেষ। প্রিমিয়াম নিন।","en":"❌ Daily limit reached. Get Premium.","hi":"❌ दैनिक सीमा समाप्त। प्रीमियम लें।","ru":"❌ Дневной лимит. Купите Премиум."},
+    "spam_warning": {"bn":"⚠️ ভদ্রভাবে বলুন।","en":"⚠️ Be respectful.","hi":"⚠️ सम्मान से बोलें।","ru":"⚠️ Будьте вежливы."},
+    "no_partner_ai": {"bn":"🤖 পার্টনার নেই। AI চ্যাট?","en":"🤖 No partner. Chat with AI?","hi":"🤖 पार्टनर नहीं। AI चैट?","ru":"🤖 Нет партнёра. Чат с AI?"},
+    "ai_mode_on": {"bn":"🤖 AI মোড চালু। /stop বন্ধ।","en":"🤖 AI mode ON. /stop to end.","hi":"🤖 AI मोड चालू। /stop बंद।","ru":"🤖 AI режим. /stop конец."},
+    "profile_saved": {"bn":"✅ সেভ!","en":"✅ Saved!","hi":"✅ सेव!","ru":"✅ Сохранено!"},
+    "leaderboard_title": {"bn":"🏆 টপ চ্যাটার","en":"🏆 Top Chatters","hi":"🏆 टॉप चैटर","ru":"🏆 Топ чаттеры"},
+    "leaderboard_empty": {"bn":"ডেটা নেই।","en":"No data.","hi":"डेटा नहीं।","ru":"Нет данных."},
+    "group_room_menu": {"bn":"👥 গ্রুপ রুম (3-10 জন):","en":"👥 Group Rooms (3-10 users):","hi":"👥 ग्रुप रूम (3-10):","ru":"👥 Групповые комнаты (3-10):"},
+    "group_room_full": {"bn":"❌ রুম ফুল।","en":"❌ Room full.","hi":"❌ रूम भरा।","ru":"❌ Комната полна."},
+    "group_room_not_found": {"bn":"❌ রুম নেই।","en":"❌ Room not found.","hi":"❌ रूम नहीं।","ru":"❌ Комната не найдена."},
+    "group_room_left": {"bn":"🚪 বেরিয়ে গেছেন।","en":"🚪 Left.","hi":"🚪 निकल गए।","ru":"🚪 Выйдено."},
+    "wait_moment": {"bn":"⏳ অপেক্ষা।","en":"⏳ Wait.","hi":"⏳ इंतज़ार।","ru":"⏳ Подождите."},
+    "choose_tier": {"bn":"💎 প্রিমিয়াম প্যাকেজ:","en":"💎 Premium Package:","hi":"💎 प्रीमियम पैकेज:","ru":"💎 Премиум пакет:"},
+    "choose_payment": {"bn":"💳 পেমেন্ট পদ্ধতি:","en":"💳 Payment Method:","hi":"💳 भुगतान विधि:","ru":"💳 Способ оплаты:"},
+    "payment_sent": {"bn":"✅ পাঠানো হয়েছে। ৫-১০ মিনিটে verify করবে।","en":"✅ Sent. Admin will verify in 5-10 min.","hi":"✅ भेजा गया। 5-10 मिनट में जांच।","ru":"✅ Отправлено. Проверка 5-10 мин."},
+    "premium_activated": {"bn":"🎉 প্রিমিয়াম চালু!\n🌟 {tier}\n📅 {days} দিন\n🪙 +{coins} কয়েন","en":"🎉 Premium activated!\n🌟 {tier}\n📅 {days} days\n🪙 +{coins} coins","hi":"🎉 प्रीमियम सक्रिय!\n🌟 {tier}\n📅 {days} दिन\n🪙 +{coins} सिक्के","ru":"🎉 Премиум активирован!\n🌟 {tier}\n📅 {days} дней\n🪙 +{coins} монет"},
+    "achievements_title": {"bn":"🏅 অ্যাচিভমেন্ট","en":"🏅 Achievements","hi":"🏅 उपलब्धियाँ","ru":"🏅 Достижения"},
+    "missions_title": {"bn":"🎯 ডেইলি মিশন","en":"🎯 Daily Missions","hi":"🎯 दैनिक मिशन","ru":"🎯 Ежедневные миссии"},
+    "xp_level": {"bn":"📈 Lv{level} • XP {xp}/{next}","en":"📈 Lv{level} • XP {xp}/{next}","hi":"📈 Lv{level} • XP {xp}/{next}","ru":"📈 Ур{level} • XP {xp}/{next}"},
+    "level_up": {"bn":"🎉 Level Up! Lv{level}!","en":"🎉 Level Up! Lv{level}!","hi":"🎉 लेवल अप! Lv{level}!","ru":"🎉 Новый уровень! Ур{level}!"},
+    "truth_or_dare": {"bn":"🎲 সত্য না সাহস","en":"🎲 Truth or Dare","hi":"🎲 सच या साहस","ru":"🎲 Правда или действие"},
+    "chat_summary": {"bn":"📝 চ্যাট সারাংশ","en":"📝 Chat Summary","hi":"📝 चैट सारांश","ru":"📝 Резюме чата"},
+    "compatibility": {"bn":"💯 মিল","en":"💯 Compatibility","hi":"💯 अनुकूलता","ru":"💯 Совместимость"},
+    "ice_breaker": {"bn":"🧊 আইস-ব্রেকার","en":"🧊 Ice-Breaker","hi":"🧊 आइस-ब्रेकर","ru":"🧊 Лёд растопить"},
+    "chat_extend": {"bn":"⏱️ +১০ মিনিট (২০ কয়েন)","en":"⏱️ +10 Min (20 coins)","hi":"⏱️ +10 मिनट (20 सिक्के)","ru":"⏱️ +10 мин (20 монет)"},
+    "support": {"bn":"🎫 সাপোর্ট টিকেট","en":"🎫 Support Ticket","hi":"🎫 सहायता टिकट","ru":"🎫 Тикет поддержки"},
+    "stars_btn": {"bn":"⭐ {n} Stars দিয়ে কিনুন","en":"⭐ Buy with {n} Stars","hi":"⭐ {n} Stars से खरीदें","ru":"⭐ Купить за {n} Stars"},
 }
 
 
 def t(key, lang="bn", **kw):
     s = STRINGS.get(key, {})
-    txt = s.get(lang) or s.get("en") or key
+    txt = s.get(lang) or s.get("en") or s.get("bn") or key
     if kw:
         try: return txt.format(**kw)
         except: return txt
@@ -228,9 +235,8 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_18_plus BOOLEAN DEFAULT FALSE,
                 is_banned BOOLEAN DEFAULT FALSE,
-                ban_reason TEXT,
                 last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                language VARCHAR(5) DEFAULT 'bn',
+                language VARCHAR(5) DEFAULT 'en',
                 coins INTEGER DEFAULT 0,
                 xp INTEGER DEFAULT 0,
                 level INTEGER DEFAULT 1,
@@ -246,8 +252,7 @@ async def init_db():
                 daily_bonus_date DATE,
                 is_verified BOOLEAN DEFAULT FALSE,
                 birthday DATE,
-                truth_count INTEGER DEFAULT 0,
-                voice_count INTEGER DEFAULT 0
+                truth_count INTEGER DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id BIGINT PRIMARY KEY,
@@ -269,7 +274,6 @@ async def init_db():
             CREATE TABLE IF NOT EXISTS active_chats (
                 user_id BIGINT PRIMARY KEY, partner_id BIGINT,
                 is_ai BOOLEAN DEFAULT FALSE,
-                is_super BOOLEAN DEFAULT FALSE,
                 started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS group_rooms (
@@ -327,19 +331,14 @@ async def init_db():
             );
             CREATE TABLE IF NOT EXISTS statuses (
                 status_id SERIAL PRIMARY KEY, user_id BIGINT,
-                content TEXT, media_type VARCHAR(20) DEFAULT 'text',
-                expires_at TIMESTAMP, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                content TEXT, expires_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
             CREATE TABLE IF NOT EXISTS support_tickets (
                 ticket_id SERIAL PRIMARY KEY, user_id BIGINT,
                 message TEXT, status VARCHAR(20) DEFAULT 'open',
                 admin_reply TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 replied_at TIMESTAMP
-            );
-            CREATE TABLE IF NOT EXISTS rewards (
-                user_id BIGINT, reward_key VARCHAR(50),
-                date DATE, claimed BOOLEAN DEFAULT FALSE,
-                PRIMARY KEY (user_id, reward_key, date)
             );
             CREATE TABLE IF NOT EXISTS chat_log (
                 id SERIAL PRIMARY KEY, user_id BIGINT, partner_id BIGINT,
@@ -363,7 +362,7 @@ async def touch_user(uid):
 async def get_lang(uid):
     async with db_pool.acquire() as c:
         r = await c.fetchrow("SELECT language FROM users WHERE user_id = $1", uid)
-        return (r['language'] if r and r['language'] else 'bn')
+        return (r['language'] if r and r['language'] else 'en')
 
 
 async def set_lang(uid, lang):
@@ -403,7 +402,7 @@ async def get_stats(uid):
         return dict(r) if r else None
 
 
-# ============ COINS / XP / LEVEL ============
+# ============ COINS / XP ============
 async def get_coins(uid):
     async with db_pool.acquire() as c:
         return (await c.fetchval("SELECT coins FROM users WHERE user_id = $1", uid)) or 0
@@ -457,7 +456,7 @@ async def set_vip(uid, tier="bronze", days=30):
                         tier, datetime.now() + timedelta(days=days), uid)
 
 
-# ============ STREAK ============
+# ============ STREAK / DAILY ============
 async def update_streak(uid):
     async with db_pool.acquire() as c:
         r = await c.fetchrow("SELECT streak,last_streak_date FROM users WHERE user_id=$1", uid)
@@ -591,27 +590,6 @@ def rate_limited(uid, max_r=20, win=10):
     return False
 
 
-# ============ TRANSLATION ============
-async def translate_text(text, target="en"):
-    """Use Groq for translation"""
-    if not groq_client:
-        return None
-    try:
-        lang_map = {"bn": "Bangla", "en": "English", "hi": "Hindi"}
-        target_name = lang_map.get(target, "English")
-        prompt = f"Translate the following text to {target_name}. Return ONLY the translation, nothing else:\n\n{text}"
-        resp = await asyncio.to_thread(
-            groq_client.chat.completions.create,
-            model="llama-3.1-8b-instant",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3,
-            max_tokens=500,
-        )
-        return resp.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"Translate error: {e}")
-        return None
-
 # ============ CHAT HELPERS ============
 async def get_chat(uid):
     async with db_pool.acquire() as c:
@@ -663,7 +641,7 @@ def chat_kb(pid, lang):
     ])
 
 
-# ============ QUEUE TIMEOUT ============
+# ============ QUEUE / TIMER ============
 async def queue_timeout(ctx):
     uid = ctx.job.data['user_id']
     lang = await get_lang(uid)
@@ -680,20 +658,18 @@ async def queue_timeout(ctx):
         except: pass
 
 
-# ============ CHAT TIMER ============
 async def chat_timer_end(ctx):
     uid = ctx.job.data['user_id']
     lang = await get_lang(uid)
     chat = await get_chat(uid)
     if not chat: return
-    pid = chat['partner_id']
-    is_ai = chat.get('is_ai', False)
+    pid = chat['partner_id']; is_ai = chat.get('is_ai', False)
     await remove_chat(uid, pid)
     try:
         await ctx.bot.send_message(uid, t("chat_ended", lang), reply_markup=await main_menu_kb(lang))
         if not is_ai:
-            p_lang = await get_lang(pid)
-            await ctx.bot.send_message(pid, t("chat_ended", p_lang), reply_markup=await main_menu_kb(p_lang))
+            pl = await get_lang(pid)
+            await ctx.bot.send_message(pid, t("chat_ended", pl), reply_markup=await main_menu_kb(pl))
     except: pass
 
 
@@ -724,13 +700,15 @@ async def start(update, context):
                 except: pass
             context.user_data.clear()
             context.user_data['reg_step'] = 'language'
-            await update.message.reply_text(t("language_select", "bn"),
+            await update.message.reply_text(t("language_select", "en"),
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn"),
-                     InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]))
+                     InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
+                    [InlineKeyboardButton("🇮🇳 हिन्दी", callback_data="lang_hi"),
+                     InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")]]))
             return
 
-    lang = u.get('language') or 'bn'
+    lang = u.get('language') or 'en'
 
     if ref_id:
         async with db_pool.acquire() as c:
@@ -809,11 +787,12 @@ async def start(update, context):
                                     reply_markup=await main_menu_kb(lang))
 
 
-# ============ LANGUAGE ============
+# ============ LANGUAGE (4 LANGUAGES) ============
 async def language_callback(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
-    lang = "bn" if q.data == "lang_bn" else "en"
+    lang = q.data.replace("lang_", "")
+    if lang not in ("bn", "en", "hi", "ru"): lang = "en"
     await set_lang(uid, lang)
     prof = await get_profile(uid)
     if prof and prof.get('display_name'):
@@ -821,7 +800,9 @@ async def language_callback(update, context):
         try:
             await q.edit_message_text(f"{t('language_changed', lang)}\n\n{t('main_menu', lang)}\n\n{t('online_count', lang, n=on)}",
                                       reply_markup=await main_menu_kb(lang))
-        except: pass
+        except Exception:
+            try: await q.message.reply_text(t("main_menu", lang), reply_markup=await main_menu_kb(lang))
+            except: pass
         return
     context.user_data['reg_step'] = 'age_gate'
     await q.edit_message_text(t("welcome", lang),
@@ -832,10 +813,12 @@ async def language_callback(update, context):
 
 async def change_language(update, context):
     q = update.callback_query; await q.answer()
-    await q.edit_message_text(t("language_select", "bn"),
+    await q.edit_message_text(t("language_select", "en"),
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn")],
-            [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]))
+            [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn"),
+             InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
+            [InlineKeyboardButton("🇮🇳 हिन्दी", callback_data="lang_hi"),
+             InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")]]))
 
 
 async def age_gate_callback(update, context):
@@ -868,7 +851,7 @@ async def handle_text(update, context):
             try:
                 await context.bot.forward_message(chat_id=aid, from_chat_id=uid, message_id=update.message.message_id)
                 await context.bot.send_message(aid,
-                    f"💰 Payment\n\n👤 {update.effective_user.full_name}\n🆔 `{uid}`\n📦 {tier}\n💳 {method}\n\n"
+                    f"💰 Payment Proof\n\n👤 {update.effective_user.full_name}\n🆔 `{uid}`\n📦 {tier}\n💳 {method}\n\n"
                     f"Approve: `/approve {uid} {tier}`")
             except: pass
         async with db_pool.acquire() as c:
@@ -942,15 +925,6 @@ async def handle_text(update, context):
         await update.message.reply_text(t("profile_saved", lang))
         return
 
-    # Report reason
-    if context.user_data.get('report_reason_uid'):
-        target = context.user_data.pop('report_reason_uid')
-        async with db_pool.acquire() as c:
-            await c.execute("INSERT INTO reports (reporter_id,reported_id,reason) VALUES ($1,$2,$3)", uid, target, text[:100])
-            await c.execute("INSERT INTO blocks (blocker_id,blocked_id) VALUES ($1,$2) ON CONFLICT DO NOTHING", uid, target)
-        await update.message.reply_text(t("report_blocked", lang))
-        return
-
     # Chat
     await handle_chat_msg(update, context)
 
@@ -1020,7 +994,7 @@ async def refresh_online(update, context):
     await q.answer(t("online_count", lang, n=on), show_alert=True)
 
 
-# ============ FIND PARTNER ============
+# ============ FIND PARTNER (FIXED) ============
 async def find_partner(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; await touch_user(uid); lang = await get_lang(uid)
@@ -1051,12 +1025,14 @@ async def find_partner(update, context):
     ag = prof.get('age') or 18; mi = prof.get('min_age') or 18; ma = prof.get('max_age') or 99
     vip = await is_vip(uid)
 
+    # FIXED: Convert asyncpg records to dicts
     async with db_pool.acquire() as c:
         await c.execute("DELETE FROM match_queue WHERE user_id=$1", uid)
-        cands = await c.fetchall("""SELECT mq.* FROM match_queue mq WHERE mq.user_id != $1
+        rows = await c.fetchall("""SELECT mq.* FROM match_queue mq WHERE mq.user_id != $1
             AND NOT EXISTS (SELECT 1 FROM blocks WHERE (blocker_id=$1 AND blocked_id=mq.user_id)
             OR (blocker_id=mq.user_id AND blocked_id=$1))
             ORDER BY mq.is_vip DESC, mq.queued_at ASC LIMIT 50""", uid)
+        cands = [dict(r) for r in rows]
 
     def score(c):
         s = 0
@@ -1064,9 +1040,10 @@ async def find_partner(update, context):
         else: return -1
         if c['pref_gender'] == 'any' or c['pref_gender'] == g: s += 10
         else: return -1
-        ca = c.get('age') or 18
+        ca = c['age'] if c['age'] else 18
         if ca < mi or ca > ma: return -1
-        cmi = c.get('min_age') or 18; cma = c.get('max_age') or 99
+        cmi = c['min_age'] if c['min_age'] else 18
+        cma = c['max_age'] if c['max_age'] else 99
         if ag < cmi or ag > cma: return -1
         if it != 'any' and c['interest'] == it: s += 5
         if pl != 'any' and c['pref_language'] == pl: s += 3
@@ -1152,7 +1129,7 @@ async def ai_chat_start(update, context):
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Stop", callback_data="end_chat")]]))
 
 
-# ============ CHAT MESSAGE ============
+# ============ CHAT MSG ============
 async def handle_chat_msg(update, context):
     uid = update.effective_user.id
     lang = await get_lang(uid)
@@ -1179,20 +1156,17 @@ async def handle_chat_msg(update, context):
 
     try:
         await context.bot.copy_message(chat_id=pid, from_chat_id=uid, message_id=update.message.message_id)
-        async with db_pool.acquire() as c:
-            await c.execute("UPDATE chat_log SET messages=messages+1 WHERE user_id=$1 AND ended_at IS NULL ORDER BY id DESC LIMIT 1", uid)
     except Exception as e: logger.error(f"Copy: {e}")
 
 
 async def handle_ai_msg(update, context, lang):
     uid = update.effective_user.id
     text = update.message.text or ""
-    if not text or has_bad_words(text):
-        return
+    if not text or has_bad_words(text): return
     typing = await update.message.reply_text("🤖...")
     hist = context.user_data.get('ai_history', [])
     hist.append({"role": "user", "content": text})
-    sys = "You are a friendly anonymous chat partner. Reply in user's language (Bangla/English/Hindi). Short replies under 300 chars. Be warm, funny. Use emojis."
+    sys = "You are a friendly anonymous chat partner. Reply in user's language. Short replies under 300 chars. Be warm, funny. Use emojis."
     ans = None
     for m in AI_MODELS:
         try:
@@ -1201,8 +1175,7 @@ async def handle_ai_msg(update, context, lang):
                 temperature=0.8, max_tokens=400)
             ans = r.choices[0].message.content.strip()
             break
-        except Exception as e:
-            logger.warning(f"AI {m}: {e}")
+        except Exception as e: logger.warning(f"AI {m}: {e}")
     if not ans:
         await typing.edit_text("🤖 Busy, try again."); return
     hist.append({"role": "assistant", "content": ans})
@@ -1210,7 +1183,7 @@ async def handle_ai_msg(update, context, lang):
     await typing.edit_text(ans)
 
 
-# ============ GROUP ROOMS ============
+# ============ GROUP / VOICE ROOMS ============
 async def group_menu(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
@@ -1302,7 +1275,6 @@ async def handle_group_msg(update, context, rid):
         except: pass
 
 
-# ============ VOICE ROOMS ============
 async def voice_menu(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
@@ -1321,7 +1293,7 @@ async def voice_menu(update, context):
         rows.append([InlineKeyboardButton(f"🎤 Room {r['room_id']} ({r['cnt']}/6)", callback_data=f"jvr_{r['room_id']}")])
     rows.append([InlineKeyboardButton("➕ Create Voice Room", callback_data="create_vr")])
     rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
-    await q.edit_message_text("🎤 Voice Rooms\n\nJoin or create a voice-only room.\nSend voice notes to chat.", reply_markup=InlineKeyboardMarkup(rows))
+    await q.edit_message_text("🎤 Voice Rooms\n\nJoin or create a voice-only room.", reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def create_voice_room(update, context):
@@ -1333,7 +1305,7 @@ async def create_voice_room(update, context):
         rid = await c.fetchval("INSERT INTO voice_rooms (host_id) VALUES ($1) RETURNING room_id", uid)
         await c.execute("INSERT INTO voice_members (room_id,user_id) VALUES ($1,$2)", rid, uid)
     context.user_data['voice_room_id'] = rid
-    await q.edit_message_text(f"🎤 Voice Room {rid} created!\n\nSend voice notes only.\n\n/leavevoice to exit.",
+    await q.edit_message_text(f"🎤 Voice Room {rid} created!\n\nSend voice notes.\n\n/leavevoice to exit.",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🛑 Leave", callback_data="leave_vr")]]))
 
 
@@ -1365,8 +1337,7 @@ async def leave_voice_room(update, context):
 
 async def handle_voice_room_msg(update, context, rid):
     uid = update.effective_user.id
-    if not (update.message.voice or update.message.audio):
-        return
+    if not (update.message.voice or update.message.audio): return
     async with db_pool.acquire() as c:
         mem = await c.fetchall("SELECT user_id FROM voice_members WHERE room_id=$1 AND user_id != $2", rid, uid)
     for m in mem:
@@ -1374,7 +1345,7 @@ async def handle_voice_room_msg(update, context, rid):
         except: pass
 
 
-# ============ TRUTH OR DARE ============
+# ============ GAMES / ICE / COMPAT ============
 async def tod_start(update, context):
     q = update.callback_query; await q.answer()
     await q.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup([
@@ -1389,32 +1360,25 @@ async def tod_truth(update, context):
     async with db_pool.acquire() as c:
         await c.execute("UPDATE users SET truth_count=truth_count+1 WHERE user_id=$1", uid)
     await mission_progress(uid, "truth_1", 1)
-    q_text = random.choice(TRUTH_QUESTIONS)
-    await q.message.reply_text(f"🎯 Truth:\n\n{q_text}")
+    await q.message.reply_text(f"🎯 Truth:\n\n{random.choice(TRUTH_QUESTIONS)}")
 
 
 async def tod_dare(update, context):
     q = update.callback_query; await q.answer()
-    d = random.choice(DARE_TASKS)
-    await q.message.reply_text(f"🔥 Dare:\n\n{d}")
+    await q.message.reply_text(f"🔥 Dare:\n\n{random.choice(DARE_TASKS)}")
 
 
 async def tod_random(update, context):
     q = update.callback_query; await q.answer()
-    if random.random() > 0.5:
-        await tod_truth(update, context)
-    else:
-        await tod_dare(update, context)
+    if random.random() > 0.5: await tod_truth(update, context)
+    else: await tod_dare(update, context)
 
 
-# ============ ICE BREAKER ============
 async def ice_breaker(update, context):
     q = update.callback_query; await q.answer()
-    ib = random.choice(ICE_BREAKERS)
-    await q.message.reply_text(f"🧊 Ice-Breaker:\n\n{ib}")
+    await q.message.reply_text(f"🧊 Ice-Breaker:\n\n{random.choice(ICE_BREAKERS)}")
 
 
-# ============ COMPATIBILITY ============
 async def compat(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
@@ -1432,10 +1396,9 @@ async def compat(update, context):
     if p1.get('gender') == p2.get('pref_gender') or p2.get('pref_gender') == 'any': score += 20
     score = min(score, 100)
     bar = "🟩" * (score // 10) + "⬜" * (10 - score // 10)
-    await q.message.reply_text(f"💯 Compatibility: {score}%\n\n{bar}\n\nBased on interests, language, age, gender.")
+    await q.message.reply_text(f"💯 Compatibility: {score}%\n\n{bar}")
 
 
-# ============ CHAT EXTEND ============
 async def extend_chat(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
@@ -1444,7 +1407,6 @@ async def extend_chat(update, context):
         await q.answer("Need 20 coins", show_alert=True); return
     if await deduct_coins(uid, 20):
         await q.answer("⏱️ +10 min added!", show_alert=True)
-        # Extend both timers
         for jn in [f"end1_{uid}", f"end2_{uid}"]:
             for j in context.job_queue.get_jobs_by_name(jn): j.schedule_removal()
         chat = await get_chat(uid)
@@ -1454,7 +1416,6 @@ async def extend_chat(update, context):
             context.job_queue.run_once(chat_timer_end, CHAT_TIMER_SECONDS, data={'user_id': pid}, name=f"end2_{pid}")
 
 
-# ============ CHAT SUMMARY ============
 async def chat_summary(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
@@ -1466,25 +1427,22 @@ async def chat_summary(update, context):
     async with db_pool.acquire() as c:
         r = await c.fetchrow("SELECT messages FROM chat_log WHERE user_id=$1 AND ended_at IS NULL ORDER BY id DESC LIMIT 1", uid)
     msgs = r['messages'] if r else 0
-    prompt = f"Give a friendly one-line summary of an anonymous chat that lasted with {msgs} messages. Be creative, positive. Under 200 chars."
+    prompt = f"Give a friendly one-line summary of an anonymous chat with {msgs} messages. Positive, under 200 chars."
     try:
         resp = await asyncio.to_thread(groq_client.chat.completions.create, model=AI_MODELS[0],
             messages=[{"role": "user", "content": prompt}], temperature=0.9, max_tokens=200)
         summary = resp.choices[0].message.content.strip()
-    except:
-        summary = f"Chat ended after {msgs} messages!"
+    except: summary = f"Chat ended after {msgs} messages!"
     await q.message.reply_text(f"📝 Chat Summary:\n\n{summary}")
 
 
-# ============ STATUS ============
 async def status_menu(update, context):
     q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
     rows = [
         [InlineKeyboardButton("📸 Post Status", callback_data="post_status")],
         [InlineKeyboardButton("👀 View Statuses", callback_data="view_statuses")],
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
-    await q.edit_message_text("📸 Anonymous Status\n\nPost 24-hour anonymous status.\nEveryone can see it.", reply_markup=InlineKeyboardMarkup(rows))
+    await q.edit_message_text("📸 Anonymous Status\n\n24-hour status.", reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def post_status(update, context):
@@ -1503,8 +1461,7 @@ async def view_statuses(update, context):
         await q.edit_message_text("📸 No active statuses.", reply_markup=await main_menu_kb(await get_lang(q.from_user.id))); return
     text = "📸 Latest Statuses:\n\n"
     for s in statuses:
-        nm = s['display_name'] or "Anon"
-        text += f"💬 {nm}: {s['content'][:100]}\n\n"
+        text += f"💬 {s['display_name'] or 'Anon'}: {s['content'][:100]}\n\n"
     await q.edit_message_text(text[:4000], reply_markup=await main_menu_kb(await get_lang(q.from_user.id)))
 
 
@@ -1517,8 +1474,6 @@ async def end_chat_cb(update, context):
         await q.edit_message_text(t("not_in_chat", lang), reply_markup=await main_menu_kb(lang)); return
     pid = chat['partner_id']; is_ai = chat.get('is_ai', False)
     await remove_chat(uid, pid)
-    async with db_pool.acquire() as c:
-        await c.execute("UPDATE chat_log SET ended_at=NOW() WHERE user_id=$1 AND ended_at IS NULL", uid)
     for n in [f"end1_{uid}", f"end2_{uid}", f"end1_{pid}", f"end2_{pid}"]:
         for j in context.job_queue.get_jobs_by_name(n): j.schedule_removal()
     await q.edit_message_text(t("chat_ended", lang), reply_markup=await main_menu_kb(lang))
@@ -1536,8 +1491,6 @@ async def next_partner(update, context):
     if chat:
         pid = chat['partner_id']; is_ai = chat.get('is_ai', False)
         await remove_chat(uid, pid)
-        async with db_pool.acquire() as c:
-            await c.execute("UPDATE chat_log SET ended_at=NOW() WHERE user_id=$1 AND ended_at IS NULL", uid)
         for n in [f"end1_{uid}", f"end2_{uid}", f"end1_{pid}", f"end2_{pid}"]:
             for j in context.job_queue.get_jobs_by_name(n): j.schedule_removal()
         if not is_ai:
@@ -1621,14 +1574,13 @@ async def my_profile(update, context):
 
 async def edit_profile(update, context):
     q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
     await q.edit_message_text("✏️ Edit Profile:", reply_markup=InlineKeyboardMarkup([
         [InlineKeyboardButton("📛 Name", callback_data="edit_name"),
          InlineKeyboardButton("📝 Bio", callback_data="edit_bio")],
         [InlineKeyboardButton("🎯 Pref", callback_data="edit_pref_gender"),
          InlineKeyboardButton("💡 Interest", callback_data="edit_interest")],
         [InlineKeyboardButton("🌐 Lang", callback_data="edit_lang"),
-         InlineKeyboardButton("📅 Age Range", callback_data="edit_age_range")],
+         InlineKeyboardButton("📅 Age", callback_data="edit_age_range")],
         [InlineKeyboardButton("🎂 Birthday", callback_data="edit_birthday")],
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
@@ -1648,13 +1600,13 @@ async def edit_bio(update, context):
 async def edit_birthday(update, context):
     q = update.callback_query; await q.answer()
     context.user_data['edit_step'] = 'birthday'
-    await q.edit_message_text("🎂 Send birthday (DD-MM-YYYY):")
+    await q.edit_message_text("🎂 DD-MM-YYYY:")
 
 
 async def edit_pref_gender(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
-    await q.edit_message_text("🎯 Pref:", reply_markup=InlineKeyboardMarkup([
+    await q.edit_message_text(t("ask_pref", lang), reply_markup=InlineKeyboardMarkup([
         [InlineKeyboardButton(t("male", lang), callback_data="setpg_male"),
          InlineKeyboardButton(t("female", lang), callback_data="setpg_female")],
         [InlineKeyboardButton(t("any", lang), callback_data="setpg_any")]]))
@@ -1670,7 +1622,7 @@ async def set_pref_gender(update, context):
 
 async def edit_interest(update, context):
     q = update.callback_query; await q.answer()
-    await q.edit_message_text("💡 Interest:", reply_markup=InlineKeyboardMarkup([
+    await q.edit_message_text(t("ask_interest", "en"), reply_markup=InlineKeyboardMarkup([
         [InlineKeyboardButton("🎵 Music", callback_data="setint_music"),
          InlineKeyboardButton("🎬 Movie", callback_data="setint_movie")],
         [InlineKeyboardButton("📚 Study", callback_data="setint_study"),
@@ -1689,7 +1641,7 @@ async def set_interest(update, context):
 
 async def edit_lang(update, context):
     q = update.callback_query; await q.answer()
-    await q.edit_message_text("🌐 Lang:", reply_markup=InlineKeyboardMarkup([
+    await q.edit_message_text(t("ask_lang_pref", "en"), reply_markup=InlineKeyboardMarkup([
         [InlineKeyboardButton("🇧🇩 Bangla", callback_data="setplang_bn"),
          InlineKeyboardButton("🇬🇧 English", callback_data="setplang_en")],
         [InlineKeyboardButton("🇮🇳 Hindi", callback_data="setplang_hi"),
@@ -1721,15 +1673,14 @@ async def set_age(update, context):
     await q.edit_message_text(t("profile_saved", lang), reply_markup=await main_menu_kb(lang))
 
 
-# ============ ACHIEVEMENTS / MISSIONS / FRIENDS ============
+# ============ ACH / MISSIONS / FRIENDS ============
 async def show_achievements(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     unlocked = await user_achievements(uid)
     text = f"{t('achievements_title', lang)}\n\n"
     for k, (e, title) in ACHIEVEMENTS.items():
-        mark = "✅" if k in unlocked else "🔒"
-        text += f"{mark} {e} {title}\n"
+        text += f"{'✅' if k in unlocked else '🔒'} {e} {title}\n"
     await q.edit_message_text(text[:4000], reply_markup=await main_menu_kb(lang))
 
 
@@ -1739,10 +1690,8 @@ async def show_missions(update, context):
     st = await missions_status(uid)
     text = f"{t('missions_title', lang)}\n\n"
     for k, m in st.items():
-        if m['completed']:
-            text += f"✅ {m['text']} — +{m['reward']} coins\n"
-        else:
-            text += f"⏳ {m['text']} ({m['progress']}/{m['target']}) — +{m['reward']}\n"
+        if m['completed']: text += f"✅ {m['text']} — +{m['reward']}\n"
+        else: text += f"⏳ {m['text']} ({m['progress']}/{m['target']}) — +{m['reward']}\n"
     await q.edit_message_text(text, reply_markup=await main_menu_kb(lang))
 
 
@@ -1752,28 +1701,21 @@ async def show_friends(update, context):
     async with db_pool.acquire() as c:
         rows = await c.fetchall("""SELECT f.friend_id,p.display_name FROM friends f
             LEFT JOIN profiles p ON p.user_id=f.friend_id WHERE f.user_id=$1 LIMIT 20""", uid)
-    if not rows:
-        text = "👫 No friends yet.\n\nAdd from chat via '👫 Friend' button."
-    else:
-        text = "👫 Friends:\n\n" + "\n".join([f"• {r['display_name'] or 'Anon'}" for r in rows])
+    if not rows: text = "👫 No friends yet.\n\nAdd from chat."
+    else: text = "👫 Friends:\n\n" + "\n".join([f"• {r['display_name'] or 'Anon'}" for r in rows])
     await q.edit_message_text(text, reply_markup=await main_menu_kb(lang))
 
 
 # ============ SAFETY / HELP / SUPPORT ============
 async def safety_cb(update, context):
     q = update.callback_query; await q.answer()
-    lang = await get_lang(q.from_user.id)
-    text = ("🛡 Safety:\n\n• Never share OTP\n• Never send money\n• Don't share address\n"
-            "• Report bad behavior\n\n🚫 5 reports = auto-ban") if lang == 'bn' else \
-           ("🛡 Safety:\n\n• Never share OTP\n• Never send money\n• Don't share address\n"
-            "• Report bad behavior\n\n🚫 5 reports = auto-ban")
+    text = "🛡 Safety:\n\n• Never share OTP\n• Never send money\n• Don't share address\n• Report bad behavior\n\n🚫 5 reports = auto-ban"
     await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
 async def help_cb(update, context):
     q = update.callback_query; await q.answer()
-    text = ("📖 Commands:\n\n/start /stop /profile /coins /vip /link\n/leaderboard /language "
-            "/missions /achievements /joinroom /leaveroom\n\n🔒 Anonymous")
+    text = "📖 Commands:\n\n/start /stop /profile /coins /vip /link\n/leaderboard /language /missions /achievements\n/joinroom /leaveroom\n\n🔒 Anonymous"
     await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
@@ -1792,16 +1734,15 @@ async def reply_ticket_cmd(update, context):
         async with db_pool.acquire() as c:
             r = await c.fetchrow("SELECT user_id FROM support_tickets WHERE ticket_id=$1", tid)
             if not r:
-                await update.message.reply_text("❌ Ticket not found"); return
+                await update.message.reply_text("❌ Not found"); return
             await c.execute("UPDATE support_tickets SET admin_reply=$1,status='closed',replied_at=NOW() WHERE ticket_id=$2", msg, tid)
         try: await context.bot.send_message(r['user_id'], f"📩 Support Reply:\n\n{msg}")
         except: pass
         await update.message.reply_text("✅ Replied")
-    except Exception as e:
-        await update.message.reply_text(f"❌ {e}")
+    except Exception as e: await update.message.reply_text(f"❌ {e}")
 
 
-# ============ COINS / VIP ============
+# ============ COINS / PREMIUM (WITH STARS) ============
 async def show_coins(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
@@ -1821,7 +1762,7 @@ async def coins_topup(update, context):
         [InlineKeyboardButton("500 coins — 200৳", callback_data="topup_500")],
         [InlineKeyboardButton("2000 coins — 700৳", callback_data="topup_2000")],
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
-    await q.edit_message_text("💰 Coins Top-Up:\n\nPay via bKash/Rocket and get coins instantly after admin approval.", reply_markup=InlineKeyboardMarkup(rows))
+    await q.edit_message_text("💰 Coins Top-Up:\n\nSend bKash/Rocket. Admin approves.", reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def topup_select(update, context):
@@ -1850,7 +1791,7 @@ async def show_vip(update, context):
     rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
     text = t("choose_tier", lang) + "\n\n"
     for k, info in PREMIUM_TIERS.items():
-        text += f"{info['name']} — {info['price']}৳\n{info['features']}\n\n"
+        text += f"{info['name']} — {info['price']}৳ / {info['stars']}⭐\n{info['features']}\n\n"
     await q.edit_message_text(text[:4000], reply_markup=InlineKeyboardMarkup(rows))
 
 
@@ -1864,6 +1805,7 @@ async def tier_select(update, context):
     text = (f"{info['name']}\n💰 {info['price']}৳ — {info['days']} days\n🎁 {info['coins']} coins\n"
             f"✨ {info['features']}\n\n{t('choose_payment', lang)}")
     await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
+        [InlineKeyboardButton(t("stars_btn", lang, n=info['stars']), callback_data=f"stars_{tier}")],
         [InlineKeyboardButton("📱 bKash", callback_data=f"pay_bkash_{tier}"),
          InlineKeyboardButton("📱 Rocket", callback_data=f"pay_rocket_{tier}")],
         [InlineKeyboardButton("💎 Binance", callback_data=f"pay_binance_{tier}")],
@@ -1872,25 +1814,64 @@ async def tier_select(update, context):
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
+async def stars_payment(update, context):
+    """Telegram Stars payment for premium tier"""
+    q = update.callback_query; await q.answer()
+    uid = q.from_user.id; lang = await get_lang(uid)
+    tier = q.data.replace("stars_", "")
+    info = PREMIUM_TIERS.get(tier)
+    if not info: return
+    try:
+        await context.bot.send_invoice(
+            chat_id=uid,
+            title=f"⭐ {info['name']} Premium",
+            description=f"{info['days']} days premium + {info['coins']} coins",
+            payload=f"premium_{tier}_{uid}",
+            provider_token="",
+            currency="XTR",
+            prices=[LabeledPrice(label=f"{info['name']}", amount=info['stars'])]
+        )
+    except Exception as e:
+        logger.error(f"Stars invoice error: {e}")
+        await q.answer("❌ Payment failed. Try again.", show_alert=True)
+
+
 async def payment_method(update, context):
+    """Multilingual payment method page"""
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     parts = q.data.split("_")
     method = parts[1]; tier = parts[2] if len(parts) > 2 else "bronze"
     info = PREMIUM_TIERS.get(tier, PREMIUM_TIERS["bronze"])
     m = {"bkash": (BKASH_NUMBER, "bKash"), "rocket": (ROCKET_NUMBER, "Rocket"),
-         "binance": (BINANCE_ID, "Binance Pay"), "bsc20": (USDT_BSC20, "USDT BSC20"),
-         "trc20": (USDT_TRC20, "USDT TRC20")}
+         "binance": (BINANCE_ID, "Binance Pay ID"), "bsc20": (USDT_BSC20, "USDT BSC20 Address"),
+         "trc20": (USDT_TRC20, "USDT TRC20 Address")}
     if method not in m: return
     num, mname = m[method]
     context.user_data['awaiting_payment'] = True
     context.user_data['payment_method'] = mname
-    text = (f"💳 {mname}\n\n📦 {info['name']}\n💰 {info['price']}৳ ({info['days']} days)\n\n"
-            f"Send to:\n`{num}`\n\n✅ Send TrxID/Screenshot here.")
+    
+    # Language-specific text
+    tpl = {
+        "bn": (f"💳 {mname} পেমেন্ট\n\n📦 প্যাকেজ: {info['name']}\n💰 মূল্য: {info['price']}৳ ({info['days']} দিন)\n\n"
+               f"📍 ঠিকানা:\n`{num}`\n\n✅ পাঠানোর পর TrxID অথবা Screenshot এখানে পাঠান।\n\n⏱️ ৫-১০ মিনিটে verify হবে।",
+               "📋 কপি করুন", "❌ বাতিল", "🏠 মেনু"),
+        "hi": (f"💳 {mname} भुगतान\n\n📦 पैकेज: {info['name']}\n💰 मूल्य: {info['price']}৳ ({info['days']} दिन)\n\n"
+               f"📍 पता:\n`{num}`\n\n✅ भेजने के बाद TrxID या Screenshot यहाँ भेजें।\n\n⏱️ 5-10 मिनट में जाँच।",
+               "📋 कॉपी करें", "❌ रद्द", "🏠 मेनू"),
+        "ru": (f"💳 {mname} оплата\n\n📦 Пакет: {info['name']}\n💰 Цена: {info['price']}৳ ({info['days']} дней)\n\n"
+               f"📍 Адрес:\n`{num}`\n\n✅ После отправки пришлите TrxID или скриншот.\n\n⏱️ Проверка 5-10 мин.",
+               "📋 Копировать", "❌ Отмена", "🏠 Меню"),
+        "en": (f"💳 {mname} Payment\n\n📦 Package: {info['name']}\n💰 Price: {info['price']}৳ ({info['days']} days)\n\n"
+               f"Send to:\n`{num}`\n\n✅ After sending, send TrxID or Screenshot here.\n\n⏱️ Verify in 5-10 min.",
+               "📋 Copy", "❌ Cancel", "🏠 Menu"),
+    }
+    text, copy_lbl, cancel_lbl, menu_lbl = tpl.get(lang, tpl["en"])
+    
     await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton("📋 Copy", callback_data=f"copy_{method}")],
-        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton(copy_lbl, callback_data=f"copy_{method}")],
+        [InlineKeyboardButton(cancel_lbl, callback_data="cancel_payment")],
+        [InlineKeyboardButton(menu_lbl, callback_data="main_menu")]]))
 
 
 async def copy_number(update, context):
@@ -1913,10 +1894,28 @@ async def precheckout(update, context):
 
 
 async def successful_payment(update, context):
-    uid = update.effective_user.id; lang = await get_lang(uid)
-    await set_vip(uid, "bronze", 30); await add_coins(uid, 50)
-    await update.message.reply_text(t("premium_activated", lang, tier="🥉 Bronze", days=30, coins=50),
-                                    reply_markup=await main_menu_kb(lang))
+    """Handle Telegram Stars payment"""
+    uid = update.effective_user.id
+    lang = await get_lang(uid)
+    payload = update.message.successful_payment.invoice_payload
+    # payload format: premium_<tier>_<uid>
+    try:
+        parts = payload.split("_")
+        tier = parts[1] if len(parts) > 1 else "bronze"
+        info = PREMIUM_TIERS.get(tier, PREMIUM_TIERS["bronze"])
+    except:
+        tier = "bronze"; info = PREMIUM_TIERS["bronze"]
+    
+    await set_vip(uid, tier, info['days'])
+    await add_coins(uid, info['coins'])
+    
+    async with db_pool.acquire() as c:
+        await c.execute("INSERT INTO payments (user_id,tier,method,amount_bdt,status,approved_at) VALUES ($1,$2,'Telegram Stars',$3,'approved',NOW())",
+                        uid, tier, info['price'])
+    
+    await update.message.reply_text(
+        t("premium_activated", lang, tier=info['name'], days=info['days'], coins=info['coins']),
+        reply_markup=await main_menu_kb(lang))
 
 
 # ============ LINK / COMMANDS ============
@@ -1937,22 +1936,24 @@ async def link_cmd(update, context):
 
 
 async def coins_cmd(update, context):
-    uid = update.effective_user.id
+    uid = update.effective_user.id; lang = await get_lang(uid)
     c = await get_coins(uid); vip = await is_vip(uid); tier = await get_tier(uid) if vip else None
-    await update.message.reply_text(f"🪙 Coins: {c}\n⭐ Premium: {'✅ ' + (tier or 'Active') if vip else '❌ Inactive'}")
+    await update.message.reply_text(t("coins_balance", lang, coins=c, vip=('✅ ' + (tier or 'Active')) if vip else '❌'))
 
 
 async def vip_cmd(update, context):
     uid = update.effective_user.id; lang = await get_lang(uid)
-    rows = [[InlineKeyboardButton(f"{info['name']} — {info['price']}৳", callback_data=f"tier_{k}")] for k, info in PREMIUM_TIERS.items()]
+    rows = [[InlineKeyboardButton(f"{info['name']} — {info['price']}৳ / {info['stars']}⭐", callback_data=f"tier_{k}")] for k, info in PREMIUM_TIERS.items()]
     await update.message.reply_text(t("choose_tier", lang), reply_markup=InlineKeyboardMarkup(rows))
 
 
 async def language_cmd(update, context):
-    await update.message.reply_text(t("language_select", "bn"),
+    await update.message.reply_text(t("language_select", "en"),
         reply_markup=InlineKeyboardMarkup([
-            [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn")],
-            [InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")]]))
+            [InlineKeyboardButton("🇧🇩 বাংলা", callback_data="lang_bn"),
+             InlineKeyboardButton("🇬🇧 English", callback_data="lang_en")],
+            [InlineKeyboardButton("🇮🇳 हिन्दी", callback_data="lang_hi"),
+             InlineKeyboardButton("🇷🇺 Русский", callback_data="lang_ru")]]))
 
 
 async def profile_cmd(update, context):
@@ -1964,7 +1965,8 @@ async def profile_cmd(update, context):
     lvl = st.get('level', 1) or 1; xp = st.get('xp', 0) or 0
     nx = LEVEL_THRESHOLDS[lvl] if lvl < len(LEVEL_THRESHOLDS) else 0
     await update.message.reply_text(
-        f"👤 {prof.get('display_name')}\n📈 Lv{lvl} • XP {xp}/{nx}\n🪙 {st.get('coins', 0)}\n🔥 {st.get('streak', 0)}\n💬 {st.get('total_chats', 0)}")
+        f"👤 {prof.get('display_name')}\n{t('xp_level', lang, level=lvl, xp=xp, next=nx)}\n"
+        f"🪙 {st.get('coins', 0)}\n🔥 {st.get('streak', 0)}\n💬 {st.get('total_chats', 0)}")
 
 
 async def missions_cmd(update, context):
@@ -2110,10 +2112,9 @@ async def unban_cmd(update, context):
 
 
 async def approve_cmd(update, context):
-    """Usage: /approve <user_id> <tier> OR /approve <user_id> topup_100"""
     if update.effective_user.id not in ADMIN_IDS: return
     if len(context.args) < 2:
-        await update.message.reply_text("Usage: /approve <user_id> <tier|topup_XXX>"); return
+        await update.message.reply_text("Usage: /approve <uid> <tier|topup_XXX>"); return
     try:
         tid = int(context.args[0]); tier_key = context.args[1]
         if tier_key.startswith("topup_"):
@@ -2141,7 +2142,7 @@ async def approve_cmd(update, context):
 async def verify_cmd(update, context):
     if update.effective_user.id not in ADMIN_IDS: return
     if not context.args:
-        await update.message.reply_text("Usage: /verify <user_id>"); return
+        await update.message.reply_text("Usage: /verify <uid>"); return
     try:
         tid = int(context.args[0])
         async with db_pool.acquire() as c:
@@ -2259,7 +2260,8 @@ def main():
         ("^coins_topup$", coins_topup), ("^topup_", topup_select),
         ("^show_achievements$", show_achievements), ("^show_missions$", show_missions),
         ("^show_friends$", show_friends),
-        ("^tier_", tier_select), ("^pay_", payment_method),
+        ("^tier_", tier_select), ("^stars_", stars_payment),
+        ("^pay_", payment_method),
         ("^copy_", copy_number), ("^cancel_payment$", cancel_payment),
         ("^end_chat$", end_chat_cb), ("^next_partner$", next_partner),
         ("^addfriend_", add_friend_cb),
