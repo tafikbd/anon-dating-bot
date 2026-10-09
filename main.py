@@ -485,7 +485,7 @@ async def daily_bonus(uid):
 # ============ ACHIEVEMENTS ============
 async def user_achievements(uid):
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("SELECT achievement_key FROM user_achievements WHERE user_id=$1", uid)
+        rows = await c.fetch("SELECT achievement_key FROM user_achievements WHERE user_id=$1", uid)
         return {r['achievement_key'] for r in rows}
 
 
@@ -551,7 +551,7 @@ async def mission_progress(uid, key, amt=1):
 async def missions_status(uid):
     today = datetime.now().date()
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("SELECT mission_key,progress,completed FROM daily_missions WHERE user_id=$1 AND date=$2", uid, today)
+        rows = await c.fetch("SELECT mission_key,progress,completed FROM daily_missions WHERE user_id=$1 AND date=$2", uid, today)
     out = {}
     for k, m in DAILY_MISSIONS.items():
         r = next((x for x in rows if x['mission_key'] == k), None)
@@ -1028,7 +1028,7 @@ async def find_partner(update, context):
     # FIXED: Convert asyncpg records to dicts
     async with db_pool.acquire() as c:
         await c.execute("DELETE FROM match_queue WHERE user_id=$1", uid)
-        rows = await c.fetchall("""SELECT mq.* FROM match_queue mq WHERE mq.user_id != $1
+        rows = await c.fetch("""SELECT mq.* FROM match_queue mq WHERE mq.user_id != $1
             AND NOT EXISTS (SELECT 1 FROM blocks WHERE (blocker_id=$1 AND blocked_id=mq.user_id)
             OR (blocker_id=mq.user_id AND blocked_id=$1))
             ORDER BY mq.is_vip DESC, mq.queued_at ASC LIMIT 50""", uid)
@@ -1188,7 +1188,7 @@ async def group_menu(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     async with db_pool.acquire() as c:
-        rooms = await c.fetchall("""SELECT r.room_id,r.name,COUNT(m.user_id) cnt FROM group_rooms r
+        rooms = await c.fetch("""SELECT r.room_id,r.name,COUNT(m.user_id) cnt FROM group_rooms r
             LEFT JOIN group_members m ON m.room_id=r.room_id WHERE r.is_active=TRUE
             GROUP BY r.room_id,r.name HAVING COUNT(m.user_id) < $1 ORDER BY r.room_id DESC LIMIT 5""", GROUP_ROOM_MAX)
     rows = []
@@ -1269,7 +1269,7 @@ async def leave_room_cmd(update, context):
 async def handle_group_msg(update, context, rid):
     uid = update.effective_user.id
     async with db_pool.acquire() as c:
-        mem = await c.fetchall("SELECT user_id FROM group_members WHERE room_id=$1 AND user_id != $2", rid, uid)
+        mem = await c.fetch("SELECT user_id FROM group_members WHERE room_id=$1 AND user_id != $2", rid, uid)
     for m in mem:
         try: await context.bot.copy_message(chat_id=m['user_id'], from_chat_id=uid, message_id=update.message.message_id)
         except: pass
@@ -1285,7 +1285,7 @@ async def voice_menu(update, context):
                 [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
         return
     async with db_pool.acquire() as c:
-        rooms = await c.fetchall("""SELECT r.room_id,COUNT(m.user_id) cnt FROM voice_rooms r
+        rooms = await c.fetch("""SELECT r.room_id,COUNT(m.user_id) cnt FROM voice_rooms r
             LEFT JOIN voice_members m ON m.room_id=r.room_id WHERE r.is_active=TRUE
             GROUP BY r.room_id HAVING COUNT(m.user_id) < 6 ORDER BY r.room_id DESC LIMIT 5""")
     rows = []
@@ -1339,7 +1339,7 @@ async def handle_voice_room_msg(update, context, rid):
     uid = update.effective_user.id
     if not (update.message.voice or update.message.audio): return
     async with db_pool.acquire() as c:
-        mem = await c.fetchall("SELECT user_id FROM voice_members WHERE room_id=$1 AND user_id != $2", rid, uid)
+        mem = await c.fetch("SELECT user_id FROM voice_members WHERE room_id=$1 AND user_id != $2", rid, uid)
     for m in mem:
         try: await context.bot.copy_message(chat_id=m['user_id'], from_chat_id=uid, message_id=update.message.message_id)
         except: pass
@@ -1454,7 +1454,7 @@ async def post_status(update, context):
 async def view_statuses(update, context):
     q = update.callback_query; await q.answer()
     async with db_pool.acquire() as c:
-        statuses = await c.fetchall("""SELECT s.content,p.display_name FROM statuses s
+        statuses = await c.fetch("""SELECT s.content,p.display_name FROM statuses s
             LEFT JOIN profiles p ON p.user_id=s.user_id
             WHERE s.expires_at > NOW() ORDER BY s.created_at DESC LIMIT 10""")
     if not statuses:
@@ -1699,7 +1699,7 @@ async def show_friends(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("""SELECT f.friend_id,p.display_name FROM friends f
+        rows = await c.fetch("""SELECT f.friend_id,p.display_name FROM friends f
             LEFT JOIN profiles p ON p.user_id=f.friend_id WHERE f.user_id=$1 LIMIT 20""", uid)
     if not rows: text = "👫 No friends yet.\n\nAdd from chat."
     else: text = "👫 Friends:\n\n" + "\n".join([f"• {r['display_name'] or 'Anon'}" for r in rows])
@@ -1992,7 +1992,7 @@ async def leaderboard(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("""SELECT u.user_id,p.display_name,u.total_chats,u.xp,u.level
+        rows = await c.fetch("""SELECT u.user_id,p.display_name,u.total_chats,u.xp,u.level
             FROM users u JOIN profiles p ON p.user_id=u.user_id WHERE u.total_chats>0
             ORDER BY u.xp DESC LIMIT 10""")
     if not rows:
@@ -2008,7 +2008,7 @@ async def leaderboard(update, context):
 async def leaderboard_cmd(update, context):
     uid = update.effective_user.id; lang = await get_lang(uid)
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("""SELECT u.user_id,p.display_name,u.total_chats,u.xp,u.level
+        rows = await c.fetch("""SELECT u.user_id,p.display_name,u.total_chats,u.xp,u.level
             FROM users u JOIN profiles p ON p.user_id=u.user_id WHERE u.total_chats>0
             ORDER BY u.xp DESC LIMIT 10""")
     if not rows:
@@ -2158,7 +2158,7 @@ async def broadcast_cmd(update, context):
         await update.message.reply_text("Usage: /broadcast <msg>"); return
     msg = " ".join(context.args)
     async with db_pool.acquire() as c:
-        users = await c.fetchall("SELECT user_id FROM users WHERE is_banned=FALSE")
+        users = await c.fetch("SELECT user_id FROM users WHERE is_banned=FALSE")
     sent, failed = 0, 0
     for u in users:
         try:
@@ -2171,7 +2171,7 @@ async def broadcast_cmd(update, context):
 async def pending_cmd(update, context):
     if update.effective_user.id not in ADMIN_IDS: return
     async with db_pool.acquire() as c:
-        rows = await c.fetchall("SELECT * FROM payments WHERE status='pending' ORDER BY created_at DESC LIMIT 20")
+        rows = await c.fetch("SELECT * FROM payments WHERE status='pending' ORDER BY created_at DESC LIMIT 20")
     if not rows:
         await update.message.reply_text("✅ No pending"); return
     text = "💳 Pending:\n\n"
