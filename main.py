@@ -211,7 +211,6 @@ async def init_db():
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=10)
     async with db_pool.acquire() as c:
-        # USERS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id BIGINT PRIMARY KEY,
@@ -245,7 +244,6 @@ async def init_db():
                 status VARCHAR(20) DEFAULT 'idle'
             );
         """)
-        # PROFILES
         await c.execute("""
             CREATE TABLE IF NOT EXISTS profiles (
                 user_id BIGINT PRIMARY KEY,
@@ -257,7 +255,6 @@ async def init_db():
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # MATCH QUEUE
         await c.execute("""
             CREATE TABLE IF NOT EXISTS match_queue (
                 user_id BIGINT PRIMARY KEY,
@@ -269,7 +266,6 @@ async def init_db():
                 queued_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # ACTIVE CHATS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS active_chats (
                 user_id BIGINT PRIMARY KEY, partner_id BIGINT,
@@ -277,7 +273,6 @@ async def init_db():
                 started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        # CHAT LOG (for delete window)
         await c.execute("""
             CREATE TABLE IF NOT EXISTS chat_log (
                 id SERIAL PRIMARY KEY, user_id BIGINT, partner_id BIGINT,
@@ -285,7 +280,6 @@ async def init_db():
                 started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ended_at TIMESTAMP
             );
         """)
-        # GROUP ROOMS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS group_rooms (
                 room_id SERIAL PRIMARY KEY, host_id BIGINT,
@@ -300,7 +294,6 @@ async def init_db():
                 PRIMARY KEY (room_id, user_id)
             );
         """)
-        # VOICE ROOMS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS voice_rooms (
                 room_id SERIAL PRIMARY KEY, host_id BIGINT,
@@ -315,7 +308,6 @@ async def init_db():
                 PRIMARY KEY (room_id, user_id)
             );
         """)
-        # BLOCKS / REPORTS / FRIENDS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS blocks (
                 blocker_id BIGINT, blocked_id BIGINT,
@@ -334,7 +326,6 @@ async def init_db():
                 PRIMARY KEY (user_id, friend_id)
             );
         """)
-        # ACHIEVEMENTS / MISSIONS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS user_achievements (
                 user_id BIGINT, achievement_key VARCHAR(50),
@@ -347,7 +338,6 @@ async def init_db():
                 PRIMARY KEY (user_id, mission_key, date)
             );
         """)
-        # PAYMENTS / STATUSES / TICKETS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS payments (
                 payment_id SERIAL PRIMARY KEY, user_id BIGINT,
@@ -368,7 +358,6 @@ async def init_db():
                 replied_at TIMESTAMP
             );
         """)
-        # LIKES / VIEWS / ANON LINKS
         await c.execute("""
             CREATE TABLE IF NOT EXISTS likes (
                 liker_id BIGINT, liked_id BIGINT,
@@ -387,8 +376,7 @@ async def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        
-        # MIGRATIONS for old DBs
+
         migrations = [
             ("users", "xp", "INTEGER DEFAULT 0"),
             ("users", "level", "INTEGER DEFAULT 1"),
@@ -437,7 +425,7 @@ async def close_db():
 
 
 # ========== HELPERS ==========
-def gen_id(): 
+def gen_id():
     return ''.join(random.choice(string.ascii_letters+string.digits) for _ in range(4))
 
 async def touch(uid):
@@ -577,7 +565,6 @@ async def get_same_age(uid):
     async with db_pool.acquire() as c:
         return bool(await c.fetchval("SELECT same_age_search FROM users WHERE user_id=$1", uid))
 
-# LIKES
 async def add_like(liker, liked):
     if liker == liked: return False
     async with db_pool.acquire() as c:
@@ -616,7 +603,7 @@ async def unblock_user(uid, target):
     async with db_pool.acquire() as c:
         await c.execute("DELETE FROM blocks WHERE blocker_id=$1 AND blocked_id=$2", uid, target)
 
-async def browse_people(uid, limit=10):
+async def browse_people_db(uid, limit=10):
     async with db_pool.acquire() as c:
         rows = await c.fetch("""SELECT u.user_id, u.anon_id, u.city, u.is_verified,
             p.display_name, p.age, p.gender
@@ -626,7 +613,7 @@ async def browse_people(uid, limit=10):
             ORDER BY u.last_active DESC LIMIT $2""", uid, limit)
         return [dict(r) for r in rows]
 
-async def nearby_people(uid, limit=10):
+async def nearby_people_db(uid, limit=10):
     async with db_pool.acquire() as c:
         city = await c.fetchval("SELECT city FROM users WHERE user_id=$1", uid)
         if not city: return []
@@ -656,7 +643,6 @@ async def resolve_anon(code):
             await c.execute("UPDATE anon_links SET clicks=clicks+1 WHERE link_code=$1", code)
         return uid
 
-# CHAT
 async def get_chat(uid):
     async with db_pool.acquire() as c:
         r = await c.fetchrow("SELECT * FROM active_chats WHERE user_id=$1", uid)
@@ -687,7 +673,6 @@ async def ref_process(new_uid, ref_uid):
         await c.execute("UPDATE users SET coins=coins+$1 WHERE user_id=$2", REFERRAL_REWARD, ref_uid)
     return True
 
-# ACHIEVEMENTS
 async def user_ach(uid):
     async with db_pool.acquire() as c:
         rows = await c.fetch("SELECT achievement_key FROM user_achievements WHERE user_id=$1", uid)
@@ -763,7 +748,6 @@ async def missions_status(uid):
 
 # ========== KEYBOARDS ==========
 def bottom_kb(lang):
-    """MeChat-style persistent bottom keyboard."""
     return ReplyKeyboardMarkup([
         [KeyboardButton(t("new_chat", lang))],
         [KeyboardButton(t("browse_people", lang)),
@@ -842,7 +826,7 @@ async def start(update, context):
     args = context.args or []
     ref_id = None
     anon_target = None
-    
+
     if args and args[0].startswith("ref_"):
         try:
             p = int(args[0][4:])
@@ -954,7 +938,6 @@ async def start(update, context):
                  InlineKeyboardButton("🌍 Any", callback_data="plang_any")]]))
         return
 
-    # Auto-connect from anon link
     if anon_target:
         try:
             await connect_users(uid, anon_target, context, lang); return
@@ -965,7 +948,6 @@ async def start(update, context):
     if chat:
         await update.message.reply_text(t("partner_found", lang), reply_markup=active_chat_kb(chat['partner_id'], lang)); return
 
-    # Send bottom keyboard
     await update.message.reply_text(
         f"{t('main_menu', lang)}\n\n{t('online_count', lang, n=await online_count())}",
         reply_markup=bottom_kb(lang))
@@ -987,13 +969,13 @@ async def connect_users(uid, target, context, lang):
             ON CONFLICT (user_id) DO UPDATE SET partner_id=EXCLUDED.partner_id, started_at=NOW(), is_ai=FALSE""", uid, target)
         await c.execute("UPDATE users SET total_chats=total_chats+1 WHERE user_id IN ($1,$2)", uid, target)
         await c.execute("INSERT INTO chat_log (user_id,partner_id) VALUES ($1,$2)", uid, target)
-    
+
     pl = await get_lang(target)
     try: await context.bot.send_message(uid, t("partner_found", lang), reply_markup=active_chat_kb(target, lang))
     except: pass
     try: await context.bot.send_message(target, t("partner_found", pl), reply_markup=active_chat_kb(uid, pl))
     except: pass
-    
+
     context.job_queue.run_once(timer_end, CHAT_TIMER, data={'user_id': uid}, name=f"end1_{uid}")
     context.job_queue.run_once(timer_end, CHAT_TIMER, data={'user_id': target}, name=f"end2_{target}")
 
@@ -1007,7 +989,6 @@ async def language_callback(update, context):
     await set_lang(uid, lang)
     prof = await get_profile(uid)
     if prof and prof.get('display_name'):
-        # Already registered — go to menu
         anon_t = context.user_data.pop('anon_target', None)
         if anon_t:
             try: await connect_users(uid, anon_t, context, lang); return
@@ -1116,7 +1097,6 @@ async def handle_text(update, context):
     step = context.user_data.get('reg_step')
     text = update.message.text.strip() if update.message.text else ""
 
-    # Payment proof
     if context.user_data.get('awaiting_payment'):
         tier = context.user_data.get('payment_tier', 'bronze')
         method = context.user_data.get('payment_method', 'unknown')
@@ -1134,7 +1114,6 @@ async def handle_text(update, context):
         for k in ['awaiting_payment','payment_tier','payment_method']: context.user_data.pop(k, None)
         return
 
-    # Support
     if context.user_data.get('awaiting_support'):
         async with db_pool.acquire() as c:
             await c.execute("INSERT INTO support_tickets (user_id,message) VALUES ($1,$2)", uid, text)
@@ -1144,13 +1123,11 @@ async def handle_text(update, context):
         await update.message.reply_text(t("support_sent", lang))
         context.user_data.pop('awaiting_support', None); return
 
-    # Custom city input
     if context.user_data.get('awaiting_city'):
         await set_city(uid, text[:50])
         await update.message.reply_text(f"✅ City: {text[:50]}")
         context.user_data.pop('awaiting_city', None); return
 
-    # Registration
     if step == 'name':
         if len(text) < 2 or len(text) > 50:
             await update.message.reply_text("⚠️ 2-50 chars"); return
@@ -1189,7 +1166,6 @@ async def handle_text(update, context):
     if step in ('gender','pref_gender','interest','pref_language'):
         await update.message.reply_text("⚠️ Use buttons"); return
 
-    # Edit profile
     es = context.user_data.get('edit_step')
     if es:
         if es == 'name': await save_profile(uid, display_name=text[:50])
@@ -1205,7 +1181,6 @@ async def handle_text(update, context):
         await update.message.reply_text(t("profile_saved", lang))
         return
 
-    # Bottom keyboard buttons
     if text == t("new_chat", lang) or text == "🌹 New Anonymous Chat!":
         await newchat_cmd(update, context); return
     if text == t("browse_people", lang) or text == "💥 Browse People":
@@ -1213,13 +1188,11 @@ async def handle_text(update, context):
     if text == t("nearby_people", lang) or text == "📍 Nearby People":
         await nearby_people(update, context); return
 
-    # Chat
     await chat_relay(update, context)
 
 
 # ========== /NEWCHAT ==========
 async def newchat_cmd(update, context):
-    """MeChat-style /newchat — show Random/Guy/Girl choices."""
     if update.callback_query:
         uid = update.callback_query.from_user.id
         try: await update.callback_query.answer()
@@ -1242,7 +1215,7 @@ async def newchat_cmd(update, context):
         if q: await q.message.reply_text(text, reply_markup=kb)
         else: await update.message.reply_text(text, reply_markup=kb)
         return
-    
+
     text = "💗 Choose who you want to chat with 👇"
     kb = newchat_kb(lang)
     try:
@@ -1265,22 +1238,20 @@ async def search_girl(update, context):
 
 
 async def do_search(update, context, mode):
-    """mode: 'random', 'male', 'female'"""
     q = update.callback_query
     await q.answer()
     uid = q.from_user.id
     await touch(uid)
     lang = await get_lang(uid)
-    
+
     prof = await get_profile(uid)
     if not prof:
         await safe_edit(q, t("reg_first", lang)); return
-    
+
     ex = await get_chat(uid)
     if ex:
         await safe_edit(q, t("already_in_chat", lang), active_chat_kb(ex['partner_id'], lang)); return
 
-    # Coin check for gender-specific
     if mode in ("male", "female"):
         coins = await get_coins(uid)
         if coins < COINS_PER_GENDER_MATCH:
@@ -1292,7 +1263,6 @@ async def do_search(update, context, mode):
                     [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
             return
 
-    # Daily limit
     if not await is_vip(uid):
         async with db_pool.acquire() as c:
             r = await c.fetchrow("SELECT chats_today,chats_today_date FROM users WHERE user_id=$1", uid)
@@ -1306,7 +1276,6 @@ async def do_search(update, context, mode):
             else:
                 await c.execute("UPDATE users SET chats_today=chats_today+1 WHERE user_id=$1", uid)
 
-    # Deduct coins for gender-specific
     if mode in ("male", "female"):
         ok = await deduct_coins(uid, COINS_PER_GENDER_MATCH)
         if not ok:
@@ -1411,7 +1380,7 @@ async def safe_edit(q, text, reply_markup=None):
 
 
 async def toggle_sa(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     new = await toggle_same_age(uid)
     sa = "🟢 ON" if new else "⚪ OFF"
@@ -1422,7 +1391,7 @@ async def toggle_sa(update, context):
             [InlineKeyboardButton("🤖 AI Chat", callback_data="ai_chat")],
             [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
     except: pass
-    await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang), show_alert=False)
+    await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang))
 
 
 async def cancel_search(update, context):
@@ -1470,10 +1439,11 @@ async def timer_end(ctx):
 
 # ========== AI CHAT ==========
 async def ai_chat_start(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     if not groq_client:
         await q.answer("AI off", show_alert=True); return
+    await q.answer()
     async with db_pool.acquire() as c:
         await c.execute("DELETE FROM match_queue WHERE user_id=$1", uid)
         await c.execute("""INSERT INTO active_chats (user_id,partner_id,is_ai) VALUES ($1,$1,TRUE)
@@ -1555,14 +1525,13 @@ async def end_chat_cb(update, context):
 
 
 async def delete_msgs_cb(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     lang = await get_lang(q.from_user.id)
     await q.answer(t("msgs_deleted", lang), show_alert=True)
 
 
 async def secure_chat_cb(update, context):
-    q = update.callback_query; await q.answer()
-    lang = await get_lang(q.from_user.id)
+    q = update.callback_query
     await q.answer("🔐 Secure mode active", show_alert=False)
 
 
@@ -1636,13 +1605,22 @@ async def show_blocked(update, context):
 
 
 async def unblock_cb(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     try: pid = int(q.data.split("_")[1])
-    except: return
+    except: await q.answer(); return
     await unblock_user(uid, pid)
     await q.answer(t("unblocked", lang), show_alert=True)
-    await show_blocked(update, context)
+    # inject-safe: show_blocked এর answer() আর call হবে না
+    blocked = await get_blocked(uid)
+    if not blocked:
+        await safe_edit(q, t("no_blocked", lang), await main_menu_kb(lang)); return
+    rows = []
+    for b in blocked[:10]:
+        nm = b.get('display_name') or f"User {b['blocked_id']}"
+        rows.append([InlineKeyboardButton(f"🔓 Unblock {nm[:20]}", callback_data=f"unblock_{b['blocked_id']}")])
+    rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
+    await safe_edit(q, t("blocked_users", lang), InlineKeyboardMarkup(rows))
 
 
 async def contact_list_cb(update, context):
@@ -1675,15 +1653,24 @@ async def advanced_settings(update, context):
 
 
 async def toggle_sa_setting(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     new = await toggle_same_age(uid)
-    await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang), show_alert=False)
-    await advanced_settings(update, context)
+    sa_lbl = "🟢 ON" if new else "⚪ OFF"
+    rows = [
+        [InlineKeyboardButton(f"⚙️ Same Age: {sa_lbl}", callback_data="toggle_sa_setting")],
+        [InlineKeyboardButton("🏙️ Change City", callback_data="choose_city")],
+        [InlineKeyboardButton("🎂 Birthday", callback_data="edit_birthday")],
+        [InlineKeyboardButton("💎 Coins→Stars", callback_data="coins_to_stars")],
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]
+    try:
+        await q.edit_message_text(t("advanced_settings", lang), reply_markup=InlineKeyboardMarkup(rows))
+    except: pass
+    await q.answer(t("same_age_on", lang) if new else t("same_age_off", lang))
 
 
 async def coins_to_stars_cb(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     coins = await get_coins(uid)
     if coins < COINS_TO_STARS:
@@ -1694,6 +1681,8 @@ async def coins_to_stars_cb(update, context):
         async with db_pool.acquire() as c:
             await c.execute("UPDATE users SET stars_balance=stars_balance+$1 WHERE user_id=$2", stars, uid)
         await q.answer(f"✅ {stars} stars added!", show_alert=True)
+    else:
+        await q.answer("❌ Failed", show_alert=True)
 
 
 async def edit_profile(update, context):
@@ -1807,10 +1796,10 @@ async def choose_city_cb(update, context):
 
 
 async def set_city_cb(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
+    q = update.callback_query
+    uid = q.from_user.id
     try: city = q.data.replace("setcity_", "")[:50]
-    except: return
+    except: await q.answer(); return
     await set_city(uid, city)
     await q.answer(f"✅ {city}", show_alert=True)
 
@@ -1823,19 +1812,20 @@ async def custom_city_cb(update, context):
 
 # ========== VIEW PROFILE ==========
 async def view_profile_cb(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     try: pid = int(q.data.split("_")[1])
-    except: return
+    except: await q.answer(); return
+    prof = await get_profile(pid)
+    if not prof:
+        await q.answer("Profile not found", show_alert=True); return
+    await q.answer()
     await record_view(uid, pid)
     try:
         pl = await get_lang(pid)
         await context.bot.send_message(pid, t("partner_viewed", pl))
     except: pass
-    prof = await get_profile(pid)
     st = await get_stats(pid)
-    if not prof:
-        await q.answer("Profile not found", show_alert=True); return
     gm = {"male":"👦","female":"👧","other":"🌈"}
     aid = (st or {}).get('anon_id') or f"user_{pid}"
     text = (
@@ -1859,10 +1849,10 @@ async def view_profile_cb(update, context):
 
 
 async def like_cb(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     try: pid = int(q.data.split("_")[1])
-    except: return
+    except: await q.answer(); return
     ok = await add_like(uid, pid)
     if ok:
         await q.answer(t("liked_success", lang), show_alert=False)
@@ -1934,17 +1924,6 @@ async def browse_people(update, context):
     else: await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(rows))
 
 
-async def browse_people_db(uid, limit=10):
-    async with db_pool.acquire() as c:
-        rows = await c.fetch("""SELECT u.user_id, u.anon_id, u.city, u.is_verified,
-            p.display_name, p.age, p.gender FROM users u
-            LEFT JOIN profiles p ON p.user_id=u.user_id
-            WHERE u.user_id!=$1 AND u.is_banned=FALSE AND p.display_name IS NOT NULL
-            AND u.last_active > NOW() - INTERVAL '1 hour'
-            ORDER BY u.last_active DESC LIMIT $2""", uid, limit)
-        return [dict(r) for r in rows]
-
-
 async def nearby_people(update, context):
     if update.callback_query:
         q = update.callback_query
@@ -1981,26 +1960,14 @@ async def nearby_people(update, context):
     else: await update.message.reply_text(text, reply_markup=InlineKeyboardMarkup(rows))
 
 
-async def nearby_people_db(uid, limit=10):
-    async with db_pool.acquire() as c:
-        city = await c.fetchval("SELECT city FROM users WHERE user_id=$1", uid)
-        if not city: return []
-        rows = await c.fetch("""SELECT u.user_id, u.anon_id, u.city, u.is_verified,
-            p.display_name, p.age FROM users u
-            LEFT JOIN profiles p ON p.user_id=u.user_id
-            WHERE u.user_id!=$1 AND u.city=$2 AND u.is_banned=FALSE
-            AND u.last_active > NOW() - INTERVAL '1 hour' AND p.display_name IS NOT NULL
-            ORDER BY u.last_active DESC LIMIT $3""", uid, city, limit)
-        return [dict(r) for r in rows]
-
-
 # ========== ANON LINK ==========
 async def show_anon_link(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id; lang = await get_lang(uid)
     code = await get_anon_link(uid)
     if not code:
         await q.answer("Error", show_alert=True); return
+    await q.answer()
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=anon_{code}"
     await safe_edit(q, t("anon_link_msg", lang, link=link),
@@ -2038,9 +2005,12 @@ async def tod_dare_cb(update, context):
 
 
 async def tod_random_cb(update, context):
-    q = update.callback_query; await q.answer()
-    if random.random() > 0.5: await tod_truth_cb(update, context)
-    else: await tod_dare_cb(update, context)
+    q = update.callback_query
+    await q.answer()
+    if random.random() > 0.5:
+        await q.message.reply_text(f"🎯 Truth:\n\n{random.choice(TRUTHS)}")
+    else:
+        await q.message.reply_text(f"🔥 Dare:\n\n{random.choice(DARES)}")
 
 
 async def ice_breaker(update, context):
@@ -2049,7 +2019,7 @@ async def ice_breaker(update, context):
 
 
 async def compat(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id
     chat = await get_chat(uid)
     if not chat or chat.get('is_ai'):
@@ -2058,6 +2028,7 @@ async def compat(update, context):
     p1 = await get_profile(uid); p2 = await get_profile(pid)
     if not p1 or not p2:
         await q.answer("No data", show_alert=True); return
+    await q.answer()
     s = 0
     if p1.get('interest') == p2.get('interest') and p1.get('interest') != 'any': s += 40
     if p1.get('pref_language') == p2.get('pref_language'): s += 20
@@ -2069,9 +2040,10 @@ async def compat(update, context):
 
 
 async def chat_summary(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     if not groq_client:
         await q.answer("AI off", show_alert=True); return
+    await q.answer()
     await q.message.reply_text("📝 Chat Summary:\n\nFriendly chat session ended. Nice talking!")
 
 
@@ -2111,7 +2083,7 @@ async def show_achievements(update, context):
     q = update.callback_query; await q.answer()
     uid = q.from_user.id; lang = await get_lang(uid)
     unlocked = await user_ach(uid)
-    text = f"🏅 {t('achievements_title', lang) if 'achievements_title' in STRINGS else 'Achievements'}\n\n"
+    text = f"🏅 Achievements\n\n"
     for k, (e, title) in ACHIEVEMENTS.items():
         text += f"{'✅' if k in unlocked else '🔒'} {e} {title}\n"
     await safe_edit(q, text[:4000], await main_menu_kb(lang))
@@ -2147,19 +2119,27 @@ async def leaderboard(update, context):
 
 # ========== CREDIT / VIP ==========
 async def show_credit(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
+    if update.callback_query:
+        q = update.callback_query
+        await q.answer()
+        uid = q.from_user.id
+    else:
+        q = None
+        uid = update.effective_user.id
+    lang = await get_lang(uid)
     st = await get_stats(uid) or {}
     vip = await is_vip(uid); tier = await get_tier(uid) if vip else None
     text = t("credit", lang, coins=st.get('coins') or 0,
              stars=st.get('stars_balance') or 0,
              vip=(f"✅ {tier}" if vip else "❌"))
-    await safe_edit(q, text, InlineKeyboardMarkup([
+    kb = InlineKeyboardMarkup([
         [InlineKeyboardButton("💰 Top-Up", callback_data="coins_topup")],
         [InlineKeyboardButton("🎁 Invite", callback_data="show_link")],
         [InlineKeyboardButton("💎 Coins→Stars", callback_data="coins_to_stars")],
         [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]])
+    if q: await safe_edit(q, text, kb)
+    else: await update.message.reply_text(text, reply_markup=kb)
 
 
 async def coins_topup(update, context):
@@ -2225,11 +2205,13 @@ async def tier_select(update, context):
 
 
 async def stars_payment(update, context):
-    q = update.callback_query; await q.answer()
+    q = update.callback_query
     uid = q.from_user.id
     tier = q.data.replace("stars_", "")
     info = PREMIUM_TIERS.get(tier)
-    if not info: return
+    if not info:
+        await q.answer(); return
+    await q.answer()
     try:
         await context.bot.send_invoice(
             chat_id=uid, title=f"⭐ {info['name']} Premium",
@@ -2239,7 +2221,6 @@ async def stars_payment(update, context):
             prices=[LabeledPrice(label=info['name'], amount=info['stars'])])
     except Exception as e:
         logger.error(f"Invoice: {e}")
-        await q.answer("❌ Failed", show_alert=True)
 
 
 async def payment_method(update, context):
