@@ -1527,7 +1527,6 @@ async def handle_text(update, context):
     await chat_relay(update, context)
 
 
-# ================= FIXED =================
 async def handle_text_photo_story(update, context):
     """Handle photo input for stories OR payment proof."""
     uid = update.effective_user.id
@@ -1538,7 +1537,7 @@ async def handle_text_photo_story(update, context):
         await story_message_handler(update, context)
         return
 
-    # 2) Payment proof photo ← FIX: ছবি দিয়ে payment proof
+    # 2) Payment proof photo
     if context.user_data.get('awaiting_payment'):
         tier = context.user_data.get('payment_tier', 'vip_1m')
         method = context.user_data.get('payment_method', 'unknown')
@@ -2576,6 +2575,7 @@ async def coins_topup(update, context):
 
 
 async def topup_select(update, context):
+    """Package selected → show payment methods."""
     q = update.callback_query; await q.answer()
     uid = q.from_user.id
     key = q.data.split("_")[1]
@@ -2594,32 +2594,6 @@ async def topup_select(update, context):
          InlineKeyboardButton("🪙 USDT TRC20", callback_data=f"topup_pay_trc20_{key}")],
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
 
-# ================= FIXED =================
-async def topup_stars(update, context):
-    q = update.callback_query
-    uid = q.from_user.id
-    key = q.data.replace("topup_stars_", "")
-    info = TOPUP_PACKAGES.get(key)
-    if not info:
-        await q.answer("❌ Invalid package", show_alert=True); return
-    await q.answer()
-    try:
-        await context.bot.send_invoice(
-            chat_id=uid,
-            title=f"🪙 {info['coins']} Coins",
-            description=f"Top-up {info['coins']} coins for anonymous chat",
-            payload=f"topup_{info['coins']}_{uid}",
-            provider_token="", currency="XTR",
-            prices=[LabeledPrice(label=f"{info['coins']} Coins", amount=info['stars'])])
-    except Exception as e:
-        logger.error(f"Topup invoice FAILED: {e}", exc_info=True)
-        await q.message.reply_text(
-            f"❌ Star payment failed.\n\n"
-            f"Reason: {str(e)[:150]}\n\n"
-            f"💡 Please use bKash/Rocket instead, or update Telegram app."
-           
-        )
-        ("^topup_pay_", topup_payment_method),
 
 async def topup_payment_method(update, context):
     """Handle payment method selection for coin top-up."""
@@ -2650,7 +2624,33 @@ async def topup_payment_method(update, context):
         [InlineKeyboardButton("📋 Copy", callback_data=f"copy_{method}")],
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
-    
+
+
+async def topup_stars(update, context):
+    """Send Stars invoice for coin top-up."""
+    q = update.callback_query
+    uid = q.from_user.id
+    key = q.data.replace("topup_stars_", "")
+    info = TOPUP_PACKAGES.get(key)
+    if not info:
+        await q.answer("❌ Invalid package", show_alert=True); return
+    await q.answer()
+    try:
+        await context.bot.send_invoice(
+            chat_id=uid,
+            title=f"🪙 {info['coins']} Coins",
+            description=f"Top-up {info['coins']} coins for anonymous chat",
+            payload=f"topup_{info['coins']}_{uid}",
+            provider_token="", currency="XTR",
+            prices=[LabeledPrice(label=f"{info['coins']} Coins", amount=info['stars'])])
+    except Exception as e:
+        logger.error(f"Topup invoice FAILED: {e}", exc_info=True)
+        await q.message.reply_text(
+            f"❌ Star payment failed.\n\n"
+            f"Reason: {str(e)[:150]}\n\n"
+            f"💡 Please use bKash/Rocket instead, or update Telegram app.")
+
+
 async def pricing_table_cb(update, context):
     q = update.callback_query; await q.answer()
     text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
@@ -2769,7 +2769,6 @@ async def tier_select(update, context):
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
-# ================= FIXED =================
 async def stars_payment(update, context):
     q = update.callback_query
     uid = q.from_user.id
@@ -2791,8 +2790,7 @@ async def stars_payment(update, context):
         await q.message.reply_text(
             f"❌ Star payment failed.\n\n"
             f"Reason: {str(e)[:150]}\n\n"
-            f"💡 Please use bKash/Rocket instead."
-        )
+            f"💡 Please use bKash/Rocket instead.")
 
 
 async def payment_method(update, context):
@@ -2831,7 +2829,6 @@ async def cancel_payment(update, context):
     await safe_edit(q, "✅ Cancelled.", await main_menu_kb(lang))
 
 
-# ================= FIXED =================
 async def precheckout(update, context):
     try:
         await update.pre_checkout_query.answer(ok=True)
@@ -3447,6 +3444,7 @@ def main():
     ]
     for n, f in cmds: app.add_handler(CommandHandler(n, f))
 
+    # ⚠️ IMPORTANT ORDER: specific patterns BEFORE generic ones!
     callbacks = [
         ("^lang_", language_callback), ("^change_language$", change_language),
         ("^age_", age_gate_callback),
@@ -3479,8 +3477,11 @@ def main():
         ("^show_link$", show_link), ("^show_anon_link$", show_anon_link),
         ("^show_credit$", show_credit), ("^show_vip$", show_vip),
         ("^daily_claim$", daily_claim_cb),
-        ("^coins_topup$", coins_topup), ("^topup_", topup_select),
+        # ⚠️ Payment order: specific → generic
+        ("^coins_topup$", coins_topup),
         ("^topup_stars_", topup_stars),
+        ("^topup_pay_", topup_payment_method),
+        ("^topup_", topup_select),
         ("^pricing_table$", pricing_table_cb),
         ("^show_achievements$", show_achievements),
         ("^show_missions$", show_missions), ("^show_blocked$", show_blocked),
