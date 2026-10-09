@@ -229,6 +229,7 @@ async def init_db():
     global db_pool
     db_pool = await asyncpg.create_pool(DATABASE_URL, min_size=1, max_size=10)
     async with db_pool.acquire() as c:
+        # ---- CREATE TABLES (if not exist) ----
         await c.execute("""
             CREATE TABLE IF NOT EXISTS users (
                 user_id BIGINT PRIMARY KEY,
@@ -346,7 +347,46 @@ async def init_db():
                 started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, ended_at TIMESTAMP
             );
         """)
-    logger.info("DB initialized.")
+
+        # ---- MIGRATIONS: Add missing columns to existing tables ----
+        migrations = [
+            # users table new columns
+            ("users", "xp", "INTEGER DEFAULT 0"),
+            ("users", "level", "INTEGER DEFAULT 1"),
+            ("users", "streak", "INTEGER DEFAULT 0"),
+            ("users", "last_streak_date", "DATE"),
+            ("users", "vip_tier", "VARCHAR(20)"),
+            ("users", "total_chats", "INTEGER DEFAULT 0"),
+            ("users", "chats_today", "INTEGER DEFAULT 0"),
+            ("users", "chats_today_date", "DATE DEFAULT CURRENT_DATE"),
+            ("users", "daily_bonus_date", "DATE"),
+            ("users", "is_verified", "BOOLEAN DEFAULT FALSE"),
+            ("users", "birthday", "DATE"),
+            ("users", "truth_count", "INTEGER DEFAULT 0"),
+            # profiles table new columns
+            ("profiles", "pref_language", "VARCHAR(10) DEFAULT 'any'"),
+            ("profiles", "interest", "VARCHAR(30) DEFAULT 'any'"),
+            ("profiles", "min_age", "INTEGER DEFAULT 18"),
+            ("profiles", "max_age", "INTEGER DEFAULT 99"),
+            # match_queue table new columns
+            ("match_queue", "pref_language", "VARCHAR(10) DEFAULT 'any'"),
+            ("match_queue", "interest", "VARCHAR(30) DEFAULT 'any'"),
+            ("match_queue", "is_vip", "BOOLEAN DEFAULT FALSE"),
+            ("match_queue", "age", "INTEGER DEFAULT 18"),
+            ("match_queue", "min_age", "INTEGER DEFAULT 18"),
+            ("match_queue", "max_age", "INTEGER DEFAULT 99"),
+            # active_chats new columns
+            ("active_chats", "is_ai", "BOOLEAN DEFAULT FALSE"),
+            # group_rooms new columns
+            ("group_rooms", "name", "VARCHAR(100)"),
+        ]
+        for tbl, col, typ in migrations:
+            try:
+                await c.execute(f"ALTER TABLE {tbl} ADD COLUMN IF NOT EXISTS {col} {typ}")
+            except Exception as e:
+                logger.warning(f"Migration {tbl}.{col} skipped: {e}")
+
+    logger.info("DB initialized + migrations applied.")
 
 
 async def close_db():
