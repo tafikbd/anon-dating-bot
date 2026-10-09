@@ -1545,32 +1545,54 @@ async def report_reason_cb(update, context):
 
 # ============ PROFILE ============
 async def my_profile(update, context):
-    q = update.callback_query; await q.answer()
-    uid = q.from_user.id; lang = await get_lang(uid)
-    prof = await get_profile(uid)
-    if not prof:
-        await q.edit_message_text(t("reg_first", lang)); return
-    st = await get_stats(uid) or {}
-    gm = {"male":"👦","female":"👧","other":"🌈"}
-    vip = await is_vip(uid); tier = await get_tier(uid) if vip else None
-    xp = st.get('xp', 0) or 0; lvl = st.get('level', 1) or 1
-    nx = LEVEL_THRESHOLDS[lvl] if lvl < len(LEVEL_THRESHOLDS) else 0
-    verified = "✅" if st.get('is_verified') else "❌"
-    text = (f"👤 {prof.get('display_name', 'N/A')}\n"
-            f"🎂 {prof.get('age', '?')} {gm.get(prof.get('gender'), '?')}\n"
-            f"💡 {prof.get('interest', 'any')}\n"
-            f"🎯 {prof.get('pref_gender', 'any')} • {prof.get('pref_language', 'any')}\n"
-            f"✅ Verified: {verified}\n\n"
-            f"{t('xp_level', lang, level=lvl, xp=xp, next=nx)}\n"
-            f"🪙 Coins: {st.get('coins', 0)}\n"
-            f"🔥 Streak: {st.get('streak', 0)}\n"
-            f"💬 Chats: {st.get('total_chats', 0)}\n"
-            f"⭐ {tier or 'Free'}\n\n"
-            f"💬 {(prof.get('bio') or 'N/A')[:150]}")
-    await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
-        [InlineKeyboardButton(t("edit_profile", lang), callback_data="edit_profile")],
-        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
-
+    q = update.callback_query
+    try:
+        await q.answer()
+    except: pass
+    try:
+        uid = q.from_user.id; lang = await get_lang(uid)
+        prof = await get_profile(uid)
+        if not prof:
+            try: await q.edit_message_text(t("reg_first", lang))
+            except: pass
+            return
+        st = await get_stats(uid) or {}
+        gm = {"male":"👦","female":"👧","other":"🌈"}
+        vip = await is_vip(uid)
+        tier = await get_tier(uid) if vip else None
+        xp = st.get('xp') or 0
+        lvl = st.get('level') or 1
+        if lvl < 1: lvl = 1
+        if lvl >= len(LEVEL_THRESHOLDS): nx = 0
+        else: nx = LEVEL_THRESHOLDS[lvl]
+        verified = "✅" if st.get('is_verified') else "❌"
+        text = (f"👤 {prof.get('display_name', 'N/A')}\n"
+                f"🎂 {prof.get('age', '?')} {gm.get(prof.get('gender'), '?')}\n"
+                f"💡 {prof.get('interest', 'any')}\n"
+                f"🎯 {prof.get('pref_gender', 'any')} • {prof.get('pref_language', 'any')}\n"
+                f"✅ Verified: {verified}\n\n"
+                f"📈 Lv{lvl} • XP {xp}/{nx}\n"
+                f"🪙 Coins: {st.get('coins') or 0}\n"
+                f"🔥 Streak: {st.get('streak') or 0}\n"
+                f"💬 Chats: {st.get('total_chats') or 0}\n"
+                f"⭐ {tier or 'Free'}\n\n"
+                f"💬 {(prof.get('bio') or 'N/A')[:150]}")
+        try:
+            await q.edit_message_text(text, reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(t("edit_profile", lang), callback_data="edit_profile")],
+                [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+        except Exception as e:
+            logger.error(f"my_profile edit: {e}")
+            try:
+                await q.message.reply_text(text, reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(t("edit_profile", lang), callback_data="edit_profile")],
+                    [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+            except: pass
+    except Exception as e:
+        logger.error(f"my_profile error: {e}")
+        try:
+            await q.message.reply_text(f"⚠️ Error: {str(e)[:100]}")
+        except: pass
 
 async def edit_profile(update, context):
     q = update.callback_query; await q.answer()
