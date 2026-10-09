@@ -2581,17 +2581,18 @@ async def topup_select(update, context):
     key = q.data.split("_")[1]
     info = TOPUP_PACKAGES.get(key)
     if not info: return
-    context.user_data['awaiting_payment'] = True
-    context.user_data['payment_method'] = f"Topup {info['coins']} coins"
     context.user_data['payment_tier'] = f"topup_{info['coins']}"
     text = (f"💰 Top-Up {info['coins']} Coins\n\n"
-            f"💵 Price: {info['price']}৳ (or {info['stars']}⭐ / ${info['usd']})\n\n"
-            f"📱 Send to:\n`{BKASH_NUMBER}` (bKash)\n`{ROCKET_NUMBER}` (Rocket)\n\n"
-            f"✅ After sending, send TrxID/Screenshot here.\n\n⏱️ Verify in 5-10 min.")
+            f"💵 Price: {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n\n"
+            f"👇 Choose payment method:")
     await safe_edit(q, text, InlineKeyboardMarkup([
-        [InlineKeyboardButton("⭐ Pay via Stars", callback_data=f"topup_stars_{key}")],
+        [InlineKeyboardButton(f"⭐ Pay {info['stars']} Stars", callback_data=f"topup_stars_{key}")],
+        [InlineKeyboardButton("📱 bKash", callback_data=f"topup_pay_bkash_{key}"),
+         InlineKeyboardButton("📱 Rocket", callback_data=f"topup_pay_rocket_{key}")],
+        [InlineKeyboardButton("💎 Binance", callback_data=f"topup_pay_binance_{key}")],
+        [InlineKeyboardButton("🪙 USDT BSC20", callback_data=f"topup_pay_bsc20_{key}"),
+         InlineKeyboardButton("🪙 USDT TRC20", callback_data=f"topup_pay_trc20_{key}")],
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
-
 
 # ================= FIXED =================
 async def topup_stars(update, context):
@@ -2616,9 +2617,40 @@ async def topup_stars(update, context):
             f"❌ Star payment failed.\n\n"
             f"Reason: {str(e)[:150]}\n\n"
             f"💡 Please use bKash/Rocket instead, or update Telegram app."
+           
         )
+        ("^topup_pay_", topup_payment_method),
 
-
+async def topup_payment_method(update, context):
+    """Handle payment method selection for coin top-up."""
+    q = update.callback_query; await q.answer()
+    uid = q.from_user.id
+    parts = q.data.split("_")   # ["topup", "pay", "bkash", "350"]
+    method = parts[2]
+    key = parts[3] if len(parts) > 3 else "120"
+    info = TOPUP_PACKAGES.get(key)
+    if not info: return
+    m = {"bkash": (BKASH_NUMBER, "bKash"),
+         "rocket": (ROCKET_NUMBER, "Rocket"),
+         "binance": (BINANCE_ID, "Binance Pay"),
+         "bsc20": (USDT_BSC20, "USDT BSC20"),
+         "trc20": (USDT_TRC20, "USDT TRC20")}
+    if method not in m: return
+    num, mname = m[method]
+    context.user_data['awaiting_payment'] = True
+    context.user_data['payment_method'] = f"{mname} (Topup {info['coins']} coins)"
+    context.user_data['payment_tier'] = f"topup_{info['coins']}"
+    text = (f"💳 {mname} Payment\n\n"
+            f"📦 {info['coins']} Coins\n"
+            f"💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n\n"
+            f"Send to:\n`{num}`\n\n"
+            f"✅ After sending, send TrxID/Screenshot here.\n\n"
+            f"⏱️ Verify in 5-10 min.")
+    await safe_edit(q, text, InlineKeyboardMarkup([
+        [InlineKeyboardButton("📋 Copy", callback_data=f"copy_{method}")],
+        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")],
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+    
 async def pricing_table_cb(update, context):
     q = update.callback_query; await q.answer()
     text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
