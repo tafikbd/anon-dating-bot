@@ -60,7 +60,6 @@ GROUP_ROOM_MAX = 10
 STORY_EXPIRY_HOURS = 24
 LEVELS = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500]
 
-# 🪙 Coin Top-Up Packages
 TOPUP_PACKAGES = {
     "120":  {"coins": 120,  "price": 30,  "stars": 15,  "usd": 0.35},
     "350":  {"coins": 350,  "price": 80,  "stars": 40,  "usd": 0.90, "popular": True},
@@ -68,7 +67,6 @@ TOPUP_PACKAGES = {
     "2000": {"coins": 2000, "price": 400, "stars": 200, "usd": 4.50},
 }
 
-# ⭐ VIP Tiers
 PREMIUM_TIERS = {
     "vip_1m": {
         "name": "⭐ VIP 1 Month",
@@ -732,7 +730,6 @@ async def get_invite_count(uid):
         return (await c.fetchval("SELECT COUNT(*) FROM users WHERE referred_by=$1", uid)) or 0
 
 async def check_free_vip(uid):
-    """Check if user earned free VIP via 80 invites."""
     count = await get_invite_count(uid)
     if count < FREE_VIP_INVITES: return False
     if await is_vip(uid): return False
@@ -748,7 +745,6 @@ async def ref_process(new_uid, ref_uid):
         await c.execute("UPDATE users SET coins=coins+$1 WHERE user_id=$2", REFERRAL_REWARD, ref_uid)
     return True
 
-# Voice Intro helpers
 async def save_voice_intro(uid, file_id):
     async with db_pool.acquire() as c:
         await c.execute("UPDATE users SET voice_intro_file_id=$1 WHERE user_id=$2", file_id, uid)
@@ -757,7 +753,6 @@ async def get_voice_intro(uid):
     async with db_pool.acquire() as c:
         return await c.fetchval("SELECT voice_intro_file_id FROM users WHERE user_id=$1", uid)
 
-# Gift helpers
 async def send_gift(sender, receiver, gift_type):
     if sender == receiver: return False, "You cannot gift yourself"
     info = GIFT_TYPES.get(gift_type)
@@ -775,7 +770,6 @@ async def get_gift_count(uid):
     async with db_pool.acquire() as c:
         return (await c.fetchval("SELECT gifts_received FROM users WHERE user_id=$1", uid)) or 0
 
-# Story helpers
 async def post_story(uid, content=None, file_id=None):
     expires = datetime.now() + timedelta(hours=STORY_EXPIRY_HOURS)
     async with db_pool.acquire() as c:
@@ -1533,11 +1527,43 @@ async def handle_text(update, context):
     await chat_relay(update, context)
 
 
+# ================= FIXED =================
 async def handle_text_photo_story(update, context):
+    """Handle photo input for stories OR payment proof."""
     uid = update.effective_user.id
+    await touch(uid)
+
+    # 1) Story photo
     if context.user_data.get('awaiting_story'):
         await story_message_handler(update, context)
         return
+
+    # 2) Payment proof photo ← FIX: ছবি দিয়ে payment proof
+    if context.user_data.get('awaiting_payment'):
+        tier = context.user_data.get('payment_tier', 'vip_1m')
+        method = context.user_data.get('payment_method', 'unknown')
+        for aid in ADMIN_IDS:
+            try:
+                await context.bot.forward_message(
+                    chat_id=aid, from_chat_id=uid,
+                    message_id=update.message.message_id)
+                await context.bot.send_message(aid,
+                    f"💰 Payment Screenshot\n👤 {update.effective_user.full_name}\n"
+                    f"🆔 `{uid}`\n📦 {tier}\n💳 {method}\n\n"
+                    f"Approve: `/approve {uid} {tier}`")
+            except: pass
+        async with db_pool.acquire() as c:
+            await c.execute("""INSERT INTO payments
+                (user_id,tier,method,transaction_id,status)
+                VALUES ($1,$2,$3,$4,'pending')""",
+                uid, tier, method, "[Photo Screenshot]")
+        await update.message.reply_text(
+            "✅ Screenshot sent to admin. Verify in 5-10 min.")
+        for k in ['awaiting_payment','payment_tier','payment_method']:
+            context.user_data.pop(k, None)
+        return
+
+    # 3) Normal photo in active chat
     await chat_relay(update, context)
 
 
@@ -1598,7 +1624,6 @@ async def do_search(update, context, mode):
 
     unlimited = await has_unlimited_vip(uid)
 
-    # Cost: Random = 0, Guy = 2, Girl = 3
     cost = 0
     if mode == "male":   cost = COINS_FOR_GUY
     elif mode == "female": cost = COINS_FOR_GIRL
@@ -2568,23 +2593,30 @@ async def topup_select(update, context):
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
 
 
+# ================= FIXED =================
 async def topup_stars(update, context):
     q = update.callback_query
     uid = q.from_user.id
     key = q.data.replace("topup_stars_", "")
     info = TOPUP_PACKAGES.get(key)
     if not info:
-        await q.answer(); return
+        await q.answer("❌ Invalid package", show_alert=True); return
     await q.answer()
     try:
         await context.bot.send_invoice(
-            chat_id=uid, title=f"🪙 {info['coins']} Coins",
+            chat_id=uid,
+            title=f"🪙 {info['coins']} Coins",
             description=f"Top-up {info['coins']} coins for anonymous chat",
             payload=f"topup_{info['coins']}_{uid}",
             provider_token="", currency="XTR",
             prices=[LabeledPrice(label=f"{info['coins']} Coins", amount=info['stars'])])
     except Exception as e:
-        logger.error(f"Topup invoice: {e}")
+        logger.error(f"Topup invoice FAILED: {e}", exc_info=True)
+        await q.message.reply_text(
+            f"❌ Star payment failed.\n\n"
+            f"Reason: {str(e)[:150]}\n\n"
+            f"💡 Please use bKash/Rocket instead, or update Telegram app."
+        )
 
 
 async def pricing_table_cb(update, context):
@@ -2705,23 +2737,30 @@ async def tier_select(update, context):
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
+# ================= FIXED =================
 async def stars_payment(update, context):
     q = update.callback_query
     uid = q.from_user.id
     tier = q.data.replace("stars_", "")
     info = PREMIUM_TIERS.get(tier)
     if not info:
-        await q.answer(); return
+        await q.answer("❌ Invalid tier", show_alert=True); return
     await q.answer()
     try:
         await context.bot.send_invoice(
-            chat_id=uid, title=f"⭐ {info['name']}",
-            description=f"{info['days']} days VIP",
+            chat_id=uid,
+            title=f"⭐ {info['name']}",
+            description=f"{info['days']} days VIP subscription",
             payload=f"premium_{tier}_{uid}",
             provider_token="", currency="XTR",
             prices=[LabeledPrice(label=info['name'], amount=info['stars'])])
     except Exception as e:
-        logger.error(f"Invoice: {e}")
+        logger.error(f"VIP invoice FAILED: {e}", exc_info=True)
+        await q.message.reply_text(
+            f"❌ Star payment failed.\n\n"
+            f"Reason: {str(e)[:150]}\n\n"
+            f"💡 Please use bKash/Rocket instead."
+        )
 
 
 async def payment_method(update, context):
@@ -2760,8 +2799,16 @@ async def cancel_payment(update, context):
     await safe_edit(q, "✅ Cancelled.", await main_menu_kb(lang))
 
 
+# ================= FIXED =================
 async def precheckout(update, context):
-    await update.pre_checkout_query.answer(ok=True)
+    try:
+        await update.pre_checkout_query.answer(ok=True)
+    except Exception as e:
+        logger.error(f"Precheckout failed: {e}")
+        try:
+            await update.pre_checkout_query.answer(
+                ok=False, error_message="Payment failed. Try again or use bKash.")
+        except: pass
 
 
 async def successful_payment(update, context):
@@ -2769,7 +2816,6 @@ async def successful_payment(update, context):
     lang = await get_lang(uid)
     payload = update.message.successful_payment.invoice_payload
 
-    # Coin Top-Up via Stars
     if payload.startswith("topup_"):
         parts = payload.split("_")
         try:
@@ -2788,7 +2834,6 @@ async def successful_payment(update, context):
             await update.message.reply_text("❌ Error processing topup.")
         return
 
-    # VIP payment
     try:
         parts = payload.split("_")
         tier = "_".join(parts[1:3]) if len(parts) >= 3 else "vip_1m"
@@ -3306,7 +3351,6 @@ async def pending_cmd(update, context):
 
 # ========== SETUP COMMANDS ==========
 async def setup_bot_commands(app):
-    """Clean Telegram command menu."""
     commands = [
         BotCommand("start",       "🏠 Open main menu"),
         BotCommand("profile",     "👤 View your profile"),
