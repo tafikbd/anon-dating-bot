@@ -50,20 +50,41 @@ USDT_TRC20 = "TKeEd3wuTqHse2rdzAg3rqYeRfQD1NC7tq"
 QUEUE_TIMEOUT = 120
 CHAT_TIMER = 600
 AUTO_BAN_COUNT = 5
-REFERRAL_REWARD = 20
+REFERRAL_REWARD = 10
 NEW_USER_BONUS = 10
 DAILY_BONUS = 5
-CHAT_REWARD = 1
-COINS_PER_GENDER_MATCH = 1
+COINS_FOR_GUY = 2
+COINS_FOR_GIRL = 3
+FREE_VIP_INVITES = 80
 GROUP_ROOM_MAX = 10
 STORY_EXPIRY_HOURS = 24
 LEVELS = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500]
 
-# Coin Top-Up packages
+# 🪙 Coin Top-Up Packages
 TOPUP_PACKAGES = {
-    "100":  {"coins": 100,  "price": 50},
-    "500":  {"coins": 500,  "price": 200},
-    "2000": {"coins": 2000, "price": 700},
+    "120":  {"coins": 120,  "price": 30,  "stars": 15,  "usd": 0.35},
+    "350":  {"coins": 350,  "price": 80,  "stars": 40,  "usd": 0.90, "popular": True},
+    "800":  {"coins": 800,  "price": 180, "stars": 90,  "usd": 2.00},
+    "2000": {"coins": 2000, "price": 400, "stars": 200, "usd": 4.50},
+}
+
+# ⭐ VIP Tiers
+PREMIUM_TIERS = {
+    "vip_1m": {
+        "name": "⭐ VIP 1 Month",
+        "days": 30, "coins": 150, "stars": 75, "price": 149, "usd": 1.5,
+        "features": "🚫 Ads-free\n⚡ Priority Match\n🪙 +150 Bonus Coins",
+    },
+    "vip_3m": {
+        "name": "⭐ VIP 3 Months — POPULAR",
+        "days": 90, "coins": 500, "stars": 200, "price": 399, "usd": 4,
+        "features": "✅ All 1M\n🔍 Advanced Filters\n🪙 +500 Bonus Coins",
+    },
+    "vip_6m": {
+        "name": "💎 VIP 6 Months — UNLIMITED 👑",
+        "days": 180, "coins": 1200, "stars": 350, "price": 699, "usd": 7,
+        "features": "✅ All 3M\n♾️ UNLIMITED Any Chat\n🎁 1200 Gift Coins\n🎙️ Voice Rooms",
+    },
 }
 
 GIFT_TYPES = {
@@ -76,24 +97,6 @@ CITIES = ["Dhaka", "Chittagong", "Sylhet", "Rajshahi", "Khulna", "Barisal",
     "Rangpur", "Mymensingh", "Comilla", "Narayanganj", "Gazipur", "Bogura",
     "Jessore", "Cox's Bazar", "Kolkata", "Delhi", "Mumbai", "Karachi",
     "Lahore", "Dubai", "Riyadh", "London", "New York", "Toronto", "Sydney"]
-
-PREMIUM_TIERS = {
-    "vip_1m": {
-        "name": "⭐ VIP 1 Month",
-        "days": 30, "coins": 100, "stars": 100, "price": 200, "usd": 2,
-        "features": "🚫 Ads-free\n⚡ Priority Match\n🪙 +100 Bonus Coins",
-    },
-    "vip_3m": {
-        "name": "⭐ VIP 3 Months",
-        "days": 90, "coins": 400, "stars": 300, "price": 600, "usd": 5,
-        "features": "✅ All 1M\n🔍 Advanced Filters\n🪙 +400 Bonus Coins",
-    },
-    "vip_6m": {
-        "name": "💎 VIP 6 Months",
-        "days": 180, "coins": 1000, "stars": 500, "price": 900, "usd": 8,
-        "features": "✅ All 3M\n♾️ UNLIMITED Any Chat\n🎁 1000 Gift Coins\n🎤 Voice Rooms",
-    },
-}
 
 ACHIEVEMENTS = {
     "first_chat": ("🎉", "First Chat"), "chats_10": ("💬", "Chatter"),
@@ -157,8 +160,8 @@ STRINGS = {
     "browse_people": {"bn":"💥 সবাইকে দেখুন","en":"💥 Browse People","hi":"💥 लोग देखें","ru":"💥 Обзор"},
     "nearby_people": {"bn":"📍 কাছাকাছি","en":"📍 Nearby People","hi":"📍 आसपास","ru":"📍 Рядом"},
     "random_free": {"bn":"🔀 র‍্যান্ডম (ফ্রি)","en":"🔀 Random (Free)","hi":"🔀 रैंडम (फ्री)","ru":"🔀 Случайный (бесплатно)"},
-    "chat_guy": {"bn":"👨‍🌾 ছেলের সাথে চ্যাট (১ কয়েন)","en":"👨‍🌾 Chat With Guy (1 coin)","hi":"👨‍🌾 लड़के से (1)","ru":"👨‍🌾 С парнем (1)"},
-    "chat_girl": {"bn":"💃 মেয়ের সাথে চ্যাট (১ কয়েন)","en":"💃 Chat With Girl (1 coin)","hi":"💃 लड़की से (1)","ru":"💃 С девушкой (1)"},
+    "chat_guy": {"bn":"👨‍🌾 ছেলের সাথে চ্যাট (২ কয়েন)","en":"👨‍🌾 Chat With Guy (2 coins)","hi":"👨‍🌾 लड़के से (2)","ru":"👨‍🌾 С парнем (2)"},
+    "chat_girl": {"bn":"💃 মেয়ের সাথে চ্যাট (৩ কয়েন)","en":"💃 Chat With Girl (3 coins)","hi":"💃 लड़की से (3)","ru":"💃 С девушкой (3)"},
     "secure_chat": {"bn":"🔐 সিকিউর চ্যাট","en":"🔐 Secure Chat","hi":"🔐 सुरक्षित","ru":"🔐 Защищённый"},
     "contact_profile": {"bn":"👤 প্রোফাইল","en":"👤 Contact Profile","hi":"👤 प्रोफाइल","ru":"👤 Профиль"},
     "end_chat": {"bn":"🚪 চ্যাট শেষ","en":"🚪 End Chat","hi":"🚪 समाप्त","ru":"🚪 Конец"},
@@ -458,7 +461,6 @@ async def init_db():
             ("active_chats", "is_ai", "BOOLEAN DEFAULT FALSE"),
             ("group_rooms", "name", "VARCHAR(100)"),
             ("chat_log", "message_id", "BIGINT"),
-            # FIX: likes table migration
             ("likes", "liker_id", "BIGINT"),
             ("likes", "liked_id", "BIGINT"),
             ("likes", "created_at", "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"),
@@ -725,6 +727,18 @@ def rate_limited(uid, mx=20, win=10):
         rate_store[uid] = ts; return True
     ts.append(now); rate_store[uid] = ts; return False
 
+async def get_invite_count(uid):
+    async with db_pool.acquire() as c:
+        return (await c.fetchval("SELECT COUNT(*) FROM users WHERE referred_by=$1", uid)) or 0
+
+async def check_free_vip(uid):
+    """Check if user earned free VIP via 80 invites."""
+    count = await get_invite_count(uid)
+    if count < FREE_VIP_INVITES: return False
+    if await is_vip(uid): return False
+    await set_vip(uid, "vip_1m", 30)
+    return True
+
 async def ref_process(new_uid, ref_uid):
     if new_uid == ref_uid: return False
     async with db_pool.acquire() as c:
@@ -865,13 +879,14 @@ async def main_menu_kb(lang):
         [InlineKeyboardButton("🎯 Missions", callback_data="show_missions"),
          InlineKeyboardButton("🏅 Achievements", callback_data="show_achievements")],
         [InlineKeyboardButton("🏆 Leaderboard", callback_data="leaderboard"),
-         InlineKeyboardButton("🎁 Invite (+20🪙)", callback_data="show_link")],
+         InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link")],
         [InlineKeyboardButton("🔗 Anon Link", callback_data="show_anon_link"),
          InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
         [InlineKeyboardButton("🪙 Credit", callback_data="show_credit"),
-         InlineKeyboardButton("🌐 Language", callback_data="change_language")],
-        [InlineKeyboardButton("🎫 Support", callback_data="support_ticket"),
-         InlineKeyboardButton(f"🟢 {on} online", callback_data="refresh_online")],
+         InlineKeyboardButton("📋 Pricing", callback_data="pricing_table")],
+        [InlineKeyboardButton("🌐 Language", callback_data="change_language"),
+         InlineKeyboardButton("🎫 Support", callback_data="support_ticket")],
+        [InlineKeyboardButton(f"🟢 {on} online", callback_data="refresh_online")],
     ])
 
 def newchat_kb(lang):
@@ -1417,11 +1432,9 @@ async def handle_text(update, context):
     step = context.user_data.get('reg_step')
     text = update.message.text.strip() if update.message.text else ""
 
-    # Story input takes priority
     if context.user_data.get('awaiting_story'):
         await story_message_handler(update, context); return
 
-    # Voice intro waiting for voice note, not text
     if context.user_data.get('awaiting_voice'):
         await update.message.reply_text("🎙️ Please send a VOICE message, not text. Tap 🎙️ icon to record.")
         return
@@ -1585,21 +1598,25 @@ async def do_search(update, context, mode):
 
     unlimited = await has_unlimited_vip(uid)
 
-    # Coin check for Guy/Girl (Random = free, no limit)
-    if mode in ("male", "female") and not unlimited:
+    # Cost: Random = 0, Guy = 2, Girl = 3
+    cost = 0
+    if mode == "male":   cost = COINS_FOR_GUY
+    elif mode == "female": cost = COINS_FOR_GIRL
+
+    if cost > 0 and not unlimited:
         coins = await get_coins(uid)
-        if coins < COINS_PER_GENDER_MATCH:
+        if coins < cost:
             await safe_edit(q,
-                t("need_coins", lang, n=COINS_PER_GENDER_MATCH, have=coins),
+                t("need_coins", lang, n=cost, have=coins),
                 InlineKeyboardMarkup([
-                    [InlineKeyboardButton("🎁 Invite (+20🪙)", callback_data="show_link")],
+                    [InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link")],
                     [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup")],
                     [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
                     [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
             return
-        ok = await deduct_coins(uid, COINS_PER_GENDER_MATCH)
+        ok = await deduct_coins(uid, cost)
         if not ok:
-            await safe_edit(q, t("need_coins", lang, n=COINS_PER_GENDER_MATCH, have=0)); return
+            await safe_edit(q, t("need_coins", lang, n=cost, have=0)); return
 
     g = prof.get('gender') or 'any'
     pg = mode if mode in ("male","female") else (prof.get('pref_gender') or 'any')
@@ -2495,9 +2512,10 @@ async def show_credit(update, context):
     text = t("credit", lang, coins=st.get('coins') or 0,
              vip=(f"✅ {tier}" if vip else "❌"))
     kb = InlineKeyboardMarkup([
-        [InlineKeyboardButton("🎁 Invite (+20🪙)", callback_data="show_link"),
+        [InlineKeyboardButton("🎁 Invite (+10🪙)", callback_data="show_link"),
          InlineKeyboardButton("📅 Daily (+5🪙)", callback_data="daily_claim")],
-        [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup")],
+        [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup"),
+         InlineKeyboardButton("📋 Pricing", callback_data="pricing_table")],
         [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
         [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]])
     if q: await safe_edit(q, text, kb)
@@ -2515,19 +2533,21 @@ async def daily_claim_cb(update, context):
 
 async def coins_topup(update, context):
     q = update.callback_query; await q.answer()
-    rows = [
-        [InlineKeyboardButton(f"{info['coins']} coins — {info['price']}৳", callback_data=f"topup_{k}")]
-        for k, info in TOPUP_PACKAGES.items()
-    ]
+    lines = "💰 COIN TOP-UP\n\n"
+    lines += "💡 Coins দিয়ে কী করবে?\n"
+    lines += "• 👦 Guy chat = 2 coins\n"
+    lines += "• 👩 Girl chat = 3 coins\n"
+    lines += "• 🎲 Random = FREE ✅\n"
+    lines += "• 🎁 Gift = 10-200 coins\n\n"
+    lines += "🎁 Invite = 10 Coins FREE → /invite\n\n"
+    lines += "👇 Select Package:"
+    rows = []
+    for k, info in TOPUP_PACKAGES.items():
+        label = f"{info['coins']} Coins — {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}"
+        if info.get('popular'): label += " 🔥"
+        rows.append([InlineKeyboardButton(label, callback_data=f"topup_{k}")])
     rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
-    await safe_edit(q,
-        "💰 COIN TOP-UP\n\n"
-        "💡 Coins দিয়ে কী করবে?\n"
-        "• 👨‍🌾 Guy chat = 1 coin\n"
-        "• 💃 Girl chat = 1 coin\n"
-        "• 🎁 Gift = 10-200 coins\n\n"
-        "📱 Send bKash/Rocket. Admin approves.",
-        InlineKeyboardMarkup(rows))
+    await safe_edit(q, lines, InlineKeyboardMarkup(rows))
 
 
 async def topup_select(update, context):
@@ -2539,11 +2559,108 @@ async def topup_select(update, context):
     context.user_data['awaiting_payment'] = True
     context.user_data['payment_method'] = f"Topup {info['coins']} coins"
     context.user_data['payment_tier'] = f"topup_{info['coins']}"
-    await safe_edit(q,
-        f"💰 Top-Up {info['coins']} coins = {info['price']}৳\n\n"
-        f"Send to:\n`{BKASH_NUMBER}` (bKash)\n`{ROCKET_NUMBER}` (Rocket)\n\n"
-        f"Then send TrxID/Screenshot here.",
-        InlineKeyboardMarkup([[InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
+    text = (f"💰 Top-Up {info['coins']} Coins\n\n"
+            f"💵 Price: {info['price']}৳ (or {info['stars']}⭐ / ${info['usd']})\n\n"
+            f"📱 Send to:\n`{BKASH_NUMBER}` (bKash)\n`{ROCKET_NUMBER}` (Rocket)\n\n"
+            f"✅ After sending, send TrxID/Screenshot here.\n\n⏱️ Verify in 5-10 min.")
+    await safe_edit(q, text, InlineKeyboardMarkup([
+        [InlineKeyboardButton("⭐ Pay via Stars", callback_data=f"topup_stars_{key}")],
+        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_payment")]]))
+
+
+async def topup_stars(update, context):
+    q = update.callback_query
+    uid = q.from_user.id
+    key = q.data.replace("topup_stars_", "")
+    info = TOPUP_PACKAGES.get(key)
+    if not info:
+        await q.answer(); return
+    await q.answer()
+    try:
+        await context.bot.send_invoice(
+            chat_id=uid, title=f"🪙 {info['coins']} Coins",
+            description=f"Top-up {info['coins']} coins for anonymous chat",
+            payload=f"topup_{info['coins']}_{uid}",
+            provider_token="", currency="XTR",
+            prices=[LabeledPrice(label=f"{info['coins']} Coins", amount=info['stars'])])
+    except Exception as e:
+        logger.error(f"Topup invoice: {e}")
+
+
+async def pricing_table_cb(update, context):
+    q = update.callback_query; await q.answer()
+    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
+
+━━━━━━━━━━━━━━━━━━━━━━
+🪙 𝗖𝗢𝗜𝗡 𝗧𝗢𝗣-𝗨𝗣
+━━━━━━━━━━━━━━━━━━━━━━
+ 120 coins =  30৳ /  15⭐ / $0.35
+ 350 coins =  80৳ /  40⭐ / $0.90  🔥
+ 800 coins = 180৳ /  90⭐ / $2.00
+2000 coins = 400৳ / 200⭐ / $4.50
+
+━━━━━━━━━━━━━━━━━━━━━━
+⭐ 𝗩𝗜𝗣 𝗦𝗨𝗕𝗦𝗖𝗥𝗜𝗣𝗧𝗜𝗢𝗡
+━━━━━━━━━━━━━━━━━━━━━━
+ 1 Month   = 149৳ /  75⭐ / $1.50  +150🪙
+ 3 Months  = 399৳ / 200⭐ / $4.00  +500🪙  🔥
+ 6 Months  = 699৳ / 350⭐ / $7.00  +1200🪙
+            ♾️ Unlimited Chat!
+
+━━━━━━━━━━━━━━━━━━━━━━
+💡 𝗖𝗢𝗜𝗡 𝗖𝗢𝗦𝗧
+━━━━━━━━━━━━━━━━━━━━━━
+👦 Guy chat    = 2 coins
+👩 Girl chat   = 3 coins
+🎲 Random chat = FREE ✅
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎁 𝗙𝗥𝗘𝗘 𝗖𝗢𝗜𝗡𝗦
+━━━━━━━━━━━━━━━━━━━━━━
+/invite = +10 coins per friend
+🆕 New user = +10 coins
+📅 Daily = +5 coins
+🎉 80 Invites = FREE VIP 1M!"""
+    await safe_edit(q, text, InlineKeyboardMarkup([
+        [InlineKeyboardButton("💰 Buy Coins", callback_data="coins_topup")],
+        [InlineKeyboardButton("⭐ VIP", callback_data="show_vip")],
+        [InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
+
+
+async def pricing_cmd(update, context):
+    text = """📋 𝗣𝗥𝗜𝗖𝗜𝗡𝗚 𝗦𝗨𝗠𝗠𝗔𝗥𝗬
+
+━━━━━━━━━━━━━━━━━━━━━━
+🪙 𝗖𝗢𝗜𝗡 𝗧𝗢𝗣-𝗨𝗣
+━━━━━━━━━━━━━━━━━━━━━━
+ 120 coins =  30৳ /  15⭐ / $0.35
+ 350 coins =  80৳ /  40⭐ / $0.90  🔥
+ 800 coins = 180৳ /  90⭐ / $2.00
+2000 coins = 400৳ / 200⭐ / $4.50
+
+━━━━━━━━━━━━━━━━━━━━━━
+⭐ 𝗩𝗜𝗣 𝗦𝗨𝗕𝗦𝗖𝗥𝗜𝗣𝗧𝗜𝗢𝗡
+━━━━━━━━━━━━━━━━━━━━━━
+ 1 Month   = 149৳ /  75⭐ / $1.50  +150🪙
+ 3 Months  = 399৳ / 200⭐ / $4.00  +500🪙  🔥
+ 6 Months  = 699৳ / 350⭐ / $7.00  +1200🪙
+            ♾️ Unlimited Chat!
+
+━━━━━━━━━━━━━━━━━━━━━━
+💡 𝗖𝗢𝗜𝗡 𝗖𝗢𝗦𝗧
+━━━━━━━━━━━━━━━━━━━━━━
+👦 Guy chat    = 2 coins
+👩 Girl chat   = 3 coins
+🎲 Random chat = FREE ✅
+
+━━━━━━━━━━━━━━━━━━━━━━
+🎁 𝗙𝗥𝗘𝗘 𝗖𝗢𝗜𝗡𝗦
+━━━━━━━━━━━━━━━━━━━━━━
+/invite = +10 coins per friend
+🆕 New user = +10 coins
+📅 Daily = +5 coins
+🎉 80 Invites = FREE VIP 1M!"""
+    await update.message.reply_text(text)
 
 
 async def show_vip(update, context):
@@ -2561,8 +2678,11 @@ async def show_vip(update, context):
     rows.append([InlineKeyboardButton("🏠 Menu", callback_data="main_menu")])
     text = "💎 VIP SUBSCRIPTION\n\n"
     for k, info in PREMIUM_TIERS.items():
-        text += f"{info['name']}\n📅 {info['days']} days • 💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n{info['features']}\n\n"
-    text += "💡 VIP = features + bonus coins. Unlimited chat with 6-month plan."
+        text += (f"{info['name']}\n"
+                 f"📅 {info['days']} days • 💰 {info['price']}৳ / {info['stars']}⭐ / ${info['usd']}\n"
+                 f"{info['features']}\n\n")
+    text += "💡 VIP = features + bonus coins.\n"
+    text += f"💡 FREE VIP: {FREE_VIP_INVITES} Invites = 1 Month FREE! → /invite"
     await safe_edit(q, text[:4000], InlineKeyboardMarkup(rows))
 
 
@@ -2648,6 +2768,27 @@ async def successful_payment(update, context):
     uid = update.effective_user.id
     lang = await get_lang(uid)
     payload = update.message.successful_payment.invoice_payload
+
+    # Coin Top-Up via Stars
+    if payload.startswith("topup_"):
+        parts = payload.split("_")
+        try:
+            coins = int(parts[1])
+        except:
+            coins = 0
+        if coins > 0:
+            await add_coins(uid, coins)
+            async with db_pool.acquire() as c:
+                await c.execute("""INSERT INTO payments (user_id,tier,method,amount_bdt,status,approved_at)
+                    VALUES ($1,$2,'Telegram Stars',0,'approved',NOW())""", uid, f"topup_{coins}")
+            await update.message.reply_text(
+                f"🎉 +{coins} Coins added!\n\n🪙 Total: {await get_coins(uid)}",
+                reply_markup=await main_menu_kb(lang))
+        else:
+            await update.message.reply_text("❌ Error processing topup.")
+        return
+
+    # VIP payment
     try:
         parts = payload.split("_")
         tier = "_".join(parts[1:3]) if len(parts) >= 3 else "vip_1m"
@@ -2672,7 +2813,12 @@ async def show_link(update, context):
     uid = q.from_user.id; lang = await get_lang(uid)
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=ref_{uid}"
-    await safe_edit(q, t("invite_msg", lang, link=link, coins=REFERRAL_REWARD),
+    invite_count = await get_invite_count(uid)
+    text = (f"🎁 Your Invite Link\n\n{link}\n\n"
+            f"💡 Each friend joining = +{REFERRAL_REWARD} Coins FREE!\n"
+            f"🎉 {FREE_VIP_INVITES} Invites = 1 Month VIP FREE!\n\n"
+            f"📊 Your Invites: {invite_count}/{FREE_VIP_INVITES}")
+    await safe_edit(q, text,
         InlineKeyboardMarkup([[InlineKeyboardButton("🏠 Menu", callback_data="main_menu")]]))
 
 
@@ -2680,7 +2826,12 @@ async def link_cmd(update, context):
     uid = update.effective_user.id; lang = await get_lang(uid)
     bot = await context.bot.get_me()
     link = f"https://t.me/{bot.username}?start=ref_{uid}"
-    await update.message.reply_text(t("invite_msg", lang, link=link, coins=REFERRAL_REWARD))
+    invite_count = await get_invite_count(uid)
+    text = (f"🎁 Your Invite Link\n\n{link}\n\n"
+            f"💡 Each friend joining = +{REFERRAL_REWARD} Coins FREE!\n"
+            f"🎉 {FREE_VIP_INVITES} Invites = 1 Month VIP FREE!\n\n"
+            f"📊 Your Invites: {invite_count}/{FREE_VIP_INVITES}")
+    await update.message.reply_text(text)
 
 
 # ========== MENU ==========
@@ -2985,12 +3136,13 @@ async def help_cmd(update, context):
         "/start — Main menu\n/newchat — Start chat\n/next — Skip partner\n"
         "/like — Like current partner\n/daily — Daily bonus (+5🪙)\n"
         "/voice — Set Voice Intro\n/gift — Send Gift\n/story — Post Story\n"
-        "/profile — Your profile\n/credit — Coins + Top-Up\n/vip — VIP plans\n"
-        "/link — Invite (+20🪙)\n/link_anon — Anonymous link\n"
-        "/leaderboard — Top chatters\n/language — Change language\n"
-        "/stop — End chat\n/reset — Reset profile\n\n"
-        "💡 Random = Free | Guy/Girl = 1 coin\n"
-        "🎁 Invite = +20 coins | 🆕 New = +10 coins\n"
+        "/profile — Your profile\n/credit — Coins + Top-Up\n/pricing — All prices\n"
+        "/vip — VIP plans\n/link or /invite — Invite (+10🪙)\n"
+        "/link_anon — Anonymous link\n/leaderboard — Top chatters\n"
+        "/language — Change language\n/stop — End chat\n/reset — Reset profile\n\n"
+        "💡 Random = FREE | Guy = 2 coins | Girl = 3 coins\n"
+        "🎁 Invite = +10 Coins | 🆕 New = +10 Coins\n"
+        "🎉 80 Invites = 1 Month VIP FREE!\n"
         "📅 Daily = +5 coins\n\n"
         "🔒 Anonymous. 18+ only."
     )
@@ -3090,7 +3242,7 @@ async def approve_cmd(update, context):
             coins = int(key.replace("topup_", ""))
             await add_coins(tid, coins)
             try:
-                await context.bot.send_message(tid, f"🎉 +{coins} Coins added to your account!\n\n🪙 Now: {await get_coins(tid)}")
+                await context.bot.send_message(tid, f"🎉 +{coins} Coins added!\n\n🪙 Now: {await get_coins(tid)}")
             except: pass
             await update.message.reply_text(f"✅ +{coins} coins to {tid}")
         else:
@@ -3166,8 +3318,10 @@ async def setup_bot_commands(app):
         BotCommand("gift",        "🎁 Send gift to partner"),
         BotCommand("story",       "📖 Post 24h story"),
         BotCommand("credit",      "💰 Check your coins"),
+        BotCommand("pricing",     "📋 View all prices"),
         BotCommand("vip",         "⭐ Upgrade to VIP"),
-        BotCommand("link",        "🔗 Invite & earn coins"),
+        BotCommand("invite",      "🎁 Invite friends (+10 coins)"),
+        BotCommand("link",        "🔗 Your invite link"),
         BotCommand("link_anon",   "👀 Get anonymous link"),
         BotCommand("leaderboard", "🏆 Top chatters"),
         BotCommand("language",    "🌐 Change language"),
@@ -3200,8 +3354,9 @@ def main():
 
     cmds = [
         ("start", start), ("stop", stop_cmd), ("reset", reset_cmd),
-        ("stats", stats_cmd), ("link", link_cmd), ("coins", coins_cmd),
-        ("credit", show_credit), ("vip", vip_cmd), ("language", language_cmd),
+        ("stats", stats_cmd), ("link", link_cmd), ("invite", link_cmd),
+        ("coins", coins_cmd), ("credit", show_credit), ("pricing", pricing_cmd),
+        ("vip", vip_cmd), ("language", language_cmd),
         ("profile", profile_cmd), ("help", help_cmd), ("newchat", newchat_cmd),
         ("next", next_cmd), ("like", like_cmd), ("daily", daily_cmd),
         ("voice", voice_cmd), ("gift", gift_cmd), ("story", story_cmd),
@@ -3249,6 +3404,8 @@ def main():
         ("^show_credit$", show_credit), ("^show_vip$", show_vip),
         ("^daily_claim$", daily_claim_cb),
         ("^coins_topup$", coins_topup), ("^topup_", topup_select),
+        ("^topup_stars_", topup_stars),
+        ("^pricing_table$", pricing_table_cb),
         ("^show_achievements$", show_achievements),
         ("^show_missions$", show_missions), ("^show_blocked$", show_blocked),
         ("^unblock_", unblock_cb), ("^contact_list$", contact_list_cb),
